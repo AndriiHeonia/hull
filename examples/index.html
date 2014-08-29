@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Concave hull example</title>
+    <script src="../src/voronoi.js" type="text/javascript"></script>
+    <script src="../src/hull.js" type="text/javascript"></script>
+    <script src="../src/intersect.js" type="text/javascript"></script>
+    <script src="../src/pxinpolygon.js" type="text/javascript"></script>
+</head>
+<body>
+    <canvas id="canv" width="400" height="400" style="border: 1px solid black; position: absolute; top:0px; left: 0px;"></canvas>
+    <canvas id="canv1" width="400" height="400" style="border: 1px solid black; position: absolute; top:0px; left: 0px;"></canvas>
+    <canvas id="canv2" width="400" height="400" style="border: 1px solid black; position: absolute; top:0px; left: 0px;"></canvas>
+    <script type="text/javascript">
+    window.onload = function() {
+        var c = document.getElementById('canv'),
+            c1 = document.getElementById('canv1'),
+            c2 = document.getElementById('canv2'),
+            ctx = window.ctx = c.getContext('2d'),
+            ctx1 = window.ctx1 = c1.getContext('2d'),
+            ctx2 = window.ctx2 = c2.getContext('2d');
+        c.onclick = function(e) {
+            console.log('{ x:' + e.offsetX + ', y:' + e.offsetY + '}');
+        }
+
+        var pixels = [
+            { x:225, y:117}, 
+            { x:223, y:98}, 
+            { x:204, y:79}, 
+            { x:186, y:81}, 
+            { x:172, y:92}, 
+            { x:163, y:133}, 
+            { x:167, y:154}, 
+            { x:169, y:166}, 
+            { x:180, y:211}, 
+            { x:209, y:215}, 
+            { x:250, y:210}, 
+            { x:278, y:197}, 
+            { x:260, y:176}, 
+            { x:249, y:184}, 
+            { x:225, y:194}, 
+            { x:200, y:194}, 
+            { x:199, y:163}, 
+            { x:194, y:138}, 
+            { x:194, y:110}, 
+            { x:212, y:95}, 
+            { x:236, y:111}, 
+            { x:247, y:137}, 
+            { x:273, y:130}, 
+            { x:273, y:112}, 
+            { x:251, y:103}, 
+            { x:230, y:91},
+            { x:257, y:122},
+            { x:246, y:111},
+            { x:235, y:106},
+            { x:202, y:89},
+            { x:181, y:100},
+            { x:187, y:107},
+            { x:175, y:119},
+            { x:141, y:140},
+            { x:184, y:129},
+            { x:184, y:144},
+            { x:179, y:144},
+            { x:180, y:177},
+            { x:188, y:177},
+            { x:188, y:199},
+            { x:197, y:202},
+            { x:199, y:216},
+            { x:219, y:209},
+            { x:238, y:207},
+            { x:238, y:197},
+            { x:253, y:199},
+            { x:261, y:189}
+        ];
+
+        // init pixels
+        ctx.fillStyle="black";
+        for (var i = 0; i < pixels.length; i++) {
+            ctx.beginPath();
+            ctx.arc(pixels[i].x, pixels[i].y, 2, 0, 2 * Math.PI, true);
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // start pixel of the hull
+        ctx.fillStyle="red";
+        ctx.beginPath();
+        ctx.arc(199, 216, 3, 0, 2 * Math.PI, true);
+        ctx.fill();
+        ctx.closePath();
+
+        var hullPixels = hull(pixels, 4);
+
+        // hull
+        ctx.strokeStyle="blue";
+        ctx.beginPath();
+        for (var i = 0; i < hullPixels.length; i++) {
+            ctx.lineTo(hullPixels[i].x, hullPixels[i].y);
+            ctx.moveTo(hullPixels[i].x, hullPixels[i].y);
+            ctx.stroke();
+        }
+        ctx.closePath();
+
+        // var seg1 = {
+        //     first: {
+        //         x: 238,
+        //         y: 207
+        //     },
+        //     second: {
+        //         x: 250,
+        //         y: 210
+        //     }
+        // },
+        // seg2 = {
+        //     first: {
+        //         x: 250,
+        //         y: 210
+        //     },
+        //     second: {
+        //         x: 219,
+        //         y: 209
+        //     }
+        // };
+        // bug
+        // ctx.strokeStyle = "orange";
+        // ctx.beginPath();
+        // ctx.moveTo(seg1.first.x, seg1.first.y);
+        // ctx.lineTo(seg1.second.x, seg1.second.y);
+        // ctx.stroke();
+        // ctx.closePath();
+        // ctx.strokeStyle = "red";
+        // ctx.beginPath();
+        // ctx.moveTo(seg2.first.x, seg2.first.y);
+        // ctx.lineTo(seg2.second.x, seg2.second.y);
+        // ctx.stroke();
+        // ctx.closePath();
+
+        // console.log(segments.intersect(seg1, seg2), segments.getIntersection(seg1, seg2));
+    }
+    </script>
+</body>
+</html>
