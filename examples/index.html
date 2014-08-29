@@ -79,6 +79,7 @@
 
         var triangles = hull(vertices, 50);
         triangles.forEach(function(t) {
+            // debugger;
             ctx.beginPath();
             ctx.moveTo(t[0][0], t[0][1]);
             ctx.lineTo(t[1][0], t[1][1]);
