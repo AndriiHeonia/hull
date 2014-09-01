@@ -5,6 +5,14 @@ function dsq(a, b) {
     return dx * dx + dy * dy;
 }
 
+function _drawPx(x, y, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, 2 * Math.PI, true);
+    ctx.fill();
+    ctx.closePath();
+}
+
 function hull(vertices, alpha) {
     var tIdxs = Delaunay.triangulate(vertices),
         triangles = [],
@@ -56,14 +64,20 @@ function hull(vertices, alpha) {
     // TODO: think about O(N^2) optimization
     var checked = {},
         edge = borderEdges[0],
-        nextEdge;
+        nextEdge,
+        iterations = 0;
 
     checked[edge[0] + '-' + edge[1]] = true;
     border.push(edge[1]);
     _drawPx(vertices[edge[1]][0], vertices[edge[1]][1], 'blue');
     
     while (border.length !== borderEdges.length) {
+        // templary infinity loop break for multipolygons
+        if (iterations > Math.pow(borderEdges.length, 2)) {
+            break;
+        }
         for (var i = 0; i < borderEdges.length; i++) {
+            iterations++;
             var nextEdge = borderEdges[i],
                 k = nextEdge[0] + '-' + nextEdge[1];
 
@@ -86,16 +100,8 @@ function hull(vertices, alpha) {
             }
         }
     }
-
-    function _drawPx(x, y, color) {
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(x, y, 4, 0, 2 * Math.PI, true);
-        ctx.fill();
-        ctx.closePath();
-    }
-
-    return triangles;
+    
+    return border;
 }
 
 window.hull = hull;
