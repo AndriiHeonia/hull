@@ -6,11 +6,35 @@ function dsq(a, b) {
 }
 
 function _drawPx(x, y, color) {
+    if (window.hull.DEBUG === false) {
+        return;
+    }
+    var ctx = window.hull.DEBUG;
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(x, y, 4, 0, 2 * Math.PI, true);
     ctx.fill();
     ctx.closePath();
+}
+
+function _drawTriangles(idxs, vertices) {
+    if (window.hull.DEBUG === false) {
+        return;
+    }
+    var ctx = window.hull.DEBUG;
+    idxs.forEach(function(i) {
+        var p1X = vertices[i[0]][0],
+            p1Y = vertices[i[0]][1];
+        ctx.moveTo(p1X, p1Y);
+        var p2X = vertices[i[1]][0],
+            p2Y = vertices[i[1]][1];
+        ctx.lineTo(p2X, p2Y);
+        var p3X = vertices[i[2]][0],
+            p3Y = vertices[i[2]][1];
+        ctx.lineTo(p3X, p3Y);
+        ctx.closePath();
+        ctx.stroke();
+    });
 }
 
 function hull(vertices, alpha) {
@@ -69,7 +93,6 @@ function hull(vertices, alpha) {
 
     checked[edge[0] + '-' + edge[1]] = true;
     border.push(edge[1]);
-    _drawPx(vertices[edge[1]][0], vertices[edge[1]][1], 'blue');
     
     while (border.length !== borderEdges.length) {
         // templary infinity loop break for multipolygons
@@ -88,11 +111,9 @@ function hull(vertices, alpha) {
             if (nextEdge[0] === edge[1] || nextEdge[1] === edge[1]) {
                 if (nextEdge[0] === edge[1]) {
                     border.push(nextEdge[1]);
-                    _drawPx(vertices[nextEdge[1]][0], vertices[nextEdge[1]][1], 'blue');
                 }
                 if (nextEdge[1] === edge[1]) {
                     border.push(nextEdge[0]);
-                    _drawPx(vertices[nextEdge[0]][0], vertices[nextEdge[0]][1], 'blue');
                 }
                 edge = nextEdge;
                 checked[k] = true;
@@ -100,10 +121,13 @@ function hull(vertices, alpha) {
             }
         }
     }
-    
+
+    _drawTriangles(triangles, vertices);
+
     return border;
 }
 
 window.hull = hull;
+window.hull.DEBUG = false;
 
 })();
