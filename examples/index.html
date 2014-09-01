@@ -7,7 +7,7 @@
     <script src="../src/delaunay.js" type="text/javascript"></script>
 </head>
 <body>
-    <canvas id="canv" width="1000" height="500" style="border: 1px solid black; position: absolute; top:0px; left: 0px;"></canvas>
+    <canvas id="canv" width="500" height="500" style="border: 1px solid black; position: absolute; top:0px; left: 0px;"></canvas>
     <script type="text/javascript">
     window.onload = function() {
         var c = document.getElementById('canv'),
@@ -16,7 +16,7 @@
             console.log('{ x:' + e.offsetX + ', y:' + e.offsetY + '}');
         }
 
-        var pixels = [
+        var vertices = [
             [225, 117], 
             [223, 98], 
             [204, 79], 
@@ -77,16 +77,41 @@
             ctx.closePath();
         }
 
-        var triangles = hull(vertices, 50);
-        triangles.forEach(function(t) {
-            // debugger;
-            ctx.beginPath();
-            ctx.moveTo(t[0][0], t[0][1]);
-            ctx.lineTo(t[1][0], t[1][1]);
-            ctx.lineTo(t[2][0], t[2][1]);
+        var idxs = hull(vertices, 50);
+        // console.table(idxs);
+        ctx.fillStyle="red";
+        idxs.forEach(function(i) {
+            // ctx.beginPath();
+            // ctx.arc(vertices[i][0], vertices[i][1], 2, 0, 2 * Math.PI, true);
+            // ctx.fill();
+            // ctx.closePath();
+
+            // ctx.beginPath();
+            // console.log(vertices[idx][0], vertices[idx][1]);
+            // ctx.lineTo(vertices[idx][0], vertices[idx][1]);
+            // ctx.moveTo(vertices[idx][0], vertices[idx][1]);
+
+            var p1X = vertices[i[0]][0],
+                p1Y = vertices[i[0]][1];
+            ctx.moveTo(p1X, p1Y);
+            var p2X = vertices[i[1]][0],
+                p2Y = vertices[i[1]][1];
+            ctx.lineTo(p2X, p2Y);
+            var p3X = vertices[i[2]][0],
+                p3Y = vertices[i[2]][1];
+            ctx.lineTo(p3X, p3Y);
             ctx.closePath();
             ctx.stroke();
         });
+
+        // var pixels = hull(vertices, 50);
+        // ctx.beginPath();
+        // pixels.forEach(function(p) {
+        //     ctx.lineTo(p[0], p[1]);
+        //     ctx.moveTo(p[0], p[1]);
+        //     ctx.stroke();
+        // });
+        // ctx.closePath();
 }
     </script>
 </body>
