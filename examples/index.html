@@ -24,10 +24,11 @@
             ctx.closePath();
         }
 
-        // hull.DEBUG = ctx;
-
         // draw hull pixels
+        console.time('hull');
         var idxs = hull(vertices, 50);
+        console.timeEnd('hull');
+        
         ctx.strokeStyle="blue";
         ctx.beginPath();
         idxs.forEach(function(i) {
