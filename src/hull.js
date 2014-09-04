@@ -1,4 +1,22 @@
-(function() {
+/*
+ (c) 2014, Andrey Geonya
+ Hull.js, a JavaScript library for concave hull generation by set of points.
+ https://github.com/AndreyGeonya/hull
+*/
+
+'use strict';
+
+var Delaunay = require('./delaunay');
+
+function hull(pixels, tolerance) {
+    var tIdxs = Delaunay.triangulate(pixels),
+        tol = tolerance || 50,
+        sqTolerance = tol * tol,
+        edges2TriCount = _edges2TriCount(pixels, tIdxs, sqTolerance),
+        boundaryEdges = _getBoundaryEdges(edges2TriCount);
+
+    return _edges2cwPoly(boundaryEdges);
+}
 
 function _squaredDist(px1, px2) {
     var dx = px1[0] - px2[0],
@@ -11,8 +29,7 @@ function _edges2cwPoly(edges) {
         j = 0,
         checked = {},
         poly = [],
-        edge = edges[0],
-        nextEdge;
+        edge = edges[0];
 
     checked[edge[0] + '-' + edge[1]] = true;
     poly.push(edge[1]);
@@ -79,7 +96,7 @@ function _edges2TriCount(pixels, tIdxs, sqTolerance) {
 function _getBoundaryEdges(edges2TriCount) {
     var boundaryEdges = [];
 
-    for (edge in edges2TriCount) {
+    for (var edge in edges2TriCount) {
         if (edges2TriCount[edge][0] === 1) {
             var pxs = [edges2TriCount[edge][1], edges2TriCount[edge][2]];
             delete edges2TriCount[pxs[1] + '-' + pxs[0]];
@@ -90,16 +107,4 @@ function _getBoundaryEdges(edges2TriCount) {
     return boundaryEdges;
 }
 
-function hull(pixels, tolerance) {
-    var tIdxs = Delaunay.triangulate(pixels),
-        tolerance = tolerance || 50,
-        sqTolerance = tolerance * tolerance,
-        edges2TriCount = _edges2TriCount(pixels, tIdxs, sqTolerance),
-        boundaryEdges = _getBoundaryEdges(edges2TriCount);
-
-    return _edges2cwPoly(boundaryEdges);
-}
-
-window.hull = hull;
-
-})();
+module.exports = hull;
