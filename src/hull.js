@@ -6,23 +6,18 @@ function _squaredDist(px1, px2) {
     return dx * dx + dy * dy;
 }
 
-// http://stackoverflow.com/questions/14108553/get-border-edges-of-mesh-in-winding-order#comment19522625_14108553
-// TODO: think about O(N^2) optimization
-function _edges2ccwPoly(edges) {
-    var checked = {},
+function _edges2cwPoly(edges) {
+    var maxJ = Math.pow(edges.length, 2),
+        j = 0,
+        checked = {},
         poly = [],
         edge = edges[0],
-        nextEdge,
-        j = 0,
-        maxJ = Math.pow(edges.length, 2);
+        nextEdge;
 
     checked[edge[0] + '-' + edge[1]] = true;
     poly.push(edge[1]);
     
     while (poly.length !== edges.length) {
-        if (j > maxJ) {
-            break; // stop infinity loop for multipolygons
-        }
         for (var i = 0; i < edges.length; i++) {
             var nextEdge = edges[i],
                 k = nextEdge[0] + '-' + nextEdge[1];
@@ -41,6 +36,9 @@ function _edges2ccwPoly(edges) {
                 break;
             }
             j++;
+        }
+        if (j >= maxJ) {
+            break; // stop infinity loop for multipolygons
         }
     }
 
@@ -99,7 +97,7 @@ function hull(pixels, tolerance) {
         edges2TriCount = _edges2TriCount(pixels, tIdxs, sqTolerance),
         boundaryEdges = _getBoundaryEdges(edges2TriCount);
 
-    return _edges2ccwPoly(boundaryEdges);
+    return _edges2cwPoly(boundaryEdges);
 }
 
 window.hull = hull;
