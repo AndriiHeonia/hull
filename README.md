@@ -21,7 +21,7 @@ Let's see step by step what happens when you call `hull()` function:
 
 <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/1.png" />
 
-3. After triangulation it cuts edges according to your `tolerance` param:
+3. After triangulation it cuts edges according to your `tolerance` param. For example:
 
 <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/2_1.png" />
 `tolerance = 80`
