@@ -252,7 +252,7 @@ function hull(pixels, tolerance, ctx) {
         edges2TriCount = _edges2TriCount(pixels, tIdxs, sqTolerance),
         boundaryEdges = _getBoundaryEdges(edges2TriCount);
 
-    // _drawTriangles(pixels, sqTolerance, ctx);
+    _drawTriangles(pixels, sqTolerance, ctx);
 
     return _edges2cwPoly(boundaryEdges);
 }
@@ -367,11 +367,11 @@ function _drawTriangles(vertices, sqTolerance, ctx) {
         --i; tIdx[0] = tIdxs[i];
         --i; tIdx[1] = tIdxs[i];
         --i; tIdx[2] = tIdxs[i];
-        /*if (_squaredDist(vertices[tIdx[0]], vertices[tIdx[1]]) < sqTolerance &&
+        if (_squaredDist(vertices[tIdx[0]], vertices[tIdx[1]]) < sqTolerance &&
             _squaredDist(vertices[tIdx[0]], vertices[tIdx[2]]) < sqTolerance &&
-            _squaredDist(vertices[tIdx[1]], vertices[tIdx[2]]) < sqTolerance) {*/
+            _squaredDist(vertices[tIdx[1]], vertices[tIdx[2]]) < sqTolerance) {
             triangles.push(tIdx);
-        // }
+        }
     }
 
     triangles.forEach(function(i) {
