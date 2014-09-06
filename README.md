@@ -15,8 +15,10 @@ Let's see step by step what happens when you call `hull()` function:
 
 0. Source point set of the shape:
 <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/0.png" />
+
 1. Hull.js triangulates your shape via <a target="_blank" href="https://github.com/ironwallaby/delaunay">Delaunay triangulation library</a>:
 <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/1.png" />
+
 2. After triangulation it cuts edges according to your `tolerance` param:
 <img src="2_1.png" />
 Tolerance = 50
