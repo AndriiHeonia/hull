@@ -15,15 +15,15 @@ Let's see step by step what happens when you call `hull()` function:
 
 <ol>
 
-<li>Your initial points of the shape:
+<li>Hull.js takes your source points of the shape:
 
 <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/0.png" /></li>
 
-<li>Hull.js triangulates your shape via <a target="_blank" href="https://github.com/ironwallaby/delaunay">Delaunay triangulation library</a>:
+<li>Triangulates your shape via <a target="_blank" href="https://github.com/ironwallaby/delaunay">Delaunay triangulation library</a>:
 
 <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/1.png" />
 
-After triangulation it cuts edges according to your `tolerance` param. For example:
+<li>After triangulation it cuts edges according to your `tolerance` param. For example:
 
 <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/2_1.png" />
 `tolerance = 80`
