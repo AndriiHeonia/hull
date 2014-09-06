@@ -15,7 +15,7 @@ Let's see step by step what happens when you call `hull()` function:
 
 <ol>
 
-<li>Your initial source points of the shape:
+<li>Your initial points of the shape:
 
 <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/0.png" /></li>
 
