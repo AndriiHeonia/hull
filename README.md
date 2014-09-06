@@ -13,15 +13,17 @@ Hull.js - JavaScript library that builds concave hulls by set of points.
 
 Let's see step by step what happens when you call `hull()` function:
 
-1. Define source point set of the shape:
+<ol>
 
-<img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/0.png" />
+<li>Define source point set of the shape:
 
-2. Hull.js triangulates your shape via <a target="_blank" href="https://github.com/ironwallaby/delaunay">Delaunay triangulation library</a>:
+<img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/0.png" /></li>
+
+<li>Hull.js triangulates your shape via <a target="_blank" href="https://github.com/ironwallaby/delaunay">Delaunay triangulation library</a>:
 
 <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/1.png" />
 
-3. After triangulation it cuts edges according to your `tolerance` param. For example:
+After triangulation it cuts edges according to your `tolerance` param. For example:
 
 <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/2_1.png" />
 `tolerance = 80`
@@ -30,15 +32,15 @@ Let's see step by step what happens when you call `hull()` function:
 `tolerance = 40`
 
 <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/2_3.png" />
-`tolerance = 20`
+`tolerance = 20`</li>
 
-3. After that it finds boundary edges:
+<li>After that it finds boundary edges:
 
-<img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/3.png" />
+<img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/3.png" /></li>
 
-4. And finaly it sorts boundary edges and returns hull of the shape:
+<li>And finaly it sorts boundary edges and returns hull of the shape:
 
-<img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/4.png" />
+<img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/4.png" /></li>
 
 ## Examples
 
