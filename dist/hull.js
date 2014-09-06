@@ -250,9 +250,9 @@ function hull(pixels, tolerance, ctx) {
         tol = tolerance || 50,
         sqTolerance = tol * tol,
         edges2TriCount = _edges2TriCount(pixels, tIdxs, sqTolerance),
-        boundaryEdges = _getBoundaryEdges(edges2TriCount);
+        boundaryEdges = _getBoundaryEdges(edges2TriCount, ctx, pixels);
 
-    _drawTriangles(pixels, sqTolerance, ctx);
+    // _drawTriangles(pixels, sqTolerance, ctx);
 
     return _edges2cwPoly(boundaryEdges);
 }
@@ -332,7 +332,7 @@ function _edges2TriCount(pixels, tIdxs, sqTolerance) {
     return trianglesInEdge;
 }
 
-function _getBoundaryEdges(edges2TriCount) {
+function _getBoundaryEdges(edges2TriCount, ctx, pixels) {
     var boundaryEdges = [];
 
     for (var edge in edges2TriCount) {
@@ -340,17 +340,15 @@ function _getBoundaryEdges(edges2TriCount) {
             var pxs = [edges2TriCount[edge][1], edges2TriCount[edge][2]];
             delete edges2TriCount[pxs[1] + '-' + pxs[0]];
             boundaryEdges.push([pxs[0], pxs[1]]);
+            // _drawPx(pixels[pxs[0]][0], pixels[pxs[0]][1], 'blue', ctx);
+            // _drawPx(pixels[pxs[1]][0], pixels[pxs[1]][1], 'blue', ctx);
         }
     }
 
     return boundaryEdges;
 }
 
-function _drawPx(x, y, color) {
-    if (window.hull.DEBUG === false) {
-        return;
-    }
-    var ctx = window.hull.DEBUG;
+function _drawPx(x, y, color, ctx) {
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(x, y, 4, 0, 2 * Math.PI, true);

@@ -33,9 +33,12 @@ Let's see step by step what happens when you call `hull()` function:
 `tolerance = 20`
 
 3. After that it finds boundary edges:
-<img src="3.png" />
+
+<img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/3.png" />
+
 4. And finaly it sorts boundary edges and returns hull of the shape:
-<img src="4.png" />
+
+<img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/4.png" />
 
 ## Examples
 

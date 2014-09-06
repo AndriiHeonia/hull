@@ -908,16 +908,41 @@
 
         // get and draw hull  
         var idxs = hull(vertices, 20, ctx);      
-        // ctx.strokeStyle="blue";
-        // ctx.beginPath();
-        // idxs.forEach(function(i) {
-        //     ctx.lineTo(vertices[i][0], vertices[i][1]);
-        //     ctx.moveTo(vertices[i][0], vertices[i][1]);
-        //     ctx.stroke();
-        // });
-        // ctx.lineTo(vertices[idxs[0]][0], vertices[idxs[0]][1]);
-        // ctx.stroke();
-        // ctx.closePath();
+        ctx.strokeStyle="blue";
+        ctx.lineWidth=1;
+        ctx.beginPath();
+        idxs.forEach(function(i) {
+            // canvas_arrow(ctx, vertices[i][0], vertices[i][1], vertices[i+1][0], vertices[i+1][1]);
+            ctx.lineTo(vertices[i][0], vertices[i][1]);
+            ctx.moveTo(vertices[i][0], vertices[i][1]);
+            ctx.stroke();
+        });
+        ctx.lineTo(vertices[idxs[0]][0], vertices[idxs[0]][1]);
+        ctx.stroke();
+        ctx.closePath();
+
+        ctx.lineWidth=2;
+        ctx.beginPath();
+        for (var i = 0; i < idxs.length-1; i++) {
+            var idx = idxs[i];
+            var nextIdx = idxs[i+1];
+            if (i % 2 === 1 ) {continue;}
+            canvas_arrow(ctx, vertices[idx][0], vertices[idx][1], vertices[nextIdx][0], vertices[nextIdx][1]);
+        };
+        ctx.stroke();
+        ctx.closePath();
+
+
+
+        function canvas_arrow(context, fromx, fromy, tox, toy){
+            var headlen = 10;   // length of head in pixels
+            var angle = Math.atan2(toy-fromy,tox-fromx);
+            context.moveTo(fromx, fromy);
+            context.lineTo(tox, toy);
+            context.lineTo(tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6));
+            context.moveTo(tox, toy);
+            context.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
+        }
     }
     </script>
 </body>
