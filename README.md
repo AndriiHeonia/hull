@@ -31,7 +31,7 @@ Tolerance = 150
 
 ## Examples
 
-You can see more examples <a href="https://github.com/AndreyGeonya/hull/tree/master/examples">here</a>a>. Just clone this repository and run them in your browser.
+You can see more examples <a href="https://github.com/AndreyGeonya/hull/tree/master/examples">here</a>. Just clone this repository and run them in your browser.
 
 ## Development
 	npm install # install dependencies
