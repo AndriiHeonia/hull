@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Concave hull example</title>
+    <script src="../../dist/hull.js"></script>
+    <script src="./dbscan.js"></script>
+    <script src="./data.js"></script>
+</head>
+<body>
+    <p>
+        If you want to get hulls of the point set that looks like multipolygon, then you need to call <code>hull()</code> function for each subset (for each polygon). <br /> In this example we use LukaszKrawczyk's <a href="https://github.com/LukaszKrawczyk/clustering" target="_blank">density based clustering library</a> to split one large point set to several groups, after that we recive hulls for each of them.
+    </p>
+    <p>Result: </p>
+    <canvas id="canv" width="310" height="100" style="border: 1px solid black;"></canvas>
+    <script type="text/javascript">
+    window.onload = function() {
+        var c = document.getElementById('canv'),
+            ctx = c.getContext('2d'),
+            dbscan = new DBSCAN(),
+            clustersIndexes,
+            clusters = [],
+            colors = ["red", "green", "blue"],
+            colIdx = 0;
+
+        // draw all pixels
+        ctx.fillStyle = "gray";
+        for (var i = 0; i < vertices.length; i++) {
+            ctx.beginPath();
+            ctx.arc(vertices[i][0], vertices[i][1], 1, 0, 2 * Math.PI, true);
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // generate groups of pixels (clusters)
+        clustersIndexes = dbscan.run(vertices, 90, 650);
+        clustersIndexes.forEach(function(cluster) {
+            var cluster = cluster.map(function(i) {
+                return [vertices[i][0], vertices[i][1]];
+            });
+            clusters.push(cluster);
+        });
+
+        // get and draw hulls for each cluster
+        ctx.lineWidth = 2;
+        clusters.forEach(function(vertices) {
+            var idxs = hull(vertices, 5);
+            ctx.strokeStyle = colors[colIdx];
+            ctx.beginPath();
+            idxs.forEach(function(i) {
+                ctx.lineTo(vertices[i][0], vertices[i][1]);
+                ctx.stroke();
+                ctx.moveTo(vertices[i][0], vertices[i][1]);
+            });
+            ctx.lineTo(vertices[idxs[0]][0], vertices[idxs[0]][1]);
+            ctx.stroke();
+            ctx.closePath();
+            colIdx++;
+        });
+    }
+    </script>
+</body>
+</html>
