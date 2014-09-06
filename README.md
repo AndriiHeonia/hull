@@ -13,7 +13,7 @@ Hull.js - JavaScript library that builds concave hulls by set of points.
 
 Let's see step by step what happens when you call `hull()` function:
 
-0) Source point set of the shape:
+0) Source point set of the shape:<br />
 <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/0.png" />
 1) Hull.js triangulates your shape via <a target="_blank" href="https://github.com/ironwallaby/delaunay">Delaunay triangulation library</a>:
 <img src="1.png" />
