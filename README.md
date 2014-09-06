@@ -7,7 +7,7 @@ Hull.js - JavaScript library that builds concave hull by set of points.
 
 ## Params
 * 1st param - array of coordinates in format: [[x1, y1], [x2, y2], ..., [xn, yn]];
-* 2nd param - tolerance. The value of the cutoff boundaries. Lesser tolerance - thinning shape. Large tolerance - convex hull.
+* 2nd param - tolerance. The value of the cutoff boundaries. Lesser tolerance - thinning shape. Too large tolerance - convex hull.
 
 ## How it works
 
