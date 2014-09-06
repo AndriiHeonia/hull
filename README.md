@@ -7,26 +7,26 @@ Hull.js - JavaScript library that builds concave hulls by set of points.
 
 ## Params
 * 1st param - array of coordinates in format: [[x1, y1], [x2, y2], ..., [xn, yn]];
-* 2nd param - tolerance. The value of the cutoff boundaries. Lesser tolerance - thinning shape.
+* 2nd param - tolerance. The value of the cutoff boundaries. Lesser tolerance - thinning shape. Large tolerance - convex hull.
 
 ## How it works
 
 Let's see step by step what happens when you call `hull()` function:
 
-0) Source point set of the shape:<br />
+0. Source point set of the shape:
 <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/0.png" />
-1) Hull.js triangulates your shape via <a target="_blank" href="https://github.com/ironwallaby/delaunay">Delaunay triangulation library</a>:
-<img src="1.png" />
-2) After triangulation it cuts edges according to your `tolerance` param:
+1. Hull.js triangulates your shape via <a target="_blank" href="https://github.com/ironwallaby/delaunay">Delaunay triangulation library</a>:
+<img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/1.png" />
+2. After triangulation it cuts edges according to your `tolerance` param:
 <img src="2_1.png" />
 Tolerance = 50
 <img src="2_2.png" />
 Tolerance = 100
 <img src="2_3.png" />
 Tolerance = 150
-3) After that it finds boundary edges:
+3. After that it finds boundary edges:
 <img src="3.png" />
-4) And finaly it sorts boundary edges and returns hull of the shape:
+4. And finaly it sorts boundary edges and returns hull of the shape:
 <img src="4.png" />
 
 ## Examples

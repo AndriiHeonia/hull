@@ -245,12 +245,14 @@ var Delaunay;
 
 var Delaunay = require('./delaunay');
 
-function hull(pixels, tolerance) {
+function hull(pixels, tolerance, ctx) {
     var tIdxs = Delaunay.triangulate(pixels),
         tol = tolerance || 50,
         sqTolerance = tol * tol,
         edges2TriCount = _edges2TriCount(pixels, tIdxs, sqTolerance),
         boundaryEdges = _getBoundaryEdges(edges2TriCount);
+
+    // _drawTriangles(pixels, sqTolerance, ctx);
 
     return _edges2cwPoly(boundaryEdges);
 }
@@ -342,6 +344,49 @@ function _getBoundaryEdges(edges2TriCount) {
     }
 
     return boundaryEdges;
+}
+
+function _drawPx(x, y, color) {
+    if (window.hull.DEBUG === false) {
+        return;
+    }
+    var ctx = window.hull.DEBUG;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, 2 * Math.PI, true);
+    ctx.fill();
+    ctx.closePath();
+}
+
+function _drawTriangles(vertices, sqTolerance, ctx) {
+    var tIdxs = Delaunay.triangulate(vertices),
+        triangles = [];
+
+    for (var i = tIdxs.length; i; ) {
+        var tIdx = [];
+        --i; tIdx[0] = tIdxs[i];
+        --i; tIdx[1] = tIdxs[i];
+        --i; tIdx[2] = tIdxs[i];
+        /*if (_squaredDist(vertices[tIdx[0]], vertices[tIdx[1]]) < sqTolerance &&
+            _squaredDist(vertices[tIdx[0]], vertices[tIdx[2]]) < sqTolerance &&
+            _squaredDist(vertices[tIdx[1]], vertices[tIdx[2]]) < sqTolerance) {*/
+            triangles.push(tIdx);
+        // }
+    }
+
+    triangles.forEach(function(i) {
+        var p1X = vertices[i[0]][0],
+            p1Y = vertices[i[0]][1];
+        ctx.moveTo(p1X, p1Y);
+        var p2X = vertices[i[1]][0],
+            p2Y = vertices[i[1]][1];
+        ctx.lineTo(p2X, p2Y);
+        var p3X = vertices[i[2]][0],
+            p3Y = vertices[i[2]][1];
+        ctx.lineTo(p3X, p3Y);
+        ctx.closePath();
+        ctx.stroke();
+    });
 }
 
 module.exports = hull;
