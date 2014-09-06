@@ -24,12 +24,14 @@ Let's see step by step what happens when you call `hull()` function:
 3. After triangulation it cuts edges according to your `tolerance` param:
 
 <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/2_1.png" />
-Tolerance = 80
+`tolerance = 80`
 
-<img src="2_2.png" />
-Tolerance = 100
-<img src="2_3.png" />
-Tolerance = 150
+<img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/2_2.png" />
+`tolerance = 40`
+
+<img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/2_3.png" />
+`tolerance = 20`
+
 3. After that it finds boundary edges:
 <img src="3.png" />
 4. And finaly it sorts boundary edges and returns hull of the shape:
