@@ -1,4 +1,4 @@
-Hull.js - JavaScript library that builds concave hulls by set of points.
+Hull.js - JavaScript library that builds concave hull by set of points.
 
 ## Usage
 

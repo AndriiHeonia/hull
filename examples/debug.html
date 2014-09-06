@@ -6,10 +6,6 @@
     <script src="../dist/hull.js"></script>
 </head>
 <body>
-    <p>
-        Just call <code>hull(vertices, 50)</code> to receive hull of point set.
-    </p>
-    <p>Result: </p>
     <!-- <img id="img" width="341" height="238" src="http://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Ukraine_Political_Regions.png/1024px-Ukraine_Political_Regions.png" /> -->
     <canvas id="canv" width="341" height="238" style="border: 1px solid black;"></canvas>
     <script>
@@ -931,8 +927,6 @@
         };
         ctx.stroke();
         ctx.closePath();
-
-
 
         function canvas_arrow(context, fromx, fromy, tox, toy){
             var headlen = 10;   // length of head in pixels
