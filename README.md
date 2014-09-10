@@ -50,6 +50,10 @@ You can see more examples <a href="https://github.com/AndreyGeonya/hull/tree/mas
 	npm install # install dependencies
 	npm test	# build dist file and run tests
 
+## Contribute
+
+If you want to get involved with Hull.js development, just use <a href="https://guides.github.com/introduction/flow/index.html" target="_blank">github flow</a> and feel free to contribute!
+
 ## Changelog
 
 * 0.0.1 — 06.09.2014
