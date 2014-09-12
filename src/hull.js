@@ -30,11 +30,6 @@ function _map(pixels) {
     return trios;
 }
 
-function _segmentIntersectsPolygon(polygon, segment) {
-    // TODO
-    return false;
-}
-
 function _getUpperTangent(subset1, subset2) {
     var subs1RightPx = subset1[subset1.length - 1],
         subs2LeftPx = subset2[0],
@@ -43,9 +38,7 @@ function _getUpperTangent(subset1, subset2) {
     // walk top left (ccw) on subset1
     for (var i = subset1.length - 1; i >= 0 ; i--) {
         if (subset1[i][1] < subs1RightPx[1]) {
-            if (_segmentIntersectsPolygon(tangent, subset1)) {
-                break;
-            }
+            if (subset1[i][1] > tangent[0][1]) { break; }
             tangent[0] = subset1[i];
         }
     }
@@ -53,9 +46,7 @@ function _getUpperTangent(subset1, subset2) {
     // walk top right (cw) on subset2
     for (var i = 0; i < subset2.length; i++) {
         if (subset2[i][1] < subs2LeftPx[1]) {
-            if (_segmentIntersectsPolygon(tangent, subset2)) {
-                break;
-            }
+            if (subset2[i][1] > tangent[1][1]) { break; }
             tangent[1] = subset2[i];
         }
     }
@@ -71,9 +62,7 @@ function _getLowerTangent(subset1, subset2) {
     // walk bottom left (cw) on subset1
     for (var i = subset1.length - 1; i >= 0 ; i--) {
         if (subset1[i][1] > subs1RightPx[1]) {
-            if (_segmentIntersectsPolygon(tangent, subset1)) {
-                break;
-            }
+            if (subset1[i][1] < tangent[0][1]) { break; }
             tangent[0] = subset1[i];
         }
     }
@@ -81,9 +70,7 @@ function _getLowerTangent(subset1, subset2) {
     // walk bottom right (ccw) on subset2
     for (var i = 0; i < subset2.length; i++) {
         if (subset2[i][1] > subs2LeftPx[1]) {
-            if (_segmentIntersectsPolygon(tangent, subset2)) {
-                break;
-            }
+            if (subset2[i][1] < tangent[1][1]) { break; }
             tangent[1] = subset2[i];
         }
     }
@@ -103,17 +90,17 @@ function _reduce(subsets, ctx) {
         return [upperTangent[0], upperTangent[1], lowerTangent[1], lowerTangent[0]];
 
         // draw
-        ctx.beginPath();
-        ctx.moveTo(upperTangent[0][0], upperTangent[0][1]);
-        ctx.lineTo(upperTangent[1][0], upperTangent[1][1]);
-        ctx.stroke();
-        ctx.closePath();
+        // ctx.beginPath();
+        // ctx.moveTo(upperTangent[0][0], upperTangent[0][1]);
+        // ctx.lineTo(upperTangent[1][0], upperTangent[1][1]);
+        // ctx.stroke();
+        // ctx.closePath();
 
-        ctx.beginPath();
-        ctx.moveTo(lowerTangent[0][0], lowerTangent[0][1]);
-        ctx.lineTo(lowerTangent[1][0], lowerTangent[1][1]);
-        ctx.stroke();
-        ctx.closePath();
+        // ctx.beginPath();
+        // ctx.moveTo(lowerTangent[0][0], lowerTangent[0][1]);
+        // ctx.lineTo(lowerTangent[1][0], lowerTangent[1][1]);
+        // ctx.stroke();
+        // ctx.closePath();
     });
 }
 
