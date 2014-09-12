@@ -32,18 +32,18 @@
         }
 
         // get and draw hull  
-        var idxs = hull(vertices, ctx);      
-        // ctx.strokeStyle = "blue";
-        // ctx.lineWidth = 1;
-        // ctx.beginPath();
-        // idxs.forEach(function(i) {
-        //     ctx.lineTo(vertices[i][0], vertices[i][1]);
-        //     ctx.moveTo(vertices[i][0], vertices[i][1]);
-        //     ctx.stroke();
-        // });
-        // ctx.lineTo(vertices[idxs[0]][0], vertices[idxs[0]][1]);
-        // ctx.stroke();
-        // ctx.closePath();
+        var pxs = hull(vertices, ctx);
+        ctx.strokeStyle = "blue";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        pxs.forEach(function(px) {
+            ctx.lineTo(px[0], px[1]);
+            ctx.moveTo(px[0], px[1]);
+            ctx.stroke();
+        });
+        ctx.lineTo(pxs[0][0], pxs[0][1]);
+        ctx.stroke();
+        ctx.closePath();
 
         // ctx.lineWidth = 2;
         // ctx.beginPath();

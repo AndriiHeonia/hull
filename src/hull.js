@@ -91,14 +91,16 @@ function _getLowerTangent(subset1, subset2) {
     return tangent;
 }
 
-function _merge(subsets, ctx) {
-    // subsets.reduce(function(subset1, subset2) {
-        var subset1 = subsets[0],
-            subset2 = subsets[1];
+function _reduce(subsets, ctx) {
+    return subsets.reduce(function(subset1, subset2) {
+        // var subset1 = subsets[0],
+        //     subset2 = subsets[1];
 
         var hull = [],
             upperTangent = _getUpperTangent(subset1, subset2),
             lowerTangent = _getLowerTangent(subset1, subset2);
+
+        return [upperTangent[0], upperTangent[1], lowerTangent[1], lowerTangent[0]];
 
         // draw
         ctx.beginPath();
@@ -112,15 +114,12 @@ function _merge(subsets, ctx) {
         ctx.lineTo(lowerTangent[1][0], lowerTangent[1][1]);
         ctx.stroke();
         ctx.closePath();
-    // });
+    });
 }
 
 function hull(pixels, ctx) {
-    var pxs, trios, hull;
-
-    pxs = _sort(pixels.slice(0));
-    trios = _map(pxs);
-    hull = _merge(trios, ctx);
+    var pxs = _sort(pixels.slice(0));
+    return _reduce(_map(pxs), ctx);
 }
 
 
