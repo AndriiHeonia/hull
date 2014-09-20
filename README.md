@@ -54,6 +54,12 @@ You can see more examples <a href="https://github.com/AndreyGeonya/hull/tree/mas
 
 If you want to get involved with Hull.js development, just use <a href="https://guides.github.com/introduction/flow/index.html" target="_blank">github flow</a> and feel free to contribute!
 
+## TODO
+
+* implement algorithm from <a href="http://www.it.uu.se/edu/course/homepage/projektTDB/ht13/project10/Project-10-report.pdf" target="_blank">this</a> paper ([https://github.com/AndreyGeonya/hull/tree/speedup](speedup) branch and test it. It should be faster than current algo;
+* write more real world examples (may be as an article);
+* think about parallelisation of the calcs (on GPU or CPU).
+
 ## Changelog
 
 * 0.0.1 — 06.09.2014
