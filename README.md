@@ -58,7 +58,7 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 * implement algorithm from <a href="http://www.it.uu.se/edu/course/homepage/projektTDB/ht13/project10/Project-10-report.pdf" target="_blank">this</a> paper (<a href="https://github.com/AndreyGeonya/hull/tree/speedup">speedup</a> branch) and test it. It should be faster than current algo;
 * write more real world examples (may be as an article);
-* think about parallelisation of the calcs (on GPU or CPU).
+* think about parallelisation of the calculations (on GPU or CPU).
 
 ## Changelog
 
