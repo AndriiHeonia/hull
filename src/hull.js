@@ -90,80 +90,126 @@ function _sortByLength(edges) {
     });
 }
 
-function _medium(edge, pointset, ignore) {
+function _intersect(edge, pointset) {
+    var a = {
+        'first': {
+            x: edge[0][0],
+            y: edge[0][1]
+        },
+        'second': {
+            x: edge[1][0],
+            y: edge[1][1]                
+        }
+    };
+
+    // window.ctx1.clearRect (0, 0, 341, 238);
+    // window.ctx1.beginPath();
+    // window.ctx1.moveTo(a.first.x, a.first.y);
+    // window.ctx1.lineTo(a.second.x, a.second.y);
+    // window.ctx1.stroke();
+    // window.ctx1.closePath();
+
+    for (var i = 0; i < pointset.length - 1; i++) {
+        var b = {
+            'first': {
+                x: pointset[i][0],
+                y: pointset[i][1]
+            },
+            'second': {
+                x: pointset[i + 1][0],
+                y: pointset[i + 1][1]
+            }
+        };
+
+        // window.ctx1.fillStyle="red";
+        // window.ctx1.beginPath();
+        // window.ctx1.arc(pointset[i][0], pointset[i][1], 2, 0, 2 * Math.PI, true);
+        // window.ctx1.fill();
+        // window.ctx1.closePath();
+
+        // window.ctx1.fillStyle="red";
+        // window.ctx1.beginPath();
+        // window.ctx1.arc(pointset[i+1][0], pointset[i+1][1], 2, 0, 2 * Math.PI, true);
+        // window.ctx1.fill();
+        // window.ctx1.closePath();
+
+        // window.ctx1.beginPath();
+        // window.ctx1.moveTo(b.first.x, b.first.y);
+        // window.ctx1.lineTo(b.second.x, b.second.y);
+        // window.ctx1.stroke();
+        // window.ctx1.closePath();
+
+        if (edge[0][0] === pointset[i][0] && edge[0][1] === pointset[i][1] ||
+            edge[0][0] === pointset[i + 1][0] && edge[0][1] === pointset[i + 1][1]) {
+            continue;
+        }
+
+        if (segments.intersect(a, b)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function _midPoint(edge, innerPoints, convex) {
     var point1 = null, point2 = null,
         angle1 = 90, angle2 = 90,
         point = null;
 
-    window.ctx.strokeStyle = "red";
-    window.ctx.lineWidth = 1;
-    window.ctx.beginPath();
-    window.ctx.moveTo(edge[0][0], edge[0][1]);
-    window.ctx.lineTo(edge[1][0], edge[1][1]);
-    window.ctx.stroke();
-    window.ctx.closePath();
-
-    for (var i = 0; i < pointset.length; i++) {
-        var a1 = _angle(edge[0], edge[1], pointset[i]),
-            a2 = _angle(edge[1], edge[0], pointset[i]),
-            ignoreKey;
+    for (var i = 0; i < innerPoints.length; i++) {
+        var a1 = _angle(edge[0], edge[1], innerPoints[i]),
+            a2 = _angle(edge[1], edge[0], innerPoints[i]);
 
         if (a1 < 90 && a2 < 90) {
-            ignoreKey = pointset[i].join('-');
-            if (a1 > 0 && a1 < angle1 && ignore[ignoreKey] !== true) {
+            if (a1 > 0 && a1 < angle1 && !_intersect([edge[0], innerPoints[i]], convex)) {
                 angle1 = a1;
-                point1 = pointset[i];
+                point1 = innerPoints[i];
             }
-            if (a2 > 0 && a2 < angle2 && ignore[ignoreKey] !== true) {
+            if (a2 > 0 && a2 < angle2 && !_intersect([edge[1], innerPoints[i]], convex)) {
                 angle2 = a2;
-                point2 = pointset[i];
+                point2 = innerPoints[i];
             }
         }
     }
 
     point = angle1 > angle2 ? point1 : point2;
 
-    if (point) {
-        window.ctx1.fillStyle="red";
-        window.ctx1.beginPath();
-        window.ctx1.arc(point[0], point[1], 2, 0, 2 * Math.PI, true);
-        window.ctx1.fill();
-        window.ctx1.closePath();
-    }
+    // if (point) {
+    //     window.ctx1.fillStyle="red";
+    //     window.ctx1.beginPath();
+    //     window.ctx1.arc(point[0], point[1], 2, 0, 2 * Math.PI, true);
+    //     window.ctx1.fill();
+    //     window.ctx1.closePath();
+    // }
 
     return point;
 }
 
 function _concave(convex, pointset) {
-    var concave = [],
-        ignoreAsMedium = {};
-
-    // var convexHullEdges = [];
-    // for (var i = 0; i < convex.length - 1; i++) {
-    //     var edge = [convex[i], convex[i + 1]];
-    //     convexHullEdges.push({
-    //         edge: edge,
-    //         length: _length(edge)
-    //     });
-    // }
-    // convexHullEdges = _sortByLength(convexHullEdges);
-
-    for (var i = 0; i < convex.length; i++) {
-        ignoreAsMedium[convex[i].join('-')] = true;
-    }
+    var midPointInserted = false,
+        innerPoints = pointset.filter(function(pt) {
+            return convex.indexOf(pt) < 0;
+        });
 
     for (var i = 0; i < convex.length - 1; i++) {
-        var mediumPoint = _medium([convex[i], convex[i + 1]], pointset, ignoreAsMedium);
-        if (mediumPoint !== null) {
-            ignoreAsMedium[mediumPoint.join('-')] = true;
-            concave.push(convex[i], mediumPoint, convex[i + 1]);
-        } else {
-            concave.push(convex[i], convex[i + 1]);
+        var midPoint = _midPoint([convex[i], convex[i + 1]], innerPoints, convex);
+        if (midPoint !== null) {
+            innerPoints.splice(innerPoints.indexOf(midPoint), 1);
+            convex.splice(i + 1, 0, midPoint);
+            midPointInserted = true;
         }
     }
-    concave.push(convex[convex.length - 1]);
 
-    return concave;
+    if (midPointInserted) {
+        for (var i = 0; i < convex.length - 1; i++) {
+            if (_length([convex[i], convex[i+1]]) > 128) {
+                return _concave(convex, pointset);
+            }
+        }
+    }
+
+    return convex;
 }
 
 function hull(pointset) {
@@ -181,20 +227,7 @@ function hull(pointset) {
     lower = _lowerTangent(pointset);
     convex = lower.concat(upper);
 
-    // window.ctx.strokeStyle = "blue";
-    // window.ctx.lineWidth = 1;
-    // window.ctx.beginPath();
-    // convex.forEach(function(px) {
-    //     window.ctx.lineTo(px[0], px[1]);
-    //     window.ctx.moveTo(px[0], px[1]);
-    // });
-    // window.ctx.lineTo(convex[0][0], convex[0][1]);
-    // window.ctx.stroke();
-    // window.ctx.closePath();
-
     concave = _concave(convex, pointset);
-
-    console.log(concave.length, convex.length);
 
     return concave;
 }
