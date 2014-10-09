@@ -153,16 +153,16 @@ function _intersect(edge, pointset) {
 }
 
 function _midPoint(edge, innerPoints, convex) {
-    var MAX_ANGLE = 70;
     var point1 = null, point2 = null,
-        angle1 = MAX_ANGLE, angle2 = MAX_ANGLE,
+        angle1 = MAX_CONCAVE_ANGLE,
+        angle2 = MAX_CONCAVE_ANGLE,
         point = null;
 
     for (var i = 0; i < innerPoints.length; i++) {
         var a1 = _angle(edge[0], edge[1], innerPoints[i]),
             a2 = _angle(edge[1], edge[0], innerPoints[i]);
 
-        if (a1 < MAX_ANGLE && a2 < MAX_ANGLE) {
+        if (a1 < MAX_CONCAVE_ANGLE && a2 < MAX_CONCAVE_ANGLE) {
             if (a1 > 0 && a1 < angle1 && !_intersect([edge[0], innerPoints[i]], convex)) {
                 angle1 = a1;
                 point1 = innerPoints[i];
@@ -187,6 +187,12 @@ function _midPoint(edge, innerPoints, convex) {
     return point;
 }
 
+// TODO
+/**
+  1. Оптимизировать
+  2. Автоматически считать угол и дистанцию
+ */
+
 function _concave(convex, pointset) {
     var midPoint,
         midPointInserted = false,
@@ -195,6 +201,8 @@ function _concave(convex, pointset) {
         });
 
     for (var i = 0; i < convex.length - 1; i++) {
+        if (_length([convex[i], convex[i + 1]]) <= MAX_EDGE_LENGTH) { continue; }
+
         midPoint = _midPoint([convex[i], convex[i + 1]], innerPoints, convex);
         if (midPoint !== null) {
             innerPoints.splice(innerPoints.indexOf(midPoint), 1);
@@ -204,11 +212,7 @@ function _concave(convex, pointset) {
     }
 
     if (midPointInserted) {
-        for (var i = 0; i < convex.length - 1; i++) {
-            if (_length([convex[i], convex[i+1]]) > 10) {
-                return _concave(convex, pointset);
-            }
-        }
+        return _concave(convex, pointset);
     }
 
     return convex;
@@ -226,11 +230,18 @@ function hull(pointset) {
 
     pointset = _sortByX(pointset);
 
+    console.time('convex');
     upper = _upperTangent(pointset);
     lower = _lowerTangent(pointset);
     convex = lower.concat(upper);
+    console.timeEnd('convex');
 
+    console.time('concave');
     concave = _concave(convex, pointset);
+    console.timeEnd('concave');
 
     return concave;
 }
+
+var MAX_CONCAVE_ANGLE = 70;
+var MAX_EDGE_LENGTH = 10;
