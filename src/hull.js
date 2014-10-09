@@ -165,45 +165,51 @@ function _intersect(edge, pointset) {
 
 function _midPointIdx(edge, innerPoints, convex) {
     var point1Idx = null, point2Idx = null,
-        angle1 = MAX_CONCAVE_ANGLE,
-        angle2 = MAX_CONCAVE_ANGLE,
-        a1, a2, a1Cos, a2Cos;
-
-        var pas = [];
+        // angle1 = MAX_CONCAVE_ANGLE,
+        // angle2 = MAX_CONCAVE_ANGLE,
+        angle1Cos = MAX_CONCAVE_ANGLE_COS,
+        angle2Cos = MAX_CONCAVE_ANGLE_COS,
+        // a1, a2,
+        a1Cos, a2Cos;
 
     for (var i = 0; i < innerPoints.length; i++) {
         if (innerPoints[i] === null) { continue; }
 
-        a1 = _angle(edge[0], edge[1], innerPoints[i]);
-        a2 = _angle(edge[1], edge[0], innerPoints[i]);
+        // a1 = _angle(edge[0], edge[1], innerPoints[i]);
+        // a2 = _angle(edge[1], edge[0], innerPoints[i]);
 
         a1Cos = _cos(edge[0], edge[1], innerPoints[i]);
         a2Cos = _cos(edge[1], edge[0], innerPoints[i]);
 
-       // if (a1Cos > MAX_CONCAVE_ANGLE_COS && a2Cos > MAX_CONCAVE_ANGLE_COS) {
-       //      if (a1 < angle1 && !_intersect([edge[0], innerPoints[i]], convex)) {
-       //          angle1 = a1;
-       //          point1Idx = i;
-       //      }
-       //      if (a2 < angle2 && !_intersect([edge[1], innerPoints[i]], convex)) {
-       //          angle2 = a2;
-       //          point2Idx = i;
-       //      }
-       //  }
-
-        if (a1 < MAX_CONCAVE_ANGLE && a2 < MAX_CONCAVE_ANGLE) {
-            if (a1 < angle1 && !_intersect([edge[0], innerPoints[i]], convex)) {
-                angle1 = a1;
+       if (a1Cos > MAX_CONCAVE_ANGLE_COS && a2Cos > MAX_CONCAVE_ANGLE_COS) {
+            if (a1Cos > angle1Cos && !_intersect([edge[0], innerPoints[i]], convex)) {
+                angle1Cos = a1Cos;
                 point1Idx = i;
             }
-            if (a2 < angle2 && !_intersect([edge[1], innerPoints[i]], convex)) {
-                angle2 = a2;
+            if (a2Cos > angle2Cos && !_intersect([edge[1], innerPoints[i]], convex)) {
+                angle2Cos = a2Cos;
                 point2Idx = i;
             }
         }
+
+        // if (a1 < MAX_CONCAVE_ANGLE && a2 < MAX_CONCAVE_ANGLE) {
+        //     if (a1 < angle1 && !_intersect([edge[0], innerPoints[i]], convex)) {
+        //         angle1 = a1;
+        //         point1Idx = i;
+        //     }
+        //     if (a2 < angle2 && !_intersect([edge[1], innerPoints[i]], convex)) {
+        //         angle2 = a2;
+        //         point2Idx = i;
+        //     }
+        // }
     }
 
-    return angle1 > angle2 ? point1Idx : point2Idx;
+
+    return angle1Cos > angle2Cos ? point1Idx : point2Idx;
+    // return angle1 > angle2 ? point1Idx : point2Idx;
+
+    // concave (angle): 165.232ms
+    // concave (angle cos): 180.135ms
 
     // if (point) {
     //     window.ctx1.fillStyle="red";
