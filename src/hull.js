@@ -11,8 +11,8 @@ function _sortByX(pointset) {
             return a[1] - b[1];                           
         } else {                                                    
             return a[0] - b[0];                                                           
-        }                                                                                           
-    });                                     
+        }
+    });
 }
 
 // see: http://allenchou.net/2013/07/cross-product-of-2d-vectors/
@@ -20,15 +20,26 @@ function _cross(o, a, b) {
     return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); 
 }
 
+function _cos(o, a, b) {
+    var aShifted = [a[0] - o[0], a[1] - o[1]],
+        bShifted = [b[0] - o[0], b[1] - o[1]],
+        aLen = _length([o, a]),
+        bLen = _length([o, b]),
+        dot = aShifted[0] * bShifted[0] + aShifted[1] * bShifted[1];
+
+    return dot / (aLen * bLen);
+}
+
 function _angle(o, a, b) {
     var aShifted = [a[0] - o[0], a[1] - o[1]],
         bShifted = [b[0] - o[0], b[1] - o[1]];
 
-    var angleRad = Math.acos((aShifted[0] * bShifted[0] + aShifted[1] * bShifted[1]) /
-        (Math.sqrt(aShifted[0] * aShifted[0] + aShifted[1] * aShifted[1]) *
-         Math.sqrt(bShifted[0] * bShifted[0] + bShifted[1] * bShifted[1])));
+    var angleRad = Math.atan2(
+        aShifted[0] * bShifted[1] - bShifted[0] * aShifted[1],
+        aShifted[0] * bShifted[0] + aShifted[1] * bShifted[1]
+    );
 
-    return angleRad * 180 / Math.PI;
+    return Math.abs(angleRad);
 }
 
 function _upperTangent(pointset) {
@@ -51,7 +62,7 @@ function _upperTangent(pointset) {
         // window.ctx1.closePath();
     }
     lower.pop();
-    return lower;    
+    return lower;
 }
 
 function _lowerTangent(pointset) {
@@ -152,29 +163,36 @@ function _intersect(edge, pointset) {
     return false;
 }
 
-function _midPoint(edge, innerPoints, convex) {
-    var point1 = null, point2 = null,
+function _midPointIdx(edge, innerPoints, convex) {
+    var point1Idx = null, point2Idx = null,
         angle1 = MAX_CONCAVE_ANGLE,
         angle2 = MAX_CONCAVE_ANGLE,
-        point = null;
+        a1, a2, a1Cos, a2Cos;
+
+        var pas = [];
 
     for (var i = 0; i < innerPoints.length; i++) {
-        var a1 = _angle(edge[0], edge[1], innerPoints[i]),
-            a2 = _angle(edge[1], edge[0], innerPoints[i]);
+        if (innerPoints[i] === null) { continue; }
+
+        a1 = _angle(edge[0], edge[1], innerPoints[i]);
+        a2 = _angle(edge[1], edge[0], innerPoints[i]);
+
+        a1Cos = _cos(edge[0], edge[1], innerPoints[i]);
+        a2Cos = _cos(edge[1], edge[0], innerPoints[i]);
 
         if (a1 < MAX_CONCAVE_ANGLE && a2 < MAX_CONCAVE_ANGLE) {
-            if (a1 > 0 && a1 < angle1 && !_intersect([edge[0], innerPoints[i]], convex)) {
+            if (a1 > -2 && a1 < angle1 && !_intersect([edge[0], innerPoints[i]], convex)) {
                 angle1 = a1;
-                point1 = innerPoints[i];
+                point1Idx = i;
             }
-            if (a2 > 0 && a2 < angle2 && !_intersect([edge[1], innerPoints[i]], convex)) {
+            if (a2 > -2 && a2 < angle2 && !_intersect([edge[1], innerPoints[i]], convex)) {
                 angle2 = a2;
-                point2 = innerPoints[i];
+                point2Idx = i;
             }
         }
     }
 
-    point = angle1 > angle2 ? point1 : point2;
+    return angle1 > angle2 ? point1Idx : point2Idx;
 
     // if (point) {
     //     window.ctx1.fillStyle="red";
@@ -183,36 +201,37 @@ function _midPoint(edge, innerPoints, convex) {
     //     window.ctx1.fill();
     //     window.ctx1.closePath();
     // }
-
-    return point;
 }
 
 // TODO
 /**
-  1. Оптимизировать
+  1. Оптимизировать:
+    1.1. splice() complexity O(N), то есть, сложность вставки midPoint-ов сейчас O(N^2 + N^2).
+         innerPoints надо вместо удаления просто маркать как удаленные (FIXED).
+    1.2. ф-ю рассчета угла
+    1.3. предрассчитать length для всех edges 1 раз
+    1.4. можем ли как-то ограничить область пооиска midPoint-ов?
   2. Автоматически считать угол и дистанцию
  */
 
-function _concave(convex, pointset) {
-    var midPoint,
-        midPointInserted = false,
-        innerPoints = pointset.filter(function(pt) {
-            return convex.indexOf(pt) < 0;
-        });
+function _concave(convex, innerPoints) {
+    var midPointIdx,
+        midPointInserted = false;
 
     for (var i = 0; i < convex.length - 1; i++) {
+
         if (_length([convex[i], convex[i + 1]]) <= MAX_EDGE_LENGTH) { continue; }
 
-        midPoint = _midPoint([convex[i], convex[i + 1]], innerPoints, convex);
-        if (midPoint !== null) {
-            innerPoints.splice(innerPoints.indexOf(midPoint), 1);
-            convex.splice(i + 1, 0, midPoint);
+        midPointIdx = _midPointIdx([convex[i], convex[i + 1]], innerPoints, convex);
+        if (midPointIdx !== null) {
+            convex.splice(i + 1, 0, innerPoints[midPointIdx]);
+            innerPoints[midPointIdx] = null; // mark as deleted (it's faster than splice)
             midPointInserted = true;
         }
     }
 
     if (midPointInserted) {
-        return _concave(convex, pointset);
+        return _concave(convex, innerPoints);
     }
 
     return convex;
@@ -236,12 +255,20 @@ function hull(pointset) {
     convex = lower.concat(upper);
     console.timeEnd('convex');
 
+    
+    console.time('innerPoints');
+    var innerPoints = pointset.filter(function(pt) {
+        return convex.indexOf(pt) < 0;
+    });
+    console.timeEnd('innerPoints');
+
     console.time('concave');
-    concave = _concave(convex, pointset);
+    concave = _concave(convex, innerPoints);
     console.timeEnd('concave');
 
     return concave;
 }
 
-var MAX_CONCAVE_ANGLE = 70;
+var MAX_CONCAVE_ANGLE = 70 / (180 / Math.PI);
+var MAX_CONCAVE_ANGLE_COS = Math.cos(70 / (180 / Math.PI));
 var MAX_EDGE_LENGTH = 10;
