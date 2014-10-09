@@ -15,11 +15,13 @@ function _sortByX(pointset) {
     });
 }
 
-// see: http://allenchou.net/2013/07/cross-product-of-2d-vectors/
+// see http://allenchou.net/2013/07/cross-product-of-2d-vectors/
 function _cross(o, a, b) {
     return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); 
 }
 
+// see http://users.livejournal.com/_winnie/237714.html
+// and http://habrahabr.ru/post/105882/
 function _cos(o, a, b) {
     var aShifted = [a[0] - o[0], a[1] - o[1]],
         bShifted = [b[0] - o[0], b[1] - o[1]],
@@ -30,18 +32,6 @@ function _cos(o, a, b) {
     return dot / Math.sqrt(sqALen * sqBLen);
 }
 
-function _angle(o, a, b) {
-    var aShifted = [a[0] - o[0], a[1] - o[1]],
-        bShifted = [b[0] - o[0], b[1] - o[1]];
-
-    var angleRad = Math.atan2(
-        aShifted[0] * bShifted[1] - bShifted[0] * aShifted[1],
-        aShifted[0] * bShifted[0] + aShifted[1] * bShifted[1]
-    );
-
-    return Math.abs(angleRad);
-}
-
 function _upperTangent(pointset) {
     var lower = [];
     for (var l = 0; l < pointset.length; l++) {
@@ -49,17 +39,6 @@ function _upperTangent(pointset) {
             lower.pop();
         }
         lower.push(pointset[l]);
-
-        // debugger;
-        // window.ctx1.clearRect (0, 0, 341, 238);
-        // window.ctx1.beginPath();
-        // window.ctx1.moveTo(lower[0][0], lower[0][1]);
-        // for (var i = 0; i < lower.length; i++) {
-        //     window.ctx1.lineTo(lower[i][0], lower[i][1]);
-        //     window.ctx1.moveTo(lower[i][0], lower[i][1]);
-        // }
-        // window.ctx1.stroke();
-        // window.ctx1.closePath();
     }
     lower.pop();
     return lower;
@@ -73,17 +52,6 @@ function _lowerTangent(pointset) {
             upper.pop();
         }
         upper.push(reversed[u]);
-
-        // debugger;
-        // window.ctx1.clearRect (0, 0, 341, 238);
-        // window.ctx1.beginPath();
-        // window.ctx1.moveTo(upper[0][0], upper[0][1]);
-        // for (var i = 0; i < upper.length; i++) {
-        //     window.ctx1.lineTo(upper[i][0], upper[i][1]);
-        //     window.ctx1.moveTo(upper[i][0], upper[i][1]);
-        // }
-        // window.ctx1.stroke();
-        // window.ctx1.closePath();
     }
     upper.pop();
     return upper;
@@ -91,16 +59,6 @@ function _lowerTangent(pointset) {
 
 function _sqLength(edge) {
     return Math.pow(edge[1][0] - edge[0][0], 2) + Math.pow(edge[1][1] - edge[0][1], 2);
-}
-
-function _length(edge) {
-    return Math.sqrt(_sqLength(edge));
-}
-
-function _sortByLength(edges) {
-    return edges.sort(function(a, b) {
-        return a.length - b.length;                                                           
-    });
 }
 
 function _intersect(edge, pointset) {
@@ -115,13 +73,6 @@ function _intersect(edge, pointset) {
         }
     };
 
-    // window.ctx1.clearRect (0, 0, 341, 238);
-    // window.ctx1.beginPath();
-    // window.ctx1.moveTo(a.first.x, a.first.y);
-    // window.ctx1.lineTo(a.second.x, a.second.y);
-    // window.ctx1.stroke();
-    // window.ctx1.closePath();
-
     for (var i = 0; i < pointset.length - 1; i++) {
         var b = {
             'first': {
@@ -133,24 +84,6 @@ function _intersect(edge, pointset) {
                 y: pointset[i + 1][1]
             }
         };
-
-        // window.ctx1.fillStyle="red";
-        // window.ctx1.beginPath();
-        // window.ctx1.arc(pointset[i][0], pointset[i][1], 2, 0, 2 * Math.PI, true);
-        // window.ctx1.fill();
-        // window.ctx1.closePath();
-
-        // window.ctx1.fillStyle="red";
-        // window.ctx1.beginPath();
-        // window.ctx1.arc(pointset[i+1][0], pointset[i+1][1], 2, 0, 2 * Math.PI, true);
-        // window.ctx1.fill();
-        // window.ctx1.closePath();
-
-        // window.ctx1.beginPath();
-        // window.ctx1.moveTo(b.first.x, b.first.y);
-        // window.ctx1.lineTo(b.second.x, b.second.y);
-        // window.ctx1.stroke();
-        // window.ctx1.closePath();
 
         if (edge[0][0] === pointset[i][0] && edge[0][1] === pointset[i][1] ||
             edge[0][0] === pointset[i + 1][0] && edge[0][1] === pointset[i + 1][1]) {
@@ -167,18 +100,12 @@ function _intersect(edge, pointset) {
 
 function _midPointIdx(edge, innerPoints, convex) {
     var point1Idx = null, point2Idx = null,
-        // angle1 = MAX_CONCAVE_ANGLE,
-        // angle2 = MAX_CONCAVE_ANGLE,
         angle1Cos = MAX_CONCAVE_ANGLE_COS,
         angle2Cos = MAX_CONCAVE_ANGLE_COS,
-        // a1, a2,
         a1Cos, a2Cos;
 
     for (var i = 0; i < innerPoints.length; i++) {
         if (innerPoints[i] === null) { continue; }
-
-        // a1 = _angle(edge[0], edge[1], innerPoints[i]);
-        // a2 = _angle(edge[1], edge[0], innerPoints[i]);
 
         a1Cos = _cos(edge[0], edge[1], innerPoints[i]);
         a2Cos = _cos(edge[1], edge[0], innerPoints[i]);
@@ -193,33 +120,10 @@ function _midPointIdx(edge, innerPoints, convex) {
                 point2Idx = i;
             }
         }
-
-        // if (a1 < MAX_CONCAVE_ANGLE && a2 < MAX_CONCAVE_ANGLE) {
-        //     if (a1 < angle1 && !_intersect([edge[0], innerPoints[i]], convex)) {
-        //         angle1 = a1;
-        //         point1Idx = i;
-        //     }
-        //     if (a2 < angle2 && !_intersect([edge[1], innerPoints[i]], convex)) {
-        //         angle2 = a2;
-        //         point2Idx = i;
-        //     }
-        // }
     }
 
 
     return angle1Cos > angle2Cos ? point1Idx : point2Idx;
-    // return angle1 > angle2 ? point1Idx : point2Idx;
-
-    // concave (angle): 165.232ms
-    // concave (angle cos): 180.135ms
-
-    // if (point) {
-    //     window.ctx1.fillStyle="red";
-    //     window.ctx1.beginPath();
-    //     window.ctx1.arc(point[0], point[1], 2, 0, 2 * Math.PI, true);
-    //     window.ctx1.fill();
-    //     window.ctx1.closePath();
-    // }
 }
 
 // TODO
@@ -227,7 +131,7 @@ function _midPointIdx(edge, innerPoints, convex) {
   1. Оптимизировать:
     1.1. splice() complexity O(N), то есть, сложность вставки midPoint-ов сейчас O(N^2 + N^2).
          innerPoints надо вместо удаления просто маркать как удаленные (FIXED).
-    1.2. ф-ю рассчета угла
+    1.2. ф-ю рассчета угла (FIXED)
     1.3. предрассчитать length для всех edges 1 раз
     1.4. можем ли как-то ограничить область пооиска midPoint-ов?
   2. Автоматически считать угол и дистанцию
@@ -288,6 +192,5 @@ function hull(pointset) {
     return concave;
 }
 
-var MAX_CONCAVE_ANGLE = 70 / (180 / Math.PI);
-var MAX_CONCAVE_ANGLE_COS = Math.cos(70 / (180 / Math.PI));
-var MAX_SQ_EDGE_LENGTH = Math.pow(10, 2);
+var MAX_CONCAVE_ANGLE_COS = Math.cos(70 / (180 / Math.PI)); // angle = 70 deg
+var MAX_SQ_EDGE_LENGTH = Math.pow(10, 2); // len = 10 px
