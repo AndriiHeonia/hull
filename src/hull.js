@@ -180,12 +180,23 @@ function _midPointIdx(edge, innerPoints, convex) {
         a1Cos = _cos(edge[0], edge[1], innerPoints[i]);
         a2Cos = _cos(edge[1], edge[0], innerPoints[i]);
 
+       // if (a1Cos > MAX_CONCAVE_ANGLE_COS && a2Cos > MAX_CONCAVE_ANGLE_COS) {
+       //      if (a1 < angle1 && !_intersect([edge[0], innerPoints[i]], convex)) {
+       //          angle1 = a1;
+       //          point1Idx = i;
+       //      }
+       //      if (a2 < angle2 && !_intersect([edge[1], innerPoints[i]], convex)) {
+       //          angle2 = a2;
+       //          point2Idx = i;
+       //      }
+       //  }
+
         if (a1 < MAX_CONCAVE_ANGLE && a2 < MAX_CONCAVE_ANGLE) {
-            if (a1 > -2 && a1 < angle1 && !_intersect([edge[0], innerPoints[i]], convex)) {
+            if (a1 < angle1 && !_intersect([edge[0], innerPoints[i]], convex)) {
                 angle1 = a1;
                 point1Idx = i;
             }
-            if (a2 > -2 && a2 < angle2 && !_intersect([edge[1], innerPoints[i]], convex)) {
+            if (a2 < angle2 && !_intersect([edge[1], innerPoints[i]], convex)) {
                 angle2 = a2;
                 point2Idx = i;
             }
