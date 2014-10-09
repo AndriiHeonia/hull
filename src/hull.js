@@ -153,15 +153,16 @@ function _intersect(edge, pointset) {
 }
 
 function _midPoint(edge, innerPoints, convex) {
+    var MAX_ANGLE = 60;
     var point1 = null, point2 = null,
-        angle1 = 90, angle2 = 90,
+        angle1 = MAX_ANGLE, angle2 = MAX_ANGLE,
         point = null;
 
     for (var i = 0; i < innerPoints.length; i++) {
         var a1 = _angle(edge[0], edge[1], innerPoints[i]),
             a2 = _angle(edge[1], edge[0], innerPoints[i]);
 
-        if (a1 < 90 && a2 < 90) {
+        if (a1 < MAX_ANGLE && a2 < MAX_ANGLE) {
             if (a1 > 0 && a1 < angle1 && !_intersect([edge[0], innerPoints[i]], convex)) {
                 angle1 = a1;
                 point1 = innerPoints[i];
@@ -187,13 +188,14 @@ function _midPoint(edge, innerPoints, convex) {
 }
 
 function _concave(convex, pointset) {
-    var midPointInserted = false,
+    var midPoint,
+        midPointInserted = false,
         innerPoints = pointset.filter(function(pt) {
             return convex.indexOf(pt) < 0;
         });
 
     for (var i = 0; i < convex.length - 1; i++) {
-        var midPoint = _midPoint([convex[i], convex[i + 1]], innerPoints, convex);
+        midPoint = _midPoint([convex[i], convex[i + 1]], innerPoints, convex);
         if (midPoint !== null) {
             innerPoints.splice(innerPoints.indexOf(midPoint), 1);
             convex.splice(i + 1, 0, midPoint);
@@ -203,7 +205,7 @@ function _concave(convex, pointset) {
 
     if (midPointInserted) {
         for (var i = 0; i < convex.length - 1; i++) {
-            if (_length([convex[i], convex[i+1]]) > 128) {
+            if (_length([convex[i], convex[i+1]]) > 10) {
                 return _concave(convex, pointset);
             }
         }
@@ -223,6 +225,7 @@ function hull(pointset) {
     }
 
     pointset = _sortByX(pointset);
+
     upper = _upperTangent(pointset);
     lower = _lowerTangent(pointset);
     convex = lower.concat(upper);
