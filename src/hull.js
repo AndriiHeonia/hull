@@ -23,11 +23,11 @@ function _cross(o, a, b) {
 function _cos(o, a, b) {
     var aShifted = [a[0] - o[0], a[1] - o[1]],
         bShifted = [b[0] - o[0], b[1] - o[1]],
-        aLen = _length([o, a]),
-        bLen = _length([o, b]),
+        sqALen = _sqLength([o, a]),
+        sqBLen = _sqLength([o, b]),
         dot = aShifted[0] * bShifted[0] + aShifted[1] * bShifted[1];
 
-    return dot / (aLen * bLen);
+    return dot / Math.sqrt(sqALen * sqBLen);
 }
 
 function _angle(o, a, b) {
@@ -89,10 +89,12 @@ function _lowerTangent(pointset) {
     return upper;
 }
 
+function _sqLength(edge) {
+    return Math.pow(edge[1][0] - edge[0][0], 2) + Math.pow(edge[1][1] - edge[0][1], 2);
+}
+
 function _length(edge) {
-    return Math.sqrt(
-        Math.pow(edge[1][0] - edge[0][0], 2) + Math.pow(edge[1][1] - edge[0][1], 2)
-    );
+    return Math.sqrt(_sqLength(edge));
 }
 
 function _sortByLength(edges) {
@@ -237,7 +239,7 @@ function _concave(convex, innerPoints) {
 
     for (var i = 0; i < convex.length - 1; i++) {
 
-        if (_length([convex[i], convex[i + 1]]) <= MAX_EDGE_LENGTH) { continue; }
+        if (_sqLength([convex[i], convex[i + 1]]) <= MAX_SQ_EDGE_LENGTH) { continue; }
 
         midPointIdx = _midPointIdx([convex[i], convex[i + 1]], innerPoints, convex);
         if (midPointIdx !== null) {
@@ -288,4 +290,4 @@ function hull(pointset) {
 
 var MAX_CONCAVE_ANGLE = 70 / (180 / Math.PI);
 var MAX_CONCAVE_ANGLE_COS = Math.cos(70 / (180 / Math.PI));
-var MAX_EDGE_LENGTH = 10;
+var MAX_SQ_EDGE_LENGTH = Math.pow(10, 2);
