@@ -153,7 +153,7 @@ function _intersect(edge, pointset) {
 }
 
 function _midPoint(edge, innerPoints, convex) {
-    var MAX_ANGLE = 60;
+    var MAX_ANGLE = 70;
     var point1 = null, point2 = null,
         angle1 = MAX_ANGLE, angle2 = MAX_ANGLE,
         point = null;
