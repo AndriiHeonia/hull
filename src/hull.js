@@ -131,6 +131,8 @@ function _insideBBox(point, bbox) {
         point[1] < bbox[1][1]);
 }
 
+var time = 0;
+
 function _midPointIdx(edge, innerPoints, convex) {
     var point1Idx = null, point2Idx = null,
         angle1Cos = MAX_CONCAVE_ANGLE_COS,
@@ -138,15 +140,15 @@ function _midPointIdx(edge, innerPoints, convex) {
         a1Cos, a2Cos,
         bbox = _getBBoxAroundEdge(edge);
 
-    window.ctx.beginPath();
-    window.ctx.rect(bbox[0][0], bbox[0][1], bbox[1][0]-bbox[0][0], bbox[1][1]-bbox[0][1]);
-    window.ctx.globalAlpha=0.2;
-    window.ctx.fillStyle = 'yellow';
-    window.ctx.fill();
-    window.ctx.lineWidth = 1;
-    window.ctx.strokeStyle = 'black';
-    window.ctx.stroke();
-    window.ctx.globalAlpha=1;
+    // window.ctx.beginPath();
+    // window.ctx.rect(bbox[0][0], bbox[0][1], bbox[1][0]-bbox[0][0], bbox[1][1]-bbox[0][1]);
+    // window.ctx.globalAlpha=0.2;
+    // window.ctx.fillStyle = 'yellow';
+    // window.ctx.fill();
+    // window.ctx.lineWidth = 1;
+    // window.ctx.strokeStyle = 'black';
+    // window.ctx.stroke();
+    // window.ctx.globalAlpha=1;
 
     for (var i = 0; i < innerPoints.length; i++) {
         if (innerPoints[i] === null) { continue; }
@@ -156,14 +158,19 @@ function _midPointIdx(edge, innerPoints, convex) {
         a2Cos = _cos(edge[1], edge[0], innerPoints[i]);
 
         if (a1Cos > MAX_CONCAVE_ANGLE_COS && a2Cos > MAX_CONCAVE_ANGLE_COS) {
-            if (a1Cos > angle1Cos && !_intersect([edge[0], innerPoints[i]], convex)) {
+
+            var start = new Date().getTime();
+            
+            if (a1Cos > angle1Cos /*&& !_intersect([edge[0], innerPoints[i]], convex)*/) {
                 angle1Cos = a1Cos;
                 point1Idx = i;
             }
-            if (a2Cos > angle2Cos && !_intersect([edge[1], innerPoints[i]], convex)) {
+            if (a2Cos > angle2Cos /*&& !_intersect([edge[1], innerPoints[i]], convex)*/) {
                 angle2Cos = a2Cos;
                 point2Idx = i;
             }
+            
+            time += ((new Date().getTime()) - start);
         }
     }
 
@@ -180,31 +187,21 @@ function _midPointIdx(edge, innerPoints, convex) {
     1.4. упростить метод intersect
   2. Автоматически считать угол и дистанцию
  */
-
-var time = 0;
-
 function _concave(convex, innerPoints) {
     var midPointIdx,
         midPointInserted = false;
 
-
     for (var i = 0; i < convex.length - 1; i++) {
-
         if (_sqLength([convex[i], convex[i + 1]]) <= MAX_SQ_EDGE_LENGTH) { continue; }
 
-        var start = new Date().getTime();
         midPointIdx = _midPointIdx([convex[i], convex[i + 1]], innerPoints, convex);
-        time += ((new Date().getTime()) - start);
 
         if (midPointIdx !== null) {
             convex.splice(i + 1, 0, innerPoints[midPointIdx]);
             innerPoints[midPointIdx] = null; // mark as deleted (it's faster than splice)
             midPointInserted = true;
         }
-        
-
     }
-
 
     if (midPointInserted) {
         return _concave(convex, innerPoints);
@@ -230,7 +227,6 @@ function hull(pointset) {
     lower = _lowerTangent(pointset);
     convex = lower.concat(upper);
     console.timeEnd('convex');
-
     
     console.time('innerPoints');
     var innerPoints = pointset.filter(function(pt) {
@@ -247,6 +243,6 @@ function hull(pointset) {
     return concave;
 }
 
-var MAX_CONCAVE_ANGLE_COS = Math.cos(70 / (180 / Math.PI)); // angle = 70 deg
+var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
 var MAX_EDGE_LENGTH = 10;
 var MAX_SQ_EDGE_LENGTH = Math.pow(MAX_EDGE_LENGTH, 2);
