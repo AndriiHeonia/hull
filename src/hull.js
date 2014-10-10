@@ -124,11 +124,37 @@ function _bBoxAround(edge) {
 }
 
 function _insideBBox(point, bbox) {
-    return (
-        point[0] > bbox[0][0] &&
-        point[0] < bbox[1][0] &&
-        point[1] > bbox[0][1] &&
-        point[1] < bbox[1][1]);
+    if (point[0] < bbox[0][0] ||
+        point[0] > bbox[1][0] ||
+        point[1] < bbox[0][1] ||
+        point[1] > bbox[1][1]) { return false; }
+    return true;
+}
+
+function _markPointsOutOfBuffer(innerPoints, convex) {
+    var bboxes = [];
+    for (var i = 0; i < convex.length - 1; i++) {
+        bboxes.push(_bBoxAround([convex[i], convex[i + 1]]));
+    }
+
+    // создаем четырехугольник по макс. вершинам
+
+    function inside(point, bboxes) {
+        // если внутри большого 4-х угоольника - false? 
+
+        for (var i = 0; i < bboxes.length; i++) {
+            if (_insideBBox(point, bboxes[i]) === true) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    innerPoints.forEach(function(point, idx, array) {
+        if (point !== null && array[idx][2] !== false) { // false - точно всегда в буфере
+            array[idx][2] = inside(point, bboxes) === false ? true : false;            
+        }
+    });
 }
 
 function _midPointIdx(edge, innerPoints, convex) {
@@ -139,8 +165,11 @@ function _midPointIdx(edge, innerPoints, convex) {
         bbox = _bBoxAround(edge);
 
     for (var i = 0; i < innerPoints.length; i++) {
-        if (innerPoints[i] === null) { continue; }
-        if (_insideBBox(innerPoints[i], bbox) === false) { continue; }
+        if (innerPoints[i] === null ||
+            innerPoints[i][2] === true ||
+            _insideBBox(innerPoints[i], bbox) === false) {
+            continue;
+        }
 
         a1Cos = _cos(edge[0], edge[1], innerPoints[i]);
         a2Cos = _cos(edge[1], edge[0], innerPoints[i]);
@@ -172,14 +201,27 @@ function _midPointIdx(edge, innerPoints, convex) {
   2. Автоматически считать угол и дистанцию
  */
 function _concave(convex, innerPoints) {
-    var midPointIdx, fmidPointIdx,
+    var midPointIdx, markedInnerPoints,
         midPointInserted = false;
+
+    // console.time('_markPointsOutOfBuffer');
+    _markPointsOutOfBuffer(innerPoints, convex);
+    // console.timeEnd('_markPointsOutOfBuffer');
+
+    window.ctx.fillStyle="red";
+    for (var i = 0; i < innerPoints.length; i++) {
+        if (innerPoints[i] === null || innerPoints[i][2] === true) { continue; }
+        window.ctx.beginPath();
+        window.ctx.arc(innerPoints[i][0], innerPoints[i][1], 1, 0, 2 * Math.PI, true);
+        window.ctx.fill();
+        window.ctx.closePath();
+    }
 
     for (var i = 0; i < convex.length - 1; i++) {
         if (_sqLength([convex[i], convex[i + 1]]) <= MAX_SQ_EDGE_LENGTH) { continue; }
 
         midPointIdx = _midPointIdx([convex[i], convex[i + 1]], innerPoints, convex);
-        if (fmidPointIdx !== null) {
+        if (midPointIdx !== null) {
             convex.splice(i + 1, 0, innerPoints[midPointIdx]);
             innerPoints[midPointIdx] = null;
             midPointInserted = true;
@@ -203,7 +245,9 @@ function hull(pointset) {
         return pointset;
     }
 
+    console.time('sortByX');
     pointset = _sortByX(pointset);
+    console.timeEnd('sortByX');
 
     console.time('convex');
     upper = _upperTangent(pointset);
