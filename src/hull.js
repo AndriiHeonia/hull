@@ -98,7 +98,7 @@ function _intersect(edge, pointset) {
     return false;
 }
 
-function _getBBoxAroundEdge(edge) {
+function _bBoxAround(edge) {
     var minX, maxX, minY, maxY;
 
     if (edge[0][0] < edge[1][0]) {
@@ -138,7 +138,7 @@ function _midPointIdx(edge, innerPoints, convex) {
         angle1Cos = MAX_CONCAVE_ANGLE_COS,
         angle2Cos = MAX_CONCAVE_ANGLE_COS,
         a1Cos, a2Cos,
-        bbox = _getBBoxAroundEdge(edge);
+        bbox = _bBoxAround(edge);
 
     // window.ctx.beginPath();
     // window.ctx.rect(bbox[0][0], bbox[0][1], bbox[1][0]-bbox[0][0], bbox[1][1]-bbox[0][1]);
@@ -154,13 +154,12 @@ function _midPointIdx(edge, innerPoints, convex) {
         if (innerPoints[i] === null) { continue; }
         if (_insideBBox(innerPoints[i], bbox) === false) { continue; }
 
+        var start = new Date().getTime();
         a1Cos = _cos(edge[0], edge[1], innerPoints[i]);
         a2Cos = _cos(edge[1], edge[0], innerPoints[i]);
+        time += ((new Date().getTime()) - start);
 
-        if (a1Cos > MAX_CONCAVE_ANGLE_COS && a2Cos > MAX_CONCAVE_ANGLE_COS) {
-
-            var start = new Date().getTime();
-            
+        if (a1Cos > MAX_CONCAVE_ANGLE_COS && a2Cos > MAX_CONCAVE_ANGLE_COS) {            
             if (a1Cos > angle1Cos /*&& !_intersect([edge[0], innerPoints[i]], convex)*/) {
                 angle1Cos = a1Cos;
                 point1Idx = i;
@@ -168,9 +167,7 @@ function _midPointIdx(edge, innerPoints, convex) {
             if (a2Cos > angle2Cos /*&& !_intersect([edge[1], innerPoints[i]], convex)*/) {
                 angle2Cos = a2Cos;
                 point2Idx = i;
-            }
-            
-            time += ((new Date().getTime()) - start);
+            }            
         }
     }
 
@@ -183,8 +180,9 @@ function _midPointIdx(edge, innerPoints, convex) {
     1.1. splice() complexity O(N), то есть, сложность вставки midPoint-ов сейчас O(N^2 + N^2).
          innerPoints надо вместо удаления просто маркать как удаленные (FIXED).
     1.2. ф-ю рассчета угла (FIXED)
-    1.3. можем ли как-то ограничить область пооиска midPoint-ов?
-    1.4. упростить метод intersect
+    1.3. можем ли как-то ограничить область пооиска midPoint-ов (FIXED)
+    1.4. упростить метод intersect (А он нужен? FIXED)
+    1.5. ограничить innerPoints только бардюром между внутренним и внешним convex hull-ом
   2. Автоматически считать угол и дистанцию
  */
 function _concave(convex, innerPoints) {
@@ -238,7 +236,7 @@ function hull(pointset) {
     concave = _concave(convex, innerPoints);
     console.timeEnd('concave');
 
-    console.log('Tmp calculated time:', time);
+    console.log('Tmp calculated time:', time + 'ms');
 
     return concave;
 }

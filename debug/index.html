@@ -100,7 +100,9 @@
         }
 
         // get and draw hull  
+        console.time('Total');
         var pxs = hull(vertices, ctx, ctx1);
+        console.timeEnd('Total');
         ctx.strokeStyle = "blue";
         ctx.lineWidth = 1;
         ctx.beginPath();
