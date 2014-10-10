@@ -136,7 +136,7 @@ function _midPointIdx(edge, innerPoints, convex) {
         angle1Cos = MAX_CONCAVE_ANGLE_COS,
         angle2Cos = MAX_CONCAVE_ANGLE_COS,
         a1Cos, a2Cos;
-        bbox = _bBoxAround(edge);
+        bbox = _bBoxAround(edge); 
 
     for (var i = 0; i < innerPoints.length; i++) {
         if (innerPoints[i] === null ||
@@ -179,6 +179,15 @@ function _concave(convex, innerPoints) {
 
     for (var i = 0; i < convex.length - 1; i++) {
         if (_sqLength([convex[i], convex[i + 1]]) <= MAX_SQ_EDGE_LENGTH) { continue; }
+
+        /*
+        TODO:
+        в innerPoints должны быть только те точки, которые входят в прямоугольник _bBoxAround(edge)
+        Это позволит внутри _midPointIdx: а) не обходить все точки; б) убрать проверку _insideBBox
+        Такой поиск можно осуществить имея kd-tree за O(log N).
+        В итоге O(convex.len * innerPoints.len) проверок заменим на 
+        O(convex.len * log(innerPoints.len))
+        */
 
         midPointIdx = _midPointIdx([convex[i], convex[i + 1]], innerPoints, convex);
         if (midPointIdx !== null) {
