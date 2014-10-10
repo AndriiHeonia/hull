@@ -131,32 +131,6 @@ function _insideBBox(point, bbox) {
     return true;
 }
 
-function _markPointsOutOfBuffer(innerPoints, convex) {
-    var bboxes = [];
-    for (var i = 0; i < convex.length - 1; i++) {
-        bboxes.push(_bBoxAround([convex[i], convex[i + 1]]));
-    }
-
-    // создаем четырехугольник по макс. вершинам
-
-    function inside(point, bboxes) {
-        // если внутри большого 4-х угоольника - false? 
-
-        for (var i = 0; i < bboxes.length; i++) {
-            if (_insideBBox(point, bboxes[i]) === true) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    innerPoints.forEach(function(point, idx, array) {
-        if (point !== null && array[idx][2] !== false) { // false - точно всегда в буфере
-            array[idx][2] = inside(point, bboxes) === false ? true : false;            
-        }
-    });
-}
-
 function _midPointIdx(edge, innerPoints, convex) {
     var point1Idx = null, point2Idx = null,
         angle1Cos = MAX_CONCAVE_ANGLE_COS,
@@ -166,7 +140,6 @@ function _midPointIdx(edge, innerPoints, convex) {
 
     for (var i = 0; i < innerPoints.length; i++) {
         if (innerPoints[i] === null ||
-            innerPoints[i][2] === true ||
             _insideBBox(innerPoints[i], bbox) === false) {
             continue;
         }
@@ -203,19 +176,6 @@ function _midPointIdx(edge, innerPoints, convex) {
 function _concave(convex, innerPoints) {
     var midPointIdx, markedInnerPoints,
         midPointInserted = false;
-
-    // console.time('_markPointsOutOfBuffer');
-    _markPointsOutOfBuffer(innerPoints, convex);
-    // console.timeEnd('_markPointsOutOfBuffer');
-
-    window.ctx.fillStyle="red";
-    for (var i = 0; i < innerPoints.length; i++) {
-        if (innerPoints[i] === null || innerPoints[i][2] === true) { continue; }
-        window.ctx.beginPath();
-        window.ctx.arc(innerPoints[i][0], innerPoints[i][1], 1, 0, 2 * Math.PI, true);
-        window.ctx.fill();
-        window.ctx.closePath();
-    }
 
     for (var i = 0; i < convex.length - 1; i++) {
         if (_sqLength([convex[i], convex[i + 1]]) <= MAX_SQ_EDGE_LENGTH) { continue; }
