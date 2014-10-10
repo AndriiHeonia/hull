@@ -106,7 +106,7 @@ function _bBoxAround(edge) {
         maxX = edge[1][0] + MAX_EDGE_LENGTH;
     } else {
         minX = edge[1][0] - MAX_EDGE_LENGTH;
-        maxX = edge[0][0] + MAX_EDGE_LENGTH;        
+        maxX = edge[0][0] + MAX_EDGE_LENGTH;
     }
 
     if (edge[0][1] < edge[1][1]) {
@@ -131,33 +131,19 @@ function _insideBBox(point, bbox) {
         point[1] < bbox[1][1]);
 }
 
-var time = 0;
-
 function _midPointIdx(edge, innerPoints, convex) {
     var point1Idx = null, point2Idx = null,
         angle1Cos = MAX_CONCAVE_ANGLE_COS,
         angle2Cos = MAX_CONCAVE_ANGLE_COS,
-        a1Cos, a2Cos,
+        a1Cos, a2Cos;
         bbox = _bBoxAround(edge);
-
-    // window.ctx.beginPath();
-    // window.ctx.rect(bbox[0][0], bbox[0][1], bbox[1][0]-bbox[0][0], bbox[1][1]-bbox[0][1]);
-    // window.ctx.globalAlpha=0.2;
-    // window.ctx.fillStyle = 'yellow';
-    // window.ctx.fill();
-    // window.ctx.lineWidth = 1;
-    // window.ctx.strokeStyle = 'black';
-    // window.ctx.stroke();
-    // window.ctx.globalAlpha=1;
 
     for (var i = 0; i < innerPoints.length; i++) {
         if (innerPoints[i] === null) { continue; }
         if (_insideBBox(innerPoints[i], bbox) === false) { continue; }
 
-        var start = new Date().getTime();
         a1Cos = _cos(edge[0], edge[1], innerPoints[i]);
         a2Cos = _cos(edge[1], edge[0], innerPoints[i]);
-        time += ((new Date().getTime()) - start);
 
         if (a1Cos > MAX_CONCAVE_ANGLE_COS && a2Cos > MAX_CONCAVE_ANGLE_COS) {            
             if (a1Cos > angle1Cos /*&& !_intersect([edge[0], innerPoints[i]], convex)*/) {
@@ -182,21 +168,20 @@ function _midPointIdx(edge, innerPoints, convex) {
     1.2. ф-ю рассчета угла (FIXED)
     1.3. можем ли как-то ограничить область пооиска midPoint-ов (FIXED)
     1.4. упростить метод intersect (А он нужен? FIXED)
-    1.5. ограничить innerPoints только бардюром между внутренним и внешним convex hull-ом
+    1.5. попробовать удалить никогда не используемые точки в середине
   2. Автоматически считать угол и дистанцию
  */
 function _concave(convex, innerPoints) {
-    var midPointIdx,
+    var midPointIdx, fmidPointIdx,
         midPointInserted = false;
 
     for (var i = 0; i < convex.length - 1; i++) {
         if (_sqLength([convex[i], convex[i + 1]]) <= MAX_SQ_EDGE_LENGTH) { continue; }
 
         midPointIdx = _midPointIdx([convex[i], convex[i + 1]], innerPoints, convex);
-
-        if (midPointIdx !== null) {
+        if (fmidPointIdx !== null) {
             convex.splice(i + 1, 0, innerPoints[midPointIdx]);
-            innerPoints[midPointIdx] = null; // mark as deleted (it's faster than splice)
+            innerPoints[midPointIdx] = null;
             midPointInserted = true;
         }
     }
@@ -235,8 +220,6 @@ function hull(pointset) {
     console.time('concave');
     concave = _concave(convex, innerPoints);
     console.timeEnd('concave');
-
-    console.log('Tmp calculated time:', time + 'ms');
 
     return concave;
 }
