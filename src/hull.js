@@ -14,7 +14,7 @@
 
 'use strict';
 
-var createKDTree = require("static-kdtree");
+var rbush = require("rbush");
 
 function _sortByX(pointset) {
     return pointset.sort(function(a, b) {
@@ -89,8 +89,8 @@ function _bBoxAround(edge) {
     }
 
     return [
-        [minX, minY], // tl
-        [maxX, maxY]  // br
+        minX, minY, // tl
+        maxX, maxY  // br
     ];
 }
 
@@ -102,64 +102,53 @@ function _insideBBox(point, bbox) {
     return true;
 }
 
-function _midPointIdx(edge, innerPointIdxs, innerPoints) {
-    var point1Idx = null, point2Idx = null,
+function _midPoint(edge, innerPoints) {
+    var point1 = null, point2 = null,
         angle1Cos = MAX_CONCAVE_ANGLE_COS,
         angle2Cos = MAX_CONCAVE_ANGLE_COS,
-        a1Cos, a2Cos, idx;
+        a1Cos, a2Cos;
 
-    for (var i = 0; i < innerPointIdxs.length; i++) {
-        idx = innerPointIdxs[i];
-        if (innerPoints[idx] === null) { continue; }
-
-        a1Cos = _cos(edge[0], edge[1], innerPoints[idx]);
-        a2Cos = _cos(edge[1], edge[0], innerPoints[idx]);
+    for (var i = 0; i < innerPoints.length; i++) {
+        a1Cos = _cos(edge[0], edge[1], innerPoints[i]);
+        a2Cos = _cos(edge[1], edge[0], innerPoints[i]);
 
         if (a1Cos > MAX_CONCAVE_ANGLE_COS && a2Cos > MAX_CONCAVE_ANGLE_COS) {            
             if (a1Cos > angle1Cos) {
                 angle1Cos = a1Cos;
-                point1Idx = idx;
+                point1 = innerPoints[i];
             }
             if (a2Cos > angle2Cos) {
                 angle2Cos = a2Cos;
-                point2Idx = idx;
-            }            
+                point2 = innerPoints[i];
+            }
         }
     }
 
-    return angle1Cos > angle2Cos ? point1Idx : point2Idx;
+    return angle1Cos > angle2Cos ? point1 : point2;
 }
 
-function _pointIdxsByRange(range, innerPointsTree) {
-    var result = [];
-    innerPointsTree.range(range[0], range[1], function(idx) {
-        result.push(idx);
-    });
-    return result;
-}
-
-function _concave(convex, innerPointsTree, innerPoints) {
+function _concave(convex, innerPointsTree) {
     var edge,
-        nPointIdxs,
-        midPointIdx,
+        nPoints,
+        midPoint,
         midPointInserted = false;
 
     for (var i = 0; i < convex.length - 1; i++) {
-        if (_sqLength(convex[i], convex[i + 1]) <= MAX_SQ_EDGE_LENGTH) { continue; }
+        if (_sqLength(convex[i], convex[i + 1]) < MAX_SQ_EDGE_LENGTH) { continue; }
 
         edge = [convex[i], convex[i + 1]];
-        nPointIdxs = _pointIdxsByRange(_bBoxAround(edge), innerPointsTree);
-        midPointIdx = _midPointIdx(edge, nPointIdxs, innerPoints);
+        nPoints = innerPointsTree.search(_bBoxAround(edge));
+        midPoint = _midPoint(edge, nPoints);
         
-        if (midPointIdx !== null) {
-            convex.splice(i + 1, 0, innerPoints[midPointIdx]);
-            innerPoints[midPointIdx] = null;
+        if (midPoint !== null) {
+            convex.splice(i + 1, 0, midPoint);
+            innerPointsTree.remove(midPoint);
             midPointInserted = true;
         }
     }
 
     if (midPointInserted) {
-        return _concave(convex, innerPointsTree, innerPoints);
+        return _concave(convex, innerPointsTree);
     }
 
     return convex;
@@ -191,9 +180,10 @@ function hull(pointset) {
     });
     console.timeEnd('innerPoints');
 
-    console.time('createKDTree');
-    var innerPointsTree = createKDTree(innerPoints);
-    console.timeEnd('createKDTree');
+    console.time('init tree');
+    var innerPointsTree = rbush(9, ['[0]', '[1]', '[0]', '[1]']);
+    innerPointsTree.load(innerPoints);
+    console.timeEnd('init tree');
 
     console.time('concave');
     concave = _concave(convex, innerPointsTree, innerPoints);

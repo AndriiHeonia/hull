@@ -41689,5 +41689,5 @@ var hull = require('../src/hull');
 
 console.log('vertices count: ' + vertices.length); // 41686
 console.time('hull exec time');
-hull(vertices, 5); // 2134ms
+hull(vertices, 5); // 2134ms -> 514.302ms (kdTree) -> 332.059ms (rBush)
 console.timeEnd('hull exec time');
