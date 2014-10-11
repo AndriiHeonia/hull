@@ -602,6 +602,18 @@ else window.rbush = rbush;
  http://habrahabr.ru/post/105882/
 */
 
+/*
+ TOTO:
+ 1) Adjust MAX_EDGE_LENGTH automatically
+ 2) Try to make _bBoxAround smallest and increase it step by step to MAX_EDGE_LENGTH.
+    It should helps us to use lesser innerPoints in _midPoint on hight density pointsets
+ 3) Update readme
+ 4) Compare performance with another concave hull implementations
+ 5) Update tests
+ 6) Create live examples on GitHub pages
+ 7) Push hull.js to npmjs.org
+*/
+
 'use strict';
 
 var rbush = require("rbush");
