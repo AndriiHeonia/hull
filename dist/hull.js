@@ -4903,18 +4903,19 @@ exports.clearCache = function clearCache() {
  (c) 2014, Andrey Geonya
  Hull.js, a JavaScript library for concave hull generation by set of points.
  https://github.com/AndreyGeonya/hull
+
+ Related papers:
+ http://www.it.uu.se/edu/course/homepage/projektTDB/ht13/project10/Project-10-report.pdf
+ http://www.cs.jhu.edu/~misha/Fall05/09.13.05.pdf
+ http://martin-thoma.com/how-to-check-if-two-line-segments-intersect/
+ http://allenchou.net/2013/07/cross-product-of-2d-vectors/
+ http://users.livejournal.com/_winnie/237714.html
+ http://habrahabr.ru/post/105882/
 */
 
 'use strict';
 
 var createKDTree = require("static-kdtree");
-
-/*
- Papers:
- http://www.it.uu.se/edu/course/homepage/projektTDB/ht13/project10/Project-10-report.pdf
- http://www.cs.jhu.edu/~misha/Fall05/09.13.05.pdf
- http://martin-thoma.com/how-to-check-if-two-line-segments-intersect/
-*/
 
 function _sortByX(pointset) {
     return pointset.sort(function(a, b) {
@@ -4924,23 +4925,6 @@ function _sortByX(pointset) {
             return a[0] - b[0];                                                           
         }
     });
-}
-
-// see http://allenchou.net/2013/07/cross-product-of-2d-vectors/
-function _cross(o, a, b) {
-    return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); 
-}
-
-// see http://users.livejournal.com/_winnie/237714.html
-// and http://habrahabr.ru/post/105882/
-function _cos(o, a, b) {
-    var aShifted = [a[0] - o[0], a[1] - o[1]],
-        bShifted = [b[0] - o[0], b[1] - o[1]],
-        sqALen = _sqLength(o, a),
-        sqBLen = _sqLength(o, b),
-        dot = aShifted[0] * bShifted[0] + aShifted[1] * bShifted[1];
-
-    return dot / Math.sqrt(sqALen * sqBLen);
 }
 
 function _upperTangent(pointset) {
@@ -4968,8 +4952,22 @@ function _lowerTangent(pointset) {
     return upper;
 }
 
+function _cross(o, a, b) {
+    return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); 
+}
+
 function _sqLength(a, b) {
     return Math.pow(b[0] - a[0], 2) + Math.pow(b[1] - a[1], 2);
+}
+
+function _cos(o, a, b) {
+    var aShifted = [a[0] - o[0], a[1] - o[1]],
+        bShifted = [b[0] - o[0], b[1] - o[1]],
+        sqALen = _sqLength(o, a),
+        sqBLen = _sqLength(o, b),
+        dot = aShifted[0] * bShifted[0] + aShifted[1] * bShifted[1];
+
+    return dot / Math.sqrt(sqALen * sqBLen);
 }
 
 function _bBoxAround(edge) {
@@ -5009,10 +5007,10 @@ function _midPointIdx(edge, innerPointIdxs, innerPoints) {
     var point1Idx = null, point2Idx = null,
         angle1Cos = MAX_CONCAVE_ANGLE_COS,
         angle2Cos = MAX_CONCAVE_ANGLE_COS,
-        a1Cos, a2Cos;
+        a1Cos, a2Cos, idx;
 
     for (var i = 0; i < innerPointIdxs.length; i++) {
-        var idx = innerPointIdxs[i];
+        idx = innerPointIdxs[i];
         if (innerPoints[idx] === null) { continue; }
 
         a1Cos = _cos(edge[0], edge[1], innerPoints[idx]);
@@ -5041,22 +5039,10 @@ function _pointIdxsByRange(range, innerPointsTree) {
     return result;
 }
 
-// TODO
-/**
-  1. Оптимизировать:
-    1.1. splice() complexity O(N), то есть, сложность вставки midPoint-ов сейчас O(N^2 + N^2).
-         innerPoints надо вместо удаления просто маркать как удаленные (FIXED).
-    1.2. ф-ю рассчета угла (FIXED)
-    1.3. можем ли как-то ограничить область пооиска midPoint-ов (FIXED)
-    1.4. упростить метод intersect (А он нужен? FIXED)
-    1.5. попробовать удалить никогда не используемые точки в середине
-  2. Автоматически считать угол и дистанцию
- */
-
-function _concave(convex, innerPoints, innerPointsTree) {
+function _concave(convex, innerPointsTree, innerPoints) {
     var edge,
-        midPointIdx,
         nPointIdxs,
+        midPointIdx,
         midPointInserted = false;
 
     for (var i = 0; i < convex.length - 1; i++) {
@@ -5074,7 +5060,7 @@ function _concave(convex, innerPoints, innerPointsTree) {
     }
 
     if (midPointInserted) {
-        return _concave(convex, innerPoints, innerPointsTree);
+        return _concave(convex, innerPointsTree, innerPoints);
     }
 
     return convex;
@@ -5111,7 +5097,7 @@ function hull(pointset) {
     console.timeEnd('createKDTree');
 
     console.time('concave');
-    concave = _concave(convex, innerPoints, innerPointsTree);
+    concave = _concave(convex, innerPointsTree, innerPoints);
     console.timeEnd('concave');
 
     return concave;
