@@ -1,6 +1,6 @@
 {
     "name": "Hull.js",
-    "version": "0.0.1",
+    "version": "0.1.1",
     "description": "JavaScript library that builds concave hulls (shapes) by set of points",
     "homepage": "https://github.com/AndreyGeonya/hull",
     "keywords": [
@@ -16,6 +16,9 @@
         "url": "https://github.com/AndreyGeonya/hull"
     },
     "main": "./src/hull.js",
+    "dependencies": {
+        "static-kdtree": "~1.0.1"
+    },
     "devDependencies": {
         "mocha": "~1.18.2",
         "jshint": "~2.5.0",

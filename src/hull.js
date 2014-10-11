@@ -1,4 +1,14 @@
 /*
+ (c) 2014, Andrey Geonya
+ Hull.js, a JavaScript library for concave hull generation by set of points.
+ https://github.com/AndreyGeonya/hull
+*/
+
+'use strict';
+
+var createKDTree = require("static-kdtree");
+
+/*
  Papers:
  http://www.it.uu.se/edu/course/homepage/projektTDB/ht13/project10/Project-10-report.pdf
  http://www.cs.jhu.edu/~misha/Fall05/09.13.05.pdf
@@ -25,8 +35,8 @@ function _cross(o, a, b) {
 function _cos(o, a, b) {
     var aShifted = [a[0] - o[0], a[1] - o[1]],
         bShifted = [b[0] - o[0], b[1] - o[1]],
-        sqALen = _sqLength([o, a]),
-        sqBLen = _sqLength([o, b]),
+        sqALen = _sqLength(o, a),
+        sqBLen = _sqLength(o, b),
         dot = aShifted[0] * bShifted[0] + aShifted[1] * bShifted[1];
 
     return dot / Math.sqrt(sqALen * sqBLen);
@@ -57,45 +67,8 @@ function _lowerTangent(pointset) {
     return upper;
 }
 
-function _sqLength(edge) {
-    return Math.pow(edge[1][0] - edge[0][0], 2) + Math.pow(edge[1][1] - edge[0][1], 2);
-}
-
-function _intersect(edge, pointset) {
-    var a = {
-        'first': {
-            x: edge[0][0],
-            y: edge[0][1]
-        },
-        'second': {
-            x: edge[1][0],
-            y: edge[1][1]                
-        }
-    };
-
-    for (var i = 0; i < pointset.length - 1; i++) {
-        var b = {
-            'first': {
-                x: pointset[i][0],
-                y: pointset[i][1]
-            },
-            'second': {
-                x: pointset[i + 1][0],
-                y: pointset[i + 1][1]
-            }
-        };
-
-        if (edge[0][0] === pointset[i][0] && edge[0][1] === pointset[i][1] ||
-            edge[0][0] === pointset[i + 1][0] && edge[0][1] === pointset[i + 1][1]) {
-            continue;
-        }
-
-        if (segments.intersect(a, b)) {
-            return true;
-        }
-    }
-
-    return false;
+function _sqLength(a, b) {
+    return Math.pow(b[0] - a[0], 2) + Math.pow(b[1] - a[1], 2);
 }
 
 function _bBoxAround(edge) {
@@ -131,35 +104,40 @@ function _insideBBox(point, bbox) {
     return true;
 }
 
-function _midPointIdx(edge, innerPoints, convex) {
+function _midPointIdx(edge, innerPointIdxs, innerPoints) {
     var point1Idx = null, point2Idx = null,
         angle1Cos = MAX_CONCAVE_ANGLE_COS,
         angle2Cos = MAX_CONCAVE_ANGLE_COS,
         a1Cos, a2Cos;
-        bbox = _bBoxAround(edge); 
 
-    for (var i = 0; i < innerPoints.length; i++) {
-        if (innerPoints[i] === null ||
-            _insideBBox(innerPoints[i], bbox) === false) {
-            continue;
-        }
+    for (var i = 0; i < innerPointIdxs.length; i++) {
+        var idx = innerPointIdxs[i];
+        if (innerPoints[idx] === null) { continue; }
 
-        a1Cos = _cos(edge[0], edge[1], innerPoints[i]);
-        a2Cos = _cos(edge[1], edge[0], innerPoints[i]);
+        a1Cos = _cos(edge[0], edge[1], innerPoints[idx]);
+        a2Cos = _cos(edge[1], edge[0], innerPoints[idx]);
 
         if (a1Cos > MAX_CONCAVE_ANGLE_COS && a2Cos > MAX_CONCAVE_ANGLE_COS) {            
-            if (a1Cos > angle1Cos /*&& !_intersect([edge[0], innerPoints[i]], convex)*/) {
+            if (a1Cos > angle1Cos) {
                 angle1Cos = a1Cos;
-                point1Idx = i;
+                point1Idx = idx;
             }
-            if (a2Cos > angle2Cos /*&& !_intersect([edge[1], innerPoints[i]], convex)*/) {
+            if (a2Cos > angle2Cos) {
                 angle2Cos = a2Cos;
-                point2Idx = i;
+                point2Idx = idx;
             }            
         }
     }
 
     return angle1Cos > angle2Cos ? point1Idx : point2Idx;
+}
+
+function _pointIdxsByRange(range, innerPointsTree) {
+    var result = [];
+    innerPointsTree.range(range[0], range[1], function(idx) {
+        result.push(idx);
+    });
+    return result;
 }
 
 // TODO
@@ -173,23 +151,20 @@ function _midPointIdx(edge, innerPoints, convex) {
     1.5. попробовать удалить никогда не используемые точки в середине
   2. Автоматически считать угол и дистанцию
  */
-function _concave(convex, innerPoints) {
-    var midPointIdx, markedInnerPoints,
+
+function _concave(convex, innerPoints, innerPointsTree) {
+    var edge,
+        midPointIdx,
+        nPointIdxs,
         midPointInserted = false;
 
     for (var i = 0; i < convex.length - 1; i++) {
-        if (_sqLength([convex[i], convex[i + 1]]) <= MAX_SQ_EDGE_LENGTH) { continue; }
+        if (_sqLength(convex[i], convex[i + 1]) <= MAX_SQ_EDGE_LENGTH) { continue; }
 
-        /*
-        TODO:
-        в innerPoints должны быть только те точки, которые входят в прямоугольник _bBoxAround(edge)
-        Это позволит внутри _midPointIdx: а) не обходить все точки; б) убрать проверку _insideBBox
-        Такой поиск можно осуществить имея kd-tree за O(log N).
-        В итоге O(convex.len * innerPoints.len) проверок заменим на 
-        O(convex.len * log(innerPoints.len))
-        */
-
-        midPointIdx = _midPointIdx([convex[i], convex[i + 1]], innerPoints, convex);
+        edge = [convex[i], convex[i + 1]];
+        nPointIdxs = _pointIdxsByRange(_bBoxAround(edge), innerPointsTree);
+        midPointIdx = _midPointIdx(edge, nPointIdxs, innerPoints);
+        
         if (midPointIdx !== null) {
             convex.splice(i + 1, 0, innerPoints[midPointIdx]);
             innerPoints[midPointIdx] = null;
@@ -198,7 +173,7 @@ function _concave(convex, innerPoints) {
     }
 
     if (midPointInserted) {
-        return _concave(convex, innerPoints);
+        return _concave(convex, innerPoints, innerPointsTree);
     }
 
     return convex;
@@ -230,8 +205,12 @@ function hull(pointset) {
     });
     console.timeEnd('innerPoints');
 
+    console.time('createKDTree');
+    var innerPointsTree = createKDTree(innerPoints);
+    console.timeEnd('createKDTree');
+
     console.time('concave');
-    concave = _concave(convex, innerPoints);
+    concave = _concave(convex, innerPoints, innerPointsTree);
     console.timeEnd('concave');
 
     return concave;
@@ -240,3 +219,5 @@ function hull(pointset) {
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
 var MAX_EDGE_LENGTH = 10;
 var MAX_SQ_EDGE_LENGTH = Math.pow(MAX_EDGE_LENGTH, 2);
+
+module.exports = hull;
