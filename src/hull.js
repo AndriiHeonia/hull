@@ -14,19 +14,21 @@
 
 /*
  TOTO:
- 1) Adjust MAX_EDGE_LENGTH automatically
- 2) Try to make _bBoxAround smallest and increase it step by step to MAX_EDGE_LENGTH.
-    It should helps us to use lesser innerPoints in _midPoint on hight density pointsets
- 3) Update readme
- 4) Compare performance with another concave hull implementations
- 5) Update tests
- 6) Create live examples on GitHub pages
- 7) Push hull.js to npmjs.org
+- Adjust EDGE_LENGTH automatically (?)
+- Try to make _bBoxAround smallest and increase it step by step to EDGE_LENGTH.
+  It should helps us to use lesser innerPoints in _midPoint on hight density pointsets (DONE!)
+- Check, fix and optimize intersection checking (DONE!)
+- Update readme
+- Compare performance with another concave hull implementations
+- Update tests
+- Create live examples on GitHub pages
+- Push hull.js to npmjs.org
 */
 
 'use strict';
 
 var rbush = require("rbush");
+var intersect = require('./segments.js');
 
 function _sortByX(pointset) {
     return pointset.sort(function(a, b) {
@@ -81,23 +83,36 @@ function _cos(o, a, b) {
     return dot / Math.sqrt(sqALen * sqBLen);
 }
 
-function _bBoxAround(edge) {
+function _intersect(edge, pointset) {
+    for (var i = 0; i < pointset.length - 1; i++) {
+        if (edge[0][0] === pointset[i][0] && edge[0][1] === pointset[i][1] ||
+            edge[0][0] === pointset[i + 1][0] && edge[0][1] === pointset[i + 1][1]) {
+            continue;
+        }
+        if (intersect(edge, [pointset[i], pointset[i + 1]])) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function _bBoxAround(edge, boxSize) {
     var minX, maxX, minY, maxY;
 
     if (edge[0][0] < edge[1][0]) {
-        minX = edge[0][0] - MAX_EDGE_LENGTH;
-        maxX = edge[1][0] + MAX_EDGE_LENGTH;
+        minX = edge[0][0] - boxSize;
+        maxX = edge[1][0] + boxSize;
     } else {
-        minX = edge[1][0] - MAX_EDGE_LENGTH;
-        maxX = edge[0][0] + MAX_EDGE_LENGTH;
+        minX = edge[1][0] - boxSize;
+        maxX = edge[0][0] + boxSize;
     }
 
     if (edge[0][1] < edge[1][1]) {
-        minY = edge[0][1] - MAX_EDGE_LENGTH;
-        maxY = edge[1][1] + MAX_EDGE_LENGTH;
+        minY = edge[0][1] - boxSize;
+        maxY = edge[1][1] + boxSize;
     } else {
-        minY = edge[1][1] - MAX_EDGE_LENGTH;
-        maxY = edge[0][1] + MAX_EDGE_LENGTH;
+        minY = edge[1][1] - boxSize;
+        maxY = edge[0][1] + boxSize;
     }
 
     return [
@@ -106,15 +121,7 @@ function _bBoxAround(edge) {
     ];
 }
 
-function _insideBBox(point, bbox) {
-    if (point[0] < bbox[0][0] ||
-        point[0] > bbox[1][0] ||
-        point[1] < bbox[0][1] ||
-        point[1] > bbox[1][1]) { return false; }
-    return true;
-}
-
-function _midPoint(edge, innerPoints) {
+function _midPoint(edge, innerPoints, convex) {
     var point1 = null, point2 = null,
         angle1Cos = MAX_CONCAVE_ANGLE_COS,
         angle2Cos = MAX_CONCAVE_ANGLE_COS,
@@ -124,12 +131,12 @@ function _midPoint(edge, innerPoints) {
         a1Cos = _cos(edge[0], edge[1], innerPoints[i]);
         a2Cos = _cos(edge[1], edge[0], innerPoints[i]);
 
-        if (a1Cos > MAX_CONCAVE_ANGLE_COS && a2Cos > MAX_CONCAVE_ANGLE_COS) {            
-            if (a1Cos > angle1Cos) {
+        if (a1Cos > MAX_CONCAVE_ANGLE_COS && a2Cos > MAX_CONCAVE_ANGLE_COS) {
+            if ((a1Cos > angle1Cos && !_intersect([edge[0], innerPoints[i]], convex)) && 
+                (a2Cos > angle2Cos && !_intersect([edge[1], innerPoints[i]], convex))) {
+
                 angle1Cos = a1Cos;
                 point1 = innerPoints[i];
-            }
-            if (a2Cos > angle2Cos) {
                 angle2Cos = a2Cos;
                 point2 = innerPoints[i];
             }
@@ -142,16 +149,24 @@ function _midPoint(edge, innerPoints) {
 function _concave(convex, innerPointsTree) {
     var edge,
         nPoints,
+        bBoxSize,
         midPoint,
+        sqEdgeLen,
         midPointInserted = false;
 
     for (var i = 0; i < convex.length - 1; i++) {
-        if (_sqLength(convex[i], convex[i + 1]) < MAX_SQ_EDGE_LENGTH) { continue; }
+
+        sqEdgeLen = _sqLength(convex[i], convex[i + 1]);
+        if (sqEdgeLen < SQ_EDGE_LENGTH) { continue; }
 
         edge = [convex[i], convex[i + 1]];
-        nPoints = innerPointsTree.search(_bBoxAround(edge));
-        midPoint = _midPoint(edge, nPoints);
-        
+        bBoxSize = SEARCH_BBOX_SIZE;
+        do {
+            nPoints = innerPointsTree.search(_bBoxAround(edge, bBoxSize));
+            midPoint = _midPoint(edge, nPoints, convex);
+            bBoxSize *= 2;
+        } while (midPoint === null && sqEdgeLen > (bBoxSize * bBoxSize));
+
         if (midPoint !== null) {
             convex.splice(i + 1, 0, midPoint);
             innerPointsTree.remove(midPoint);
@@ -205,7 +220,7 @@ function hull(pointset) {
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
-var MAX_EDGE_LENGTH = 10;
-var MAX_SQ_EDGE_LENGTH = Math.pow(MAX_EDGE_LENGTH, 2);
+var SQ_EDGE_LENGTH = Math.pow(10, 2); // edgeLen = 10px
+var SEARCH_BBOX_SIZE = 10;
 
 module.exports = hull;
