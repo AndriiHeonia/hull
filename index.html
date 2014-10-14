@@ -8,19 +8,21 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
-
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
     <title>Hull.js by AndreyGeonya</title>
-    <script src="https://raw.githubusercontent.com/AndreyGeonya/hull/speedup/dist/hull.js"></script>
+    <script src="./javascripts/hull.js"></script>
+    <script src="./javascripts/dbscan.js"></script>
+    <script src="./javascripts/pointset1.js"></script>
+    <script src="./javascripts/pointset2.js"></script>
   </head>
 
   <body>
     <header>
       <div class="inner">
-        <h1>Hull.js</h1>
+        <h1>Hull.js examples</h1>
         <h2></h2>
         <a href="https://github.com/AndreyGeonya/hull" class="button"><small>View project on</small> GitHub</a>
       </div>
@@ -29,37 +31,113 @@
     <div id="content-wrapper">
       <div class="inner clearfix">
         <section id="main-content">
-          <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+<!-- Example 1 -->
+<h3><a name="generate-hull-of-the-polygon" class="anchor" href="#generate-hull-of-the-polygon"><span class="octicon octicon-link"></span>Generate hull of the polygon.</a></h3>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
+<p>Just call <code>hull</code> function to receive hull of the point set:</p>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<pre><code>var pointset = [[168, 180], [168, 178], [168, 179], ...];
+var pts = hull(pointset);
+// ... draw pts</code></pre>
+
+<p>
+  <canvas id="canv1" width="400" height="250"></canvas>
+  <script>
+  function example1() {
+    var c = document.getElementById('canv1'),
+        ctx = c.getContext('2d');
+
+    // draw all points
+    ctx.fillStyle = "black";
+    for (var i = 0; i < pointset1.length; i++) {
+        ctx.beginPath();
+        ctx.arc(pointset1[i][0], pointset1[i][1], 1, 0, 2 * Math.PI, true);
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    // get and draw hull
+    var pts = hull(pointset1, 10);
+    ctx.strokeStyle = "blue";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    pts.forEach(function(px) {
+        ctx.lineTo(px[0], px[1]);
+        ctx.moveTo(px[0], px[1]);
+    });
+    ctx.lineTo(pts[0][0], pts[0][1]);
+    ctx.stroke();
+    ctx.closePath();
+  }
+  </script>
+</p>
+<!-- END: Example 1 -->
+
+<!-- Example 2 -->
+<h3><a name="generate-hull-of-the-multipolygon" class="anchor" href="#generate-hull-of-the-multipolygon"><span class="octicon octicon-link"></span>Generate hull of the multipolygon.</a></h3>
+
+<p>If you want to get hulls of the point set that looks like multipolygon, then you need to call <code>hull</code> function for each subset (for each polygon). <br /> In this example we use LukaszKrawczyk's <a href="https://github.com/LukaszKrawczyk/clustering" target="_blank">density based clustering library</a> to split one large point set to several groups, after that we recive hulls for each of them:</p>
+
+<p>
+  <canvas id="canv2" width="310" height="100"></canvas>
+
+  <script>
+  function example2() {
+    var c = document.getElementById('canv2'),
+        ctx = c.getContext('2d'),
+        dbscan = new DBSCAN(),
+        clustersIndexes,
+        clusters = [],
+        colors = ["red", "green", "blue"],
+        colIdx = 0;
+
+    // draw all points
+    ctx.fillStyle = "gray";
+    for (var i = 0; i < pointset2.length; i++) {
+        ctx.beginPath();
+        ctx.arc(pointset2[i][0], pointset2[i][1], 1, 0, 2 * Math.PI, true);
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    // get groups of points (clusters)
+    clustersIndexes = dbscan.run(pointset2, 90, 650);
+    clustersIndexes.forEach(function(cluster) {
+        var cluster = cluster.map(function(i) {
+            return [pointset2[i][0], pointset2[i][1]];
+        });
+        clusters.push(cluster);
+    });
+
+    // get and draw hulls for each cluster
+    ctx.lineWidth = 2;
+    clusters.forEach(function(pointset, idx) {
+        var pts = hull(pointset, 5);
+        ctx.strokeStyle = colors[idx];
+        ctx.beginPath();
+        pts.forEach(function(pt) {
+            ctx.lineTo(pt[0], pt[1]);
+            ctx.stroke();
+            ctx.moveTo(pt[0], pt[1]);
+        });
+        ctx.lineTo(pts[0][0], pts[0][1]);
+        ctx.stroke();
+        ctx.closePath();
+    });
+  }
+  </script>
+</p>
+<!-- END: Example 2 -->
 
         </section>
-
-        <!-- <aside id="sidebar">
-          <a href="https://github.com/AndreyGeonya/hull/zipball/master" class="button">
-            <small>Download</small>
-            .zip file
-          </a>
-          <a href="https://github.com/AndreyGeonya/hull/tarball/master" class="button">
-            <small>Download</small>
-            .tar.gz file
-          </a>
-
-          <p class="repo-owner"><a href="https://github.com/AndreyGeonya/hull"></a> is maintained by <a href="https://github.com/AndreyGeonya">AndreyGeonya</a>.</p>
-
-          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
-        </aside> -->
       </div>
     </div>
-
-  
+<script>
+window.onload = function() {
+  example1();
+  example2();
+}  
+</script>
   </body>
 </html>
