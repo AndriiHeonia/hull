@@ -48,8 +48,7 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## Changelog
 
-* 0.2.0 — 14.10.2014
+* 0.2.0 — 14.10.2014<br>
 Second version inspired by <a href="http://www.it.uu.se/edu/course/homepage/projektTDB/ht13/project10/Project-10-report.pdf" target="_blank">this</a> article.
-
-* 0.1.0 — 06.09.2014
+* 0.1.0 — 06.09.2014<br>
 First version based on Delaunay triangulation.
