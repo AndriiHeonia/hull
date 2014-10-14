@@ -113,7 +113,7 @@
 
         // get and draw hull  
         console.time('hull');
-        var pxs = hull(vertices);
+        var pxs = hull(vertices, 10);
         console.timeEnd('hull');
         ctx.strokeStyle = "blue";
         ctx.lineWidth = 1;

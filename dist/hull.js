@@ -604,7 +604,7 @@ else window.rbush = rbush;
 
 /*
  TOTO:
-- Adjust EDGE_LENGTH automatically
+- Adjust EDGE_LENGTH automatically (global DONE!)
 - Try to make _bBoxAround smallest and increase it step by step to EDGE_LENGTH.
   It should helps us to use lesser innerPoints in _midPoint on hight density pointsets (DONE!)
 - Check, fix and optimize intersection checking (DONE!)
@@ -746,11 +746,11 @@ function _concave(convex, innerPointsTree, maxSqEdgeLen) {
         midPointInserted = false;
 
     for (var i = 0; i < convex.length - 1; i++) {
-
-        // if (sqEdgeLen < maxSqEdgeLen) { continue; }
-
         edge = [convex[i], convex[i + 1]];
         sqEdgeLen = _sqLength(edge[0], edge[1]);
+
+        if (sqEdgeLen < maxSqEdgeLen) { continue; }
+
         bBoxSize = SEARCH_BBOX_SIZE;
         do {
             bBoxAround = _bBoxAround(edge, bBoxSize);
@@ -758,12 +758,6 @@ function _concave(convex, innerPointsTree, maxSqEdgeLen) {
             midPoint = _midPoint(edge, nPoints, convex);
             bBoxSize *= 2;
         } while (midPoint === null && sqEdgeLen > (bBoxSize * bBoxSize));
-
-        var localMaxSqLen = _calcLocaMaxSqLen(edge, nPoints);
-
-        // console.log(Math.sqrt(sqEdgeLen), Math.sqrt(localMaxSqLen));
-
-        if (sqEdgeLen < localMaxSqLen) { continue; }
 
         if (midPoint !== null) {
             convex.splice(i + 1, 0, midPoint);
@@ -779,25 +773,13 @@ function _concave(convex, innerPointsTree, maxSqEdgeLen) {
     return convex;
 }
 
-function _calcLocaMaxSqLen(edge, bBoxPoints) {
-    var maxSqLen = Infinity,
-        curSqLen = Infinity;
-    for (var i = bBoxPoints.length - 1; i >= 0; i--) {
-        curSqLen = Math.min(_sqLength(edge[0], bBoxPoints[i]), _sqLength(edge[1], bBoxPoints[i]));
-        if (curSqLen < maxSqLen) {
-            maxSqLen = curSqLen;
-        }
-    }
-    return maxSqLen * 50;
-}
-
 function _detectMaxSqEdgeLen(convex, innerPointsTree, concavity) {
     var sqEdgeLen, bBoxSize, nPoints,
         bBoxAround, bBoxA, bBoxB, area,
         curDensity = 0, maxDensity = 0,
-        maxDensitySqEdgeLen = 1,
-        maxDensityPoint1 = null,
-        maxDensityPoint2 = null;
+        mostDensitySqEdgeLen = 1,
+        point1 = null,
+        point2 = null;
 
     for (var i = 0; i < convex.length - 1; i++) {
         sqEdgeLen = _sqLength(convex[i], convex[i + 1]);
@@ -815,16 +797,16 @@ function _detectMaxSqEdgeLen(convex, innerPointsTree, concavity) {
         curDensity = (nPoints.length * nPoints.length) / area;
         if (curDensity > maxDensity) {
             maxDensity = curDensity;
-            maxDensityPoint1 = nPoints[0];
-            maxDensityPoint2 = nPoints[1];
+            point1 = nPoints[0];
+            point2 = nPoints[1];
         }
     }
 
-    if (maxDensityPoint1 && maxDensityPoint2) {
-        maxDensitySqEdgeLen = _sqLength(maxDensityPoint1, maxDensityPoint2);
+    if (point1 && point2) {
+        mostDensitySqEdgeLen = _sqLength(point1, point2);
     }
 
-    return maxDensitySqEdgeLen * concavity;
+    return mostDensitySqEdgeLen * concavity;
 }
 
 function hull(pointset, concavity) {
