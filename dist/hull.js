@@ -604,7 +604,7 @@ else window.rbush = rbush;
 
 /*
  TOTO:
-- Adjust EDGE_LENGTH automatically (?)
+- Adjust EDGE_LENGTH automatically
 - Try to make _bBoxAround smallest and increase it step by step to EDGE_LENGTH.
   It should helps us to use lesser innerPoints in _midPoint on hight density pointsets (DONE!)
 - Check, fix and optimize intersection checking (DONE!)
@@ -736,26 +736,34 @@ function _midPoint(edge, innerPoints, convex) {
     return angle1Cos > angle2Cos ? point1 : point2;
 }
 
-function _concave(convex, innerPointsTree) {
+function _concave(convex, innerPointsTree, maxSqEdgeLen) {
     var edge,
         nPoints,
         bBoxSize,
         midPoint,
         sqEdgeLen,
+        bBoxAround,
         midPointInserted = false;
 
     for (var i = 0; i < convex.length - 1; i++) {
 
-        sqEdgeLen = _sqLength(convex[i], convex[i + 1]);
-        if (sqEdgeLen < SQ_EDGE_LENGTH) { continue; }
+        // if (sqEdgeLen < maxSqEdgeLen) { continue; }
 
         edge = [convex[i], convex[i + 1]];
+        sqEdgeLen = _sqLength(edge[0], edge[1]);
         bBoxSize = SEARCH_BBOX_SIZE;
         do {
-            nPoints = innerPointsTree.search(_bBoxAround(edge, bBoxSize));
+            bBoxAround = _bBoxAround(edge, bBoxSize);
+            nPoints = innerPointsTree.search(bBoxAround);
             midPoint = _midPoint(edge, nPoints, convex);
             bBoxSize *= 2;
         } while (midPoint === null && sqEdgeLen > (bBoxSize * bBoxSize));
+
+        var localMaxSqLen = _calcLocaMaxSqLen(edge, nPoints);
+
+        // console.log(Math.sqrt(sqEdgeLen), Math.sqrt(localMaxSqLen));
+
+        if (sqEdgeLen < localMaxSqLen) { continue; }
 
         if (midPoint !== null) {
             convex.splice(i + 1, 0, midPoint);
@@ -765,52 +773,89 @@ function _concave(convex, innerPointsTree) {
     }
 
     if (midPointInserted) {
-        return _concave(convex, innerPointsTree);
+        return _concave(convex, innerPointsTree, maxSqEdgeLen);
     }
 
     return convex;
 }
 
-function hull(pointset) {
-    var lower,
-        upper,
-        convex,
-        concave;
+function _calcLocaMaxSqLen(edge, bBoxPoints) {
+    var maxSqLen = Infinity,
+        curSqLen = Infinity;
+    for (var i = bBoxPoints.length - 1; i >= 0; i--) {
+        curSqLen = Math.min(_sqLength(edge[0], bBoxPoints[i]), _sqLength(edge[1], bBoxPoints[i]));
+        if (curSqLen < maxSqLen) {
+            maxSqLen = curSqLen;
+        }
+    }
+    return maxSqLen * 50;
+}
 
-    if (pointset.length <= 1) {
+function _detectMaxSqEdgeLen(convex, innerPointsTree, concavity) {
+    var sqEdgeLen, bBoxSize, nPoints,
+        bBoxAround, bBoxA, bBoxB, area,
+        curDensity = 0, maxDensity = 0,
+        maxDensitySqEdgeLen = 1,
+        maxDensityPoint1 = null,
+        maxDensityPoint2 = null;
+
+    for (var i = 0; i < convex.length - 1; i++) {
+        sqEdgeLen = _sqLength(convex[i], convex[i + 1]);
+        bBoxSize = SEARCH_BBOX_SIZE;
+        do {
+            bBoxAround = _bBoxAround([convex[i], convex[i + 1]], bBoxSize);
+            nPoints = innerPointsTree.search(bBoxAround);
+            bBoxSize *= 2;
+        } while (nPoints.length < 2 && sqEdgeLen > (bBoxSize * bBoxSize));
+
+        bBoxA = [[bBoxAround[0], bBoxAround[1]], [bBoxAround[2], bBoxAround[1]]];
+        bBoxB = [[bBoxAround[0], bBoxAround[1]], [bBoxAround[0], bBoxAround[3]]];
+        area = _sqLength(bBoxA[0], bBoxA[1]) * _sqLength(bBoxB[0], bBoxB[1]);
+
+        curDensity = (nPoints.length * nPoints.length) / area;
+        if (curDensity > maxDensity) {
+            maxDensity = curDensity;
+            maxDensityPoint1 = nPoints[0];
+            maxDensityPoint2 = nPoints[1];
+        }
+    }
+
+    if (maxDensityPoint1 && maxDensityPoint2) {
+        maxDensitySqEdgeLen = _sqLength(maxDensityPoint1, maxDensityPoint2);
+    }
+
+    return maxDensitySqEdgeLen * concavity;
+}
+
+function hull(pointset, concavity) {
+    var lower, upper, convex,
+        innerPoints, maxSqEdgeLen,
+        innerPointsTree, concave,
+        concavity = concavity || 10;
+
+    if (pointset.length < 3) {
         return pointset;
     }
 
-    console.time('sortByX');
     pointset = _sortByX(pointset);
-    console.timeEnd('sortByX');
-
-    console.time('convex');
     upper = _upperTangent(pointset);
     lower = _lowerTangent(pointset);
     convex = lower.concat(upper);
-    console.timeEnd('convex');
-    
-    console.time('innerPoints');
-    var innerPoints = pointset.filter(function(pt) {
+
+    innerPoints = pointset.filter(function(pt) {
         return convex.indexOf(pt) < 0;
     });
-    console.timeEnd('innerPoints');
-
-    console.time('init tree');
-    var innerPointsTree = rbush(9, ['[0]', '[1]', '[0]', '[1]']);
+    innerPointsTree = rbush(9, ['[0]', '[1]', '[0]', '[1]']);
     innerPointsTree.load(innerPoints);
-    console.timeEnd('init tree');
 
-    console.time('concave');
-    concave = _concave(convex, innerPointsTree, innerPoints);
-    console.timeEnd('concave');
+    maxSqEdgeLen = _detectMaxSqEdgeLen(convex, innerPointsTree, concavity);
+
+    concave = _concave(convex, innerPointsTree, maxSqEdgeLen);
 
     return concave;
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
-var SQ_EDGE_LENGTH = Math.pow(10, 2); // edgeLen = 10px
 var SEARCH_BBOX_SIZE = 10;
 
 module.exports = hull;
