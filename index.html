@@ -79,6 +79,26 @@ var pts = hull(pointset);
 
 <p>If you want to get hulls of the point set that looks like multipolygon, then you need to call <code>hull</code> function for each subset (for each polygon). <br /> In this example we use LukaszKrawczyk's <a href="https://github.com/LukaszKrawczyk/clustering" target="_blank">density based clustering library</a> to split one large point set to several groups, after that we recive hulls for each of them:</p>
 
+<pre><code>var dbscan = new DBSCAN(),
+    clustersIndexes,
+    clusters = [],
+    pointset = [[152, 38], [152, 39], [151, 39], ...];
+
+// get groups of points (clusters)
+clustersIndexes = dbscan.run(pointset, 90, 650);
+clustersIndexes.forEach(function(cluster) {
+    var cluster = cluster.map(function(i) {
+        return [pointset[i][0], pointset[i][1]];
+    });
+    clusters.push(cluster);
+});
+
+clusters.forEach(function(pointset) {
+    var pts = hull(pointset, 5);
+    // ... draw pts
+});  
+</code></pre>
+
 <p>
   <canvas id="canv2" width="310" height="100"></canvas>
 
