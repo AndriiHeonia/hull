@@ -2,8 +2,8 @@ Hull.js - JavaScript library that builds <a href="http://ubicomp.algoritmi.uminh
 
 ## Usage
 
-	var pixels = [ [236, 126], [234, 115], [238, 109], [247, 102], ... ];
-	hull(pixels, 50); // returns vertex indices of the hull (in clockwise order)
+	var points = [ [236, 126], [234, 115], [238, 109], [247, 102], ... ];
+	hull(points, 50); // returns vertex indices of the hull (in clockwise order)
 
 ## Params
 * 1st param - array of coordinates in format: [[x1, y1], [x2, y2], ..., [xn, yn]];
