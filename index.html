@@ -32,15 +32,13 @@
       <div class="inner clearfix">
         <section id="main-content">
 
+
 <!-- Example 1 -->
 <h3><a name="generate-hull-of-the-polygon" class="anchor" href="#generate-hull-of-the-polygon"><span class="octicon octicon-link"></span>Generate hull of the polygon.</a></h3>
-
 <p>Just call <code>hull</code> function to receive hull of the point set:</p>
-
 <pre><code>var pointset = [[168, 180], [168, 178], [168, 179], ...];
 var pts = hull(pointset);
 // ... draw pts</code></pre>
-
 <p>
   <canvas id="canv1" width="400" height="250"></canvas>
   <script>
@@ -58,7 +56,7 @@ var pts = hull(pointset);
     }
 
     // get and draw hull
-    var pts = hull(pointset1, 10);
+    var pts = hull(pointset1);
     ctx.strokeStyle = "blue";
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -74,11 +72,51 @@ var pts = hull(pointset);
 </p>
 <!-- END: Example 1 -->
 
+
+
+<!-- EXAMPLE 1.1 -->
+<p>You can adjust concavity of the hull via 2nd param:</p>
+<pre><code>var pointset = [[168, 180], [168, 178], [168, 179], ...];
+var pts = hull(pointset, 80);
+// ... draw pts</code></pre>
+<p>
+  <canvas id="canv1_1" width="400" height="250"></canvas>
+  <script>
+  function example1_1() {
+    var c = document.getElementById('canv1_1'),
+        ctx = c.getContext('2d');
+
+    // draw all points
+    ctx.fillStyle = "black";
+    for (var i = 0; i < pointset1.length; i++) {
+        ctx.beginPath();
+        ctx.arc(pointset1[i][0], pointset1[i][1], 1, 0, 2 * Math.PI, true);
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    // get and draw hull
+    var pts = hull(pointset1, 80);
+    ctx.strokeStyle = "blue";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    pts.forEach(function(px) {
+        ctx.lineTo(px[0], px[1]);
+        ctx.moveTo(px[0], px[1]);
+    });
+    ctx.lineTo(pts[0][0], pts[0][1]);
+    ctx.stroke();
+    ctx.closePath();
+  }
+  </script>
+</p>
+<!-- END: Example 1.1 -->
+
+
+
 <!-- Example 2 -->
 <h3><a name="generate-hull-of-the-multipolygon" class="anchor" href="#generate-hull-of-the-multipolygon"><span class="octicon octicon-link"></span>Generate hull of the multipolygon.</a></h3>
-
 <p>If you want to get hulls of the point set that looks like multipolygon, then you need to call <code>hull</code> function for each subset (for each polygon). <br /> In this example we use LukaszKrawczyk's <a href="https://github.com/LukaszKrawczyk/clustering" target="_blank">density based clustering library</a> to split one large point set to several groups, after that we recive hulls for each of them:</p>
-
 <pre><code>var dbscan = new DBSCAN(),
     clustersIndexes,
     clusters = [],
@@ -88,20 +126,18 @@ var pts = hull(pointset);
 clustersIndexes = dbscan.run(pointset, 90, 650);
 clustersIndexes.forEach(function(cluster) {
     var cluster = cluster.map(function(i) {
-        return [pointset[i][0], pointset[i][1]];
+      return pointset[i];
     });
     clusters.push(cluster);
 });
 
+// get hulls
 clusters.forEach(function(pointset) {
     var pts = hull(pointset, 5);
     // ... draw pts
-});  
-</code></pre>
-
+});</code></pre>
 <p>
   <canvas id="canv2" width="310" height="100"></canvas>
-
   <script>
   function example2() {
     var c = document.getElementById('canv2'),
@@ -125,7 +161,7 @@ clusters.forEach(function(pointset) {
     clustersIndexes = dbscan.run(pointset2, 90, 650);
     clustersIndexes.forEach(function(cluster) {
         var cluster = cluster.map(function(i) {
-            return [pointset2[i][0], pointset2[i][1]];
+            return pointset2[i];
         });
         clusters.push(cluster);
     });
@@ -150,14 +186,17 @@ clusters.forEach(function(pointset) {
 </p>
 <!-- END: Example 2 -->
 
+
         </section>
       </div>
     </div>
-<script>
-window.onload = function() {
-  example1();
-  example2();
-}  
-</script>
+
+    <script>
+    window.onload = function() {
+      example1();
+      example1_1();
+      example2();
+    }  
+    </script>
   </body>
 </html>
