@@ -36,7 +36,7 @@ Let's see step by step what happens when you call `hull()` function:
 
 ## Examples
 
-See examples (http://andreygeonya.github.io/hull/)[here]</a>.
+See examples [here](http://andreygeonya.github.io/hull/)</a>.
 
 ## Development
 	npm install # install dependencies
