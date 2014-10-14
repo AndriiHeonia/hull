@@ -6,8 +6,8 @@
     <script src="../dist/hull.js"></script>
 </head>
 <body>
-    <canvas id="canv" width="400" height="600" style="border: 1px solid black; position: absolute; left: 0px; top: 0px;"></canvas>
-    <canvas id="canv1" width="400" height="600" style="border: 1px solid black; position: absolute; left: 0px; top: 0px;"></canvas>
+    <canvas id="canv" width="400" height="400" style="border: 1px solid black; position: absolute; left: 0px; top: 0px;"></canvas>
+    <canvas id="canv1" width="400" height="400" style="border: 1px solid black; position: absolute; left: 0px; top: 0px;"></canvas>
 
     <script>
     window.onload = function() {
@@ -23,85 +23,6 @@
             console.log('[' + e.offsetX + ', ' + e.offsetY + ']');
         }
 
-// vertices = [
-// [57, 270],
-// [122, 270],
-// [238, 269],
-// [235, 295],
-// [235, 330],
-// [195, 330],
-// [130, 311],
-// [75, 339],
-// [40, 326],
-// [40, 286]];
-
-// vertices = [
-//     [10, 116],
-//     [21, 131],
-//     [31, 54],
-//     [51, 43],
-//     [65, 58],
-//     [75, 95],
-//     [95, 70],
-//     [200, 122],
-//     [269, 130]
-// ];
-
-        // vertices = [
-        //     [5, 85],
-        //     [15, 90],
-        //     [30, 70],
-        //     [35, 130],
-        //     [40, 131],
-        //     [44, 66],
-        //     [48, 65],
-        //     [49, 38],
-        //     [50, 30],
-        //     [60, 61],
-        //     [110, 134],
-        //     [130, 132],
-        //     [140, 124],
-        //     [160, 154]];
-
-        // vertices = [
-        //     [10, 15],
-        //     [20, 20],
-        //     [10, 30],
-            
-        //     [40, 15],
-        //     [30, 20],
-        //     [40, 30],
-
-        //     // [60, 10],
-        //     // [50, 20],
-        //     // [60, 30]
-        // ];
-
-        // vertices = [
-        //     [26, 106],
-        //     [35, 110],
-        //     [45, 100],
-        //     [55, 129],
-        //     [65, 94],
-        //     [85, 120],
-        //     [95, 150],
-        //     [120, 192],
-        //     [150, 164]
-        // ];
-
-        // vertices = [
-        //     [140, 68],
-        //     [160, 32],
-        //     [175, 32],
-        //     [184, 30],
-        //     [230, 213],
-        //     [241, 223],
-        //     [242, 198],
-        //     [246, 220],
-        //     [248, 210],
-        //     [258, 210]     
-        // ];
-
         // draw all pixels
         ctx.fillStyle="black";
         for (var i = 0; i < vertices.length; i++) {
@@ -112,11 +33,9 @@
         }
 
         // get and draw hull  
-        console.time('hull');
-        var pxs = hull(vertices, 10);
-        console.timeEnd('hull');
+        var pxs = hull(vertices, 20);
         ctx.strokeStyle = "blue";
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 2;
         ctx.beginPath();
         pxs.forEach(function(px) {
             ctx.lineTo(px[0], px[1]);
@@ -126,26 +45,25 @@
         ctx.stroke();
         ctx.closePath();
 
+        // ctx.strokeStyle = "blue";
         // ctx.lineWidth = 2;
         // ctx.beginPath();
-        // for (var i = 0; i < idxs.length-1; i++) {
-        //     var idx = idxs[i];
-        //     var nextIdx = idxs[i+1];
+        // for (var i = 0; i < pxs.length-1; i++) {
         //     if (i % 2 === 1 ) { continue; }
-        //     canvas_arrow(ctx, vertices[idx][0], vertices[idx][1], vertices[nextIdx][0], vertices[nextIdx][1]);
+        //     canvas_arrow(ctx, pxs[i][0], pxs[i][1], pxs[i+1][0], pxs[i+1][1]);
         // };
         // ctx.stroke();
         // ctx.closePath();
 
-        // function canvas_arrow(context, fromx, fromy, tox, toy){
-        //     var headlen = 10;   // length of head in pixels
-        //     var angle = Math.atan2(toy-fromy,tox-fromx);
-        //     context.moveTo(fromx, fromy);
-        //     context.lineTo(tox, toy);
-        //     context.lineTo(tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6));
-        //     context.moveTo(tox, toy);
-        //     context.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
-        // }
+        function canvas_arrow(context, fromx, fromy, tox, toy){
+            var headlen = 10;   // length of head in pixels
+            var angle = Math.atan2(toy-fromy,tox-fromx);
+            context.moveTo(fromx, fromy);
+            context.lineTo(tox, toy);
+            context.lineTo(tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6));
+            context.moveTo(tox, toy);
+            context.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
+        }
     }
     </script>
 </body>

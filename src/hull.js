@@ -186,7 +186,7 @@ function _concave(convex, innerPointsTree, maxSqEdgeLen) {
 function hull(pointset, concavity) {
     var lower, upper, convex,
         innerPoints,
-        innerPointsTree, concave,
+        innerPointsTree,
         concavity = concavity || 10;
 
     if (pointset.length < 3) {
@@ -203,9 +203,8 @@ function hull(pointset, concavity) {
     });
     innerPointsTree = rbush(9, ['[0]', '[1]', '[0]', '[1]']);
     innerPointsTree.load(innerPoints);
-    concave = _concave(convex, innerPointsTree, Math.pow(concavity, 2));
-
-    return concave;
+    
+    return _concave(convex, innerPointsTree, Math.pow(concavity, 2));
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
