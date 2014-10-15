@@ -145,7 +145,6 @@ clusters.forEach(function(pointset) {
         colors = ["red", "green", "blue"];
 
     // draw all points
-    ctx.fillStyle = "gray";
     for (var i = 0; i < pointset2.length; i++) {
         ctx.beginPath();
         ctx.arc(pointset2[i][0], pointset2[i][1], 1, 0, 2 * Math.PI, true);
@@ -197,7 +196,6 @@ clusters.forEach(function(pointset) {
         ctx = c.getContext('2d');
 
     // draw all points
-    ctx.fillStyle = "gray";
     for (var i = 0; i < pointset2.length; i++) {
         ctx.beginPath();
         ctx.arc(pointset2[i][0], pointset2[i][1], 1, 0, 2 * Math.PI, true);
