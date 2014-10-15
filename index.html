@@ -121,7 +121,7 @@ var pts = hull(pointset, 80);
     dbscan = new DBSCAN(),
     pointset = [[14, 18], [22, 19], [23, 20], ...];
 
-// get group of points (clusters)
+// get clusters
 clusters = dbscan.run(pointset, 250, 50);
 clusters = clusters.map(function(cluster) {
     return cluster.map(function(i) {
@@ -153,7 +153,7 @@ clusters.forEach(function(pointset) {
         ctx.closePath();
     }
 
-    // get group of points (clusters)
+    // get clusters
     clusters = dbscan.run(pointset2, 250, 50);
     clusters = clusters.map(function(cluster) {
         return cluster.map(function(i) {
