@@ -125,7 +125,7 @@ var pts = hull(pointset, 80);
 clusters = dbscan.run(pointset, 250, 50);
 clusters = clusters.map(function(cluster) {
     return cluster.map(function(i) {
-        return pointset[i];  // map index to point
+        return pointset[i]; // map index to point
     });
 });
 
