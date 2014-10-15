@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title>Concave hull example</title>
     <script src="../dist/hull.js"></script>
+    <script src="http://andreygeonya.github.io/hull/javascripts/pointset2.js"></script>
 </head>
 <body>
     <canvas id="canv" width="400" height="400" style="border: 1px solid black; position: absolute; left: 0px; top: 0px;"></canvas>
@@ -36,7 +37,6 @@
             ctx.lineTo(px[0], px[1]);
             ctx.moveTo(px[0], px[1]);
         });
-        ctx.lineTo(pts[0][0], pts[0][1]);
         ctx.stroke();
         ctx.closePath();
     }

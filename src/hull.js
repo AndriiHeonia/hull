@@ -20,7 +20,7 @@
 - Check, fix and optimize intersection checking (DONE!)
 - Update readme (DONE!)
 - Create live examples on GitHub pages (DONE!)
-- Fix problem in character example
+- Fix problem in character example (DONE!)
 - Compare performance with another concave hull implementations
 - Update tests
 - Push hull.js to npmjs.org
@@ -198,6 +198,7 @@ function hull(pointset, concavity) {
     upper = _upperTangent(pointset);
     lower = _lowerTangent(pointset);
     convex = lower.concat(upper);
+    convex.push(pointset[0]);
 
     innerPoints = pointset.filter(function(pt) {
         return convex.indexOf(pt) < 0;

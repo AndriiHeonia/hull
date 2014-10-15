@@ -608,10 +608,11 @@ else window.rbush = rbush;
 - Try to make _bBoxAround smallest and increase it step by step to EDGE_LENGTH.
   It should helps us to use lesser innerPoints in _midPoint on hight density pointsets (DONE!)
 - Check, fix and optimize intersection checking (DONE!)
-- Update readme
+- Update readme (DONE!)
+- Create live examples on GitHub pages (DONE!)
+- Fix problem in character example
 - Compare performance with another concave hull implementations
 - Update tests
-- Create live examples on GitHub pages
 - Push hull.js to npmjs.org
 */
 
@@ -776,7 +777,7 @@ function _concave(convex, innerPointsTree, maxSqEdgeLen) {
 function hull(pointset, concavity) {
     var lower, upper, convex,
         innerPoints,
-        innerPointsTree, concave,
+        innerPointsTree,
         concavity = concavity || 10;
 
     if (pointset.length < 3) {
@@ -787,15 +788,15 @@ function hull(pointset, concavity) {
     upper = _upperTangent(pointset);
     lower = _lowerTangent(pointset);
     convex = lower.concat(upper);
+    convex.push(pointset[0]);
 
     innerPoints = pointset.filter(function(pt) {
         return convex.indexOf(pt) < 0;
     });
     innerPointsTree = rbush(9, ['[0]', '[1]', '[0]', '[1]']);
     innerPointsTree.load(innerPoints);
-    concave = _concave(convex, innerPointsTree, Math.pow(concavity, 2));
-
-    return concave;
+    
+    return _concave(convex, innerPointsTree, Math.pow(concavity, 2));
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
