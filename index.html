@@ -63,7 +63,6 @@ var pts = hull(pointset);
         ctx.lineTo(px[0], px[1]);
         ctx.moveTo(px[0], px[1]);
     });
-    ctx.lineTo(pts[0][0], pts[0][1]);
     ctx.stroke();
     ctx.closePath();
   }
@@ -103,7 +102,6 @@ var pts = hull(pointset, 80);
         ctx.lineTo(px[0], px[1]);
         ctx.moveTo(px[0], px[1]);
     });
-    ctx.lineTo(pts[0][0], pts[0][1]);
     ctx.stroke();
     ctx.closePath();
   }
@@ -172,7 +170,6 @@ clusters.forEach(function(pointset) {
             ctx.stroke();
             ctx.moveTo(pt[0], pt[1]);
         });
-        ctx.lineTo(pts[0][0], pts[0][1]);
         ctx.stroke();
         ctx.closePath();
     });
@@ -211,7 +208,6 @@ clusters.forEach(function(pointset) {
         ctx.stroke();
         ctx.moveTo(pt[0], pt[1]);
     });
-    ctx.lineTo(pts[0][0], pts[0][1]);
     ctx.stroke();
     ctx.closePath();
   }
