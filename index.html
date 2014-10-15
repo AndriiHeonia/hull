@@ -116,7 +116,7 @@ var pts = hull(pointset, 80);
 
 <!-- Example 2 -->
 <h3><a name="ex2" class="anchor" href="#ex2"><span class="octicon octicon-link"></span>Chars</a></h3>
-<p>If you want to get hulls of the point set that looks like multipolygon, then you need to call <code>hull</code> function for each subset (for each polygon). <br /> In this example we use LukaszKrawczyk's <a href="https://github.com/LukaszKrawczyk/clustering" target="_blank">density based clustering library</a> (you can use any other implementation) to split one large point set to several groups, after that we recive hulls for each of them:</p>
+<p>If you want to get hulls of the point set that looks like multipolygon, then you need to call <code>hull</code> function for each subset (for each polygon). <br /> In this example we use LukaszKrawczyk's <a href="https://github.com/LukaszKrawczyk/clustering" target="_blank">density based clustering library</a> (but you can use any other implementation) to split one large point set to several groups, after that we recive hulls for each of them:</p>
 <pre><code>var clusters,
     dbscan = new DBSCAN(),
     pointset = [[152, 38], [152, 39], [151, 39], ...];
