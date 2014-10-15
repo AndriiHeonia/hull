@@ -19,7 +19,7 @@
   It should helps us to use lesser innerPoints in _midPoint on hight density pointsets (DONE!)
 - Check, fix and optimize intersection checking (DONE!)
 - Update readme (DONE!)
-- Create live examples on GitHub pages: Ukraine, Large clusters, 500px photos, Ebola
+- Create live examples on GitHub pages (DONE!)
 - Fix problem in character example
 - Compare performance with another concave hull implementations
 - Update tests
