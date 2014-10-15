@@ -218,9 +218,50 @@ clusters.forEach(function(pointset) {
     ctx.stroke();
     ctx.closePath();
   }
-  </script>
+</script>
 </p>
 <!-- END: Example 2_1 -->
+
+
+<!-- Example 3 -->
+<h3><a name="ex3" class="anchor" href="#ex3"><span class="octicon octicon-link"></span>Map with photos</a></h3>
+<p>If you want to build hull based on geospatial data, just convert geo coordinates to cartesian coordinates, build hull and convert them back:</p>
+<pre><code>var pointset = [[168, 180], [168, 178], [168, 179], ...];
+var pts = hull(pointset);
+// ... draw pts</code></pre>
+<p>
+  <canvas id="canv1" width="400" height="250"></canvas>
+  <script>
+  function example1() {
+    var c = document.getElementById('canv1'),
+        ctx = c.getContext('2d');
+
+    // draw all points
+    ctx.fillStyle = "black";
+    for (var i = 0; i < pointset1.length; i++) {
+        ctx.beginPath();
+        ctx.arc(pointset1[i][0], pointset1[i][1], 1, 0, 2 * Math.PI, true);
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    // get and draw hull
+    var pts = hull(pointset1);
+    ctx.strokeStyle = "blue";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    pts.forEach(function(px) {
+        ctx.lineTo(px[0], px[1]);
+        ctx.moveTo(px[0], px[1]);
+    });
+    ctx.lineTo(pts[0][0], pts[0][1]);
+    ctx.stroke();
+    ctx.closePath();
+  }
+  </script>
+</p>
+<!-- END: Example 1 -->
+
 
         </section>
       </div>
