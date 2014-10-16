@@ -41,6 +41,16 @@ function _sortByX(pointset) {
     });
 }
 
+function _getMaxY(pointset) {
+    var maxY = -Infinity;
+    for (var i = pointset.length - 1; i >= 0; i--) {
+        if (pointset[i][1] > maxY) {
+            maxY = pointset[i][1];
+        }
+    }
+    return maxY;
+}
+
 function _upperTangent(pointset) {
     var lower = [];
     for (var l = 0; l < pointset.length; l++) {
@@ -147,7 +157,7 @@ function _midPoint(edge, innerPoints, convex) {
     return angle1Cos > angle2Cos ? point1 : point2;
 }
 
-function _concave(convex, innerPointsTree, maxSqEdgeLen) {
+function _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize) {
     var edge,
         nPoints,
         bBoxSize,
@@ -162,13 +172,13 @@ function _concave(convex, innerPointsTree, maxSqEdgeLen) {
 
         if (sqEdgeLen < maxSqEdgeLen) { continue; }
 
-        bBoxSize = SEARCH_BBOX_SIZE;
+        bBoxSize = MIN_SEARCH_BBOX_SIZE;
         do {
             bBoxAround = _bBoxAround(edge, bBoxSize);
             nPoints = innerPointsTree.search(bBoxAround);
             midPoint = _midPoint(edge, nPoints, convex);
             bBoxSize *= 2;
-        } while (midPoint === null && sqEdgeLen > (bBoxSize * bBoxSize));
+        } while (midPoint === null && maxSearchBBoxSize > bBoxSize);
 
         if (midPoint !== null) {
             convex.splice(i + 1, 0, midPoint);
@@ -178,7 +188,7 @@ function _concave(convex, innerPointsTree, maxSqEdgeLen) {
     }
 
     if (midPointInserted) {
-        return _concave(convex, innerPointsTree, maxSqEdgeLen);
+        return _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize);
     }
 
     return convex;
@@ -188,6 +198,7 @@ function hull(pointset, concavity) {
     var lower, upper, convex,
         innerPoints,
         innerPointsTree,
+        maxSearchBBoxSize,
         concavity = concavity || 10;
 
     if (pointset.length < 3) {
@@ -200,16 +211,17 @@ function hull(pointset, concavity) {
     convex = lower.concat(upper);
     convex.push(pointset[0]);
 
+    maxSearchBBoxSize = Math.max(pointset[pointset.length - 1][0], _getMaxY(convex));
     innerPoints = pointset.filter(function(pt) {
         return convex.indexOf(pt) < 0;
     });
     innerPointsTree = rbush(9, ['[0]', '[1]', '[0]', '[1]']);
     innerPointsTree.load(innerPoints);
     
-    return _concave(convex, innerPointsTree, Math.pow(concavity, 2));
+    return _concave(convex, innerPointsTree, Math.pow(concavity, 2), maxSearchBBoxSize);
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
-var SEARCH_BBOX_SIZE = 10;
+var MIN_SEARCH_BBOX_SIZE = 10;
 
 module.exports = hull;
