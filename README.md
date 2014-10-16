@@ -1,5 +1,9 @@
 Hull.js - JavaScript library that builds <a href="http://ubicomp.algoritmi.uminho.pt/local/concavehull.html" target="_blank">concave hull</a> by set of points.
 
+## Examples
+
+See examples [here](http://andreygeonya.github.io/hull/)</a>.
+
 ## Usage
 
 	var points = [ [236, 126], [234, 115], [238, 109], [247, 102], ... ];
@@ -33,10 +37,6 @@ Let's see step by step what happens when you call `hull()` function:
 
 <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/speedup/readme-imgs/2_3.png" />
 `concavity = 20`</li>
-
-## Examples
-
-See examples [here](http://andreygeonya.github.io/hull/)</a>.
 
 ## Development
 	npm install # install dependencies
