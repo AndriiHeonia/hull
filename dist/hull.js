@@ -812,7 +812,7 @@ function hull(pointset, concavity) {
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
-var MIN_SEARCH_BBOX_SIZE = 10;
+var MIN_SEARCH_BBOX_SIZE = 50;
 
 module.exports = hull;
 },{"./segments.js":3,"rbush":1}],3:[function(require,module,exports){
