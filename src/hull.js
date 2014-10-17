@@ -26,10 +26,16 @@
 - Push hull.js to npmjs.org
 */
 
+/*
+Optimization TODO:
+- Replace RBush to simple grid and use only diff of bBoxes, not full bBox
+*/
+
 'use strict';
 
 var rbush = require("rbush");
 var intersect = require('./segments.js');
+var grid = require('./grid.js');
 
 function _sortByX(pointset) {
     return pointset.sort(function(a, b) {
@@ -157,7 +163,7 @@ function _midPoint(edge, innerPoints, convex) {
     return angle1Cos > angle2Cos ? point1 : point2;
 }
 
-function _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize) {
+function _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize, grid) {
     var edge,
         nPoints,
         bBoxSize,
@@ -173,22 +179,39 @@ function _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize) {
         if (sqEdgeLen < maxSqEdgeLen) { continue; }
 
         bBoxSize = MIN_SEARCH_BBOX_SIZE;
+        
+        var border = 1;
         do {
             bBoxAround = _bBoxAround(edge, bBoxSize);
-            nPoints = innerPointsTree.search(bBoxAround);
+            if (border === 1) {
+                nPoints = grid.rangePoints(bBoxAround);
+            } else {
+                nPoints = grid.rangeBorderPoints(bBoxAround, border);
+            }
             midPoint = _midPoint(edge, nPoints, convex);
-            bBoxSize *= 2;
-        } while (midPoint === null && maxSearchBBoxSize > bBoxSize);
-
+            border++; // TODO: fix border++ to bbox/border diff
+        }  while (midPoint === null && 3 > border); // TODO: fix 3 to len
         if (midPoint !== null) {
             convex.splice(i + 1, 0, midPoint);
-            innerPointsTree.remove(midPoint);
+            grid.removePoint(midPoint);
             midPointInserted = true;
         }
+
+        // do {
+        //     bBoxAround = _bBoxAround(edge, bBoxSize);
+        //     nPoints = innerPointsTree.search(bBoxAround);
+        //     midPoint = _midPoint(edge, nPoints, convex);
+        //     bBoxSize *= 2;
+        // } while (midPoint === null && maxSearchBBoxSize > bBoxSize);
+        // if (midPoint !== null) {
+        //     convex.splice(i + 1, 0, midPoint);
+        //     innerPointsTree.remove(midPoint);
+        //     midPointInserted = true;
+        // }
     }
 
     if (midPointInserted) {
-        return _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize);
+        return _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize, grid);
     }
 
     return convex;
@@ -211,17 +234,21 @@ function hull(pointset, concavity) {
     convex = lower.concat(upper);
     convex.push(pointset[0]);
 
-    maxSearchBBoxSize = Math.max(pointset[pointset.length - 1][0], _getMaxY(convex));
+    maxSearchBBoxSize = Math.max(pointset[pointset.length - 1][0], _getMaxY(convex)) * MAX_SEARCH_BBOX_SIZE_PERCENT;
     innerPoints = pointset.filter(function(pt) {
         return convex.indexOf(pt) < 0;
     });
+
+    var g = grid(innerPoints);
+ 
     innerPointsTree = rbush(9, ['[0]', '[1]', '[0]', '[1]']);
     innerPointsTree.load(innerPoints);
     
-    return _concave(convex, innerPointsTree, Math.pow(concavity, 2), maxSearchBBoxSize);
+    return _concave(convex, innerPointsTree, Math.pow(concavity, 2), maxSearchBBoxSize, g);
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
-var MIN_SEARCH_BBOX_SIZE = 50;
+var MIN_SEARCH_BBOX_SIZE = 40;
+var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.3;
 
 module.exports = hull;

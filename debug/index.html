@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <title>Concave hull example</title>
     <script src="../dist/hull.js"></script>
-    <script src="http://andreygeonya.github.io/hull/javascripts/pointset2.js"></script>
 </head>
 <body>
     <canvas id="canv" width="1024" height="800" style="border: 1px solid black; position: absolute; left: 0px; top: 0px;"></canvas>
@@ -13221,7 +13220,7 @@ points = pointset2;
         
         // get and draw hull
         console.time('hull');
-        var pts = hull(points, 50);
+        var pts = hull(points, 20);
         console.timeEnd('hull');
         ctx.strokeStyle = "blue";
         ctx.lineWidth = 2;

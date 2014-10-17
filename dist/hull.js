@@ -588,6 +588,135 @@ else window.rbush = rbush;
 })();
 
 },{}],2:[function(require,module,exports){
+function Grid(points) {
+    var _cells = [];
+
+    points.forEach(function(point) {
+        var cellXY = this.point2CellXY(point),
+            x = cellXY[0],
+            y = cellXY[1];
+        if (_cells[x] === undefined) {
+            _cells[x] = [];
+        }
+        if (_cells[x][y] === undefined) {
+            _cells[x][y] = [];
+        }
+        _cells[x][y].push([point[0], point[1], _cells[x][y].length]);
+    }, this);
+
+    this.cellPoints = function(x, y) { // (Number, Number) -> Array
+        return (_cells[x] !== undefined && _cells[x][y] !== undefined) ? _cells[x][y] : [];
+    },
+
+    this.removePoint = function(point) { // (Array) -> Array
+        var cellXY = this.point2CellXY(point),
+            cell = _cells[cellXY[0]][cellXY[1]],
+            pointIdxInCell = point[2];
+        
+        cell.splice(pointIdxInCell, 1);
+
+        return cell;
+    }
+}
+
+Grid.prototype = {
+    point2CellXY: function(point) { // (Array) -> Array
+        var x = parseInt(point[0] / Grid.CELL_SIZE),
+            y = parseInt(point[1] / Grid.CELL_SIZE);
+        return [x, y];
+    },
+
+    rangePoints: function(bbox) { // (Array) -> Array
+        var tlCellXY = this.point2CellXY([bbox[0], bbox[1]]),
+            brCellXY = this.point2CellXY([bbox[2], bbox[3]]),
+            points = [];
+
+        for (var x = tlCellXY[0]; x <= brCellXY[0]; x++) {
+            for (var y = tlCellXY[1]; y <= brCellXY[1]; y++) {
+                points = points.concat(this.cellPoints(x, y));
+            }
+        }
+
+        return points;
+    },
+
+    rangeBorderPoints: function(bbox, border) { // (Array, Number) -> Array
+        var tlCellXY = this.point2CellXY([bbox[0], bbox[1]]),
+            brCellXY = this.point2CellXY([bbox[2], bbox[3]]),
+            border = border || 1,
+            points = [];
+
+        /*
+         _        
+        | |      
+        | |      
+        |_|
+        
+        */
+        for (var x = tlCellXY[0] - border; x < tlCellXY[0]; x++) {
+            for (var y = tlCellXY[1]; y <= brCellXY[1]; y++) {
+                points = points.concat(this.cellPoints(x, y));
+            }
+        }
+
+        /*
+         _        _
+        | |      | |
+        | |      | |
+        |_|      |_|
+        
+        */
+        for (var x = brCellXY[0] + 1; x <= brCellXY[0] + border; x++) {
+            for (var y = tlCellXY[1]; y <= brCellXY[1]; y++) {
+                points = points.concat(this.cellPoints(x, y));
+            }
+        }
+
+        /*
+         __________
+        |  ______  |
+        | |      | |
+        | |      | |
+        |_|      |_|
+        
+        */
+        for (var x = tlCellXY[0] - border; x <= brCellXY[0] + border; x++) {
+            for (var y = tlCellXY[1] - border; y < tlCellXY[1]; y++) {
+                points = points.concat(this.cellPoints(x, y));
+            }
+        }
+
+        /*
+         __________
+        |  ______  |
+        | |      | |
+        | |      | |
+        | |______| |
+        |__________|
+
+        */
+        for (var x = tlCellXY[0] - border; x <= brCellXY[0] + border; x++) {
+            for (var y = brCellXY[1]; y <= brCellXY[1] + border; y++) {
+                points = points.concat(this.cellPoints(x, y));
+            }
+        }
+
+        return points;
+    },
+
+    addBorder2Bbox: function(bbox, border) { // (Array, Number) -> Array
+        return []; // bbox
+    }
+}
+
+function grid(points) {
+    return new Grid(points);
+}
+
+Grid.CELL_SIZE = 50;
+
+module.exports = grid;
+},{}],3:[function(require,module,exports){
 /*
  (c) 2014, Andrey Geonya
  Hull.js, a JavaScript library for concave hull generation by set of points.
@@ -616,10 +745,16 @@ else window.rbush = rbush;
 - Push hull.js to npmjs.org
 */
 
+/*
+Optimization TODO:
+- Replace RBush to simple grid and use only diff of bBoxes, not full bBox
+*/
+
 'use strict';
 
 var rbush = require("rbush");
 var intersect = require('./segments.js');
+var grid = require('./grid.js');
 
 function _sortByX(pointset) {
     return pointset.sort(function(a, b) {
@@ -747,7 +882,7 @@ function _midPoint(edge, innerPoints, convex) {
     return angle1Cos > angle2Cos ? point1 : point2;
 }
 
-function _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize) {
+function _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize, grid) {
     var edge,
         nPoints,
         bBoxSize,
@@ -763,22 +898,39 @@ function _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize) {
         if (sqEdgeLen < maxSqEdgeLen) { continue; }
 
         bBoxSize = MIN_SEARCH_BBOX_SIZE;
+        
+        var border = 1;
         do {
             bBoxAround = _bBoxAround(edge, bBoxSize);
-            nPoints = innerPointsTree.search(bBoxAround);
+            if (border === 1) {
+                nPoints = grid.rangePoints(bBoxAround);
+            } else {
+                nPoints = grid.rangeBorderPoints(bBoxAround, border);
+            }
             midPoint = _midPoint(edge, nPoints, convex);
-            bBoxSize *= 2;
-        } while (midPoint === null && maxSearchBBoxSize > bBoxSize);
-
+            border++; // TODO: fix border++ to bbox/border diff
+        }  while (midPoint === null && 3 > border); // TODO: fix 3 to len
         if (midPoint !== null) {
             convex.splice(i + 1, 0, midPoint);
-            innerPointsTree.remove(midPoint);
+            grid.removePoint(midPoint);
             midPointInserted = true;
         }
+
+        // do {
+        //     bBoxAround = _bBoxAround(edge, bBoxSize);
+        //     nPoints = innerPointsTree.search(bBoxAround);
+        //     midPoint = _midPoint(edge, nPoints, convex);
+        //     bBoxSize *= 2;
+        // } while (midPoint === null && maxSearchBBoxSize > bBoxSize);
+        // if (midPoint !== null) {
+        //     convex.splice(i + 1, 0, midPoint);
+        //     innerPointsTree.remove(midPoint);
+        //     midPointInserted = true;
+        // }
     }
 
     if (midPointInserted) {
-        return _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize);
+        return _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize, grid);
     }
 
     return convex;
@@ -801,21 +953,25 @@ function hull(pointset, concavity) {
     convex = lower.concat(upper);
     convex.push(pointset[0]);
 
-    maxSearchBBoxSize = Math.max(pointset[pointset.length - 1][0], _getMaxY(convex));
+    maxSearchBBoxSize = Math.max(pointset[pointset.length - 1][0], _getMaxY(convex)) * MAX_SEARCH_BBOX_SIZE_PERCENT;
     innerPoints = pointset.filter(function(pt) {
         return convex.indexOf(pt) < 0;
     });
+
+    var g = grid(innerPoints);
+ 
     innerPointsTree = rbush(9, ['[0]', '[1]', '[0]', '[1]']);
     innerPointsTree.load(innerPoints);
     
-    return _concave(convex, innerPointsTree, Math.pow(concavity, 2), maxSearchBBoxSize);
+    return _concave(convex, innerPointsTree, Math.pow(concavity, 2), maxSearchBBoxSize, g);
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
-var MIN_SEARCH_BBOX_SIZE = 50;
+var MIN_SEARCH_BBOX_SIZE = 40;
+var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.3;
 
 module.exports = hull;
-},{"./segments.js":3,"rbush":1}],3:[function(require,module,exports){
+},{"./grid.js":2,"./segments.js":4,"rbush":1}],4:[function(require,module,exports){
 // http://martin-thoma.com/how-to-check-if-two-line-segments-intersect/#tocAnchor-1-5
 
 /**
@@ -920,5 +1076,5 @@ function doLinesIntersect(a, b) {
 var EPSILON = 0.000001;
 
 module.exports = doLinesIntersect;
-},{}]},{},[2])(2)
+},{}]},{},[3])(3)
 });
