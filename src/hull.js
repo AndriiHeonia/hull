@@ -180,17 +180,15 @@ function _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize, grid
 
         bBoxSize = MIN_SEARCH_BBOX_SIZE;
         
-        var border = 1;
+        var border = 0;
+        bBoxAround = _bBoxAround(edge, bBoxSize);
         do {
-            bBoxAround = _bBoxAround(edge, bBoxSize);
-            if (border === 1) {
-                nPoints = grid.rangePoints(bBoxAround);
-            } else {
-                nPoints = grid.rangeBorderPoints(bBoxAround, border);
-            }
+            bBoxAround = grid.addBorder2Bbox(bBoxAround, border);
+            bBoxSize = bBoxAround[2] - bBoxAround[0];
+            nPoints = border > 0 ? grid.rangeBorderPoints(bBoxAround, 1) : grid.rangePoints(bBoxAround);
             midPoint = _midPoint(edge, nPoints, convex);
-            border++; // TODO: fix border++ to bbox/border diff
-        }  while (midPoint === null && 3 > border); // TODO: fix 3 to len
+            border++;
+        }  while (midPoint === null && maxSearchBBoxSize > bBoxSize);
         if (midPoint !== null) {
             convex.splice(i + 1, 0, midPoint);
             grid.removePoint(midPoint);
@@ -249,6 +247,6 @@ function hull(pointset, concavity) {
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
 var MIN_SEARCH_BBOX_SIZE = 40;
-var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.3;
+var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.8;
 
 module.exports = hull;

@@ -117,7 +117,12 @@ Grid.prototype = {
     },
 
     addBorder2Bbox: function(bbox, border) { // (Array, Number) -> Array
-        return []; // bbox
+        return [
+            bbox[0] - (border * Grid.CELL_SIZE),
+            bbox[1] - (border * Grid.CELL_SIZE),
+            bbox[2] + (border * Grid.CELL_SIZE),
+            bbox[3] + (border * Grid.CELL_SIZE)
+        ];
     }
 }
 
@@ -125,6 +130,6 @@ function grid(points) {
     return new Grid(points);
 }
 
-Grid.CELL_SIZE = 50;
+Grid.CELL_SIZE = 10;
 
 module.exports = grid;
