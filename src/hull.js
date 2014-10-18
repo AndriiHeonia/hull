@@ -34,7 +34,7 @@ Optimization TODO:
 'use strict';
 
 var rbush = require("rbush");
-var intersect = require('./segments.js');
+var intersect = require('./intersect.js');
 var grid = require('./grid.js');
 
 function _sortByX(pointset) {
@@ -100,16 +100,32 @@ function _cos(o, a, b) {
     return dot / Math.sqrt(sqALen * sqBLen);
 }
 
-function _intersect(edge, pointset) {
+var getRangeStartTime = 0, getRangeTime = 0,
+    getMidPointStartTime = 0, getMidPointTime = 0,
+    convexSpliceStartTime = 0, convexSpliceTime = 0,
+    removeGridPointStartTime = 0, removeGridPointTime = 0,
+    midPointIfsStartTime = 0, midPointIfsTime = 0,
+    getCosStartTime = 0, getCosTime = 0,
+    intersectStartTime = 0, intersectTime = 0;
+
+// var intersectCalls = 0;
+
+function _intersect(segment, pointset) {
+    // intersectCalls++;
+    // intersectStartTime = new Date();
     for (var i = 0; i < pointset.length - 1; i++) {
-        if (edge[0][0] === pointset[i][0] && edge[0][1] === pointset[i][1] ||
-            edge[0][0] === pointset[i + 1][0] && edge[0][1] === pointset[i + 1][1]) {
+        var seg = [pointset[i], pointset[i + 1]];
+        if (segment[0][0] === seg[0][0] && segment[0][1] === seg[0][1] ||
+            segment[0][0] === seg[1][0] && segment[0][1] === seg[1][1]) {
             continue;
         }
-        if (intersect(edge, [pointset[i], pointset[i + 1]])) {
+
+        if (intersect(segment, seg)) {
+            // intersectTime += new Date() - intersectStartTime;
             return true;
         }
     }
+    // intersectTime += new Date() - intersectStartTime;
     return false;
 }
 
@@ -138,38 +154,74 @@ function _bBoxAround(edge, boxSize) {
     ];
 }
 
+// function _midPoint1(edge, innerPoints, convex) {
+//     var a1Cos, a2Cos,
+//         angle1Cos = MAX_CONCAVE_ANGLE_COS,
+//         angle2Cos = MAX_CONCAVE_ANGLE_COS,
+//         pointsWithCos = [];
+
+//     innerPoints.forEach(function(pt) {
+//         getCosStartTime = new Date();
+//         a1Cos = _cos(edge[0], edge[1], pt);
+//         a2Cos = _cos(edge[1], edge[0], pt);
+//         getCosTime += new Date() - getCosStartTime;
+
+//         if (a1Cos > angle1Cos && a2Cos > angle2Cos) {
+//             pointsWithCos.push([pt, Math.max(a1Cos, a2Cos)]);
+//             // angle1Cos = a1Cos;
+//             // angle2Cos = a2Cos;
+//         }
+//     });
+
+//     pointsWithCos.sort(function(p1, p2) {
+//         return p1[1] - p2[1];
+//     });
+
+//     var p = pointsWithCos.pop();
+//     while (p !== undefined) {
+//         if (!_intersect([edge[0], p[0]], convex) &&
+//             !_intersect([edge[1], p[0]], convex)) {
+//             return p[0];
+//         }
+//         p = pointsWithCos.pop();
+//     }
+//     return null;
+// }
+
 function _midPoint(edge, innerPoints, convex) {
-    var point1 = null, point2 = null,
+    var point = null,
         angle1Cos = MAX_CONCAVE_ANGLE_COS,
         angle2Cos = MAX_CONCAVE_ANGLE_COS,
         a1Cos, a2Cos;
 
     for (var i = 0; i < innerPoints.length; i++) {
+        // getCosStartTime = new Date();
         a1Cos = _cos(edge[0], edge[1], innerPoints[i]);
         a2Cos = _cos(edge[1], edge[0], innerPoints[i]);
+        // getCosTime += new Date() - getCosStartTime;
 
-        if (a1Cos > MAX_CONCAVE_ANGLE_COS && a2Cos > MAX_CONCAVE_ANGLE_COS) {
-            if ((a1Cos > angle1Cos && !_intersect([edge[0], innerPoints[i]], convex)) && 
-                (a2Cos > angle2Cos && !_intersect([edge[1], innerPoints[i]], convex))) {
+        if (a1Cos > angle1Cos && a2Cos > angle2Cos &&
+            !_intersect([edge[0], innerPoints[i]], convex) &&
+            !_intersect([edge[1], innerPoints[i]], convex)) {
 
-                angle1Cos = a1Cos;
-                point1 = innerPoints[i];
-                angle2Cos = a2Cos;
-                point2 = innerPoints[i];
-            }
+            angle1Cos = a1Cos;
+            angle2Cos = a2Cos;
+            point = innerPoints[i];
         }
     }
 
-    return angle1Cos > angle2Cos ? point1 : point2;
+    return point;
 }
 
 function _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize, grid) {
     var edge,
+        border,
         nPoints,
         bBoxSize,
         midPoint,
         sqEdgeLen,
         bBoxAround,
+        
         midPointInserted = false;
 
     for (var i = 0; i < convex.length - 1; i++) {
@@ -179,19 +231,33 @@ function _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize, grid
         if (sqEdgeLen < maxSqEdgeLen) { continue; }
 
         bBoxSize = MIN_SEARCH_BBOX_SIZE;
-        
-        var border = 0;
+
+        border = 0;
         bBoxAround = _bBoxAround(edge, bBoxSize);
         do {
             bBoxAround = grid.addBorder2Bbox(bBoxAround, border);
             bBoxSize = bBoxAround[2] - bBoxAround[0];
+
+            // getRangeStartTime = new Date();
             nPoints = border > 0 ? grid.rangeBorderPoints(bBoxAround, 1) : grid.rangePoints(bBoxAround);
+            // getRangeTime += new Date() - getRangeStartTime;
+            
+            // getMidPointStartTime = new Date();
             midPoint = _midPoint(edge, nPoints, convex);
+            // getMidPointTime += new Date() - getMidPointStartTime;
+            
             border++;
         }  while (midPoint === null && maxSearchBBoxSize > bBoxSize);
         if (midPoint !== null) {
+            
+            // convexSpliceStartTime = new Date();
             convex.splice(i + 1, 0, midPoint);
+            // convexSpliceTime += new Date() - convexSpliceStartTime;
+
+            // removeGridPointStartTime = new Date();
             grid.removePoint(midPoint);
+            // removeGridPointTime += new Date() - removeGridPointStartTime;
+
             midPointInserted = true;
         }
 
@@ -226,27 +292,51 @@ function hull(pointset, concavity) {
         return pointset;
     }
 
+    // console.log('Points count', pointset.length);
+
+    // console.time('_sortByX');
     pointset = _sortByX(pointset);
+    // console.timeEnd('_sortByX');
+    // console.time('convex');
     upper = _upperTangent(pointset);
     lower = _lowerTangent(pointset);
     convex = lower.concat(upper);
     convex.push(pointset[0]);
+    // console.timeEnd('convex');
 
+    // console.time('innerPoints');
     maxSearchBBoxSize = Math.max(pointset[pointset.length - 1][0], _getMaxY(convex)) * MAX_SEARCH_BBOX_SIZE_PERCENT;
     innerPoints = pointset.filter(function(pt) {
         return convex.indexOf(pt) < 0;
     });
+    // console.timeEnd('innerPoints');
 
+    // console.time('build grid');
     var g = grid(innerPoints);
+    // console.timeEnd('build grid');
  
+    // console.time('build rbush');
     innerPointsTree = rbush(9, ['[0]', '[1]', '[0]', '[1]']);
     innerPointsTree.load(innerPoints);
-    
-    return _concave(convex, innerPointsTree, Math.pow(concavity, 2), maxSearchBBoxSize, g);
+    // console.timeEnd('build rbush');
+
+    // console.time('_concave');
+    var concave = _concave(convex, innerPointsTree, Math.pow(concavity, 2), maxSearchBBoxSize, g);
+    // console.timeEnd('_concave');
+
+    // console.log('   getRangeTime: ', getRangeTime);
+    // console.log('   getMidPointTime: ', getMidPointTime);
+    // console.log('       getCosTime', getCosTime);
+    // console.log('       intersectTime', intersectTime);
+    // console.log('       intersectCalls', intersectCalls);
+    // console.log('   convexSpliceTime: ', convexSpliceTime);
+    // console.log('   removeGridPointTime: ', removeGridPointTime);
+
+    return concave;
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
-var MIN_SEARCH_BBOX_SIZE = 10;
-var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.8;
+var MIN_SEARCH_BBOX_SIZE = 5;
+var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.6;
 
 module.exports = hull;

@@ -760,7 +760,7 @@ Optimization TODO:
 'use strict';
 
 var rbush = require("rbush");
-var intersect = require('./segments.js');
+var intersect = require('./intersect.js');
 var grid = require('./grid.js');
 
 function _sortByX(pointset) {
@@ -826,16 +826,32 @@ function _cos(o, a, b) {
     return dot / Math.sqrt(sqALen * sqBLen);
 }
 
-function _intersect(edge, pointset) {
+var getRangeStartTime = 0, getRangeTime = 0,
+    getMidPointStartTime = 0, getMidPointTime = 0,
+    convexSpliceStartTime = 0, convexSpliceTime = 0,
+    removeGridPointStartTime = 0, removeGridPointTime = 0,
+    midPointIfsStartTime = 0, midPointIfsTime = 0,
+    getCosStartTime = 0, getCosTime = 0,
+    intersectStartTime = 0, intersectTime = 0;
+
+// var intersectCalls = 0;
+
+function _intersect(segment, pointset) {
+    // intersectCalls++;
+    // intersectStartTime = new Date();
     for (var i = 0; i < pointset.length - 1; i++) {
-        if (edge[0][0] === pointset[i][0] && edge[0][1] === pointset[i][1] ||
-            edge[0][0] === pointset[i + 1][0] && edge[0][1] === pointset[i + 1][1]) {
+        var seg = [pointset[i], pointset[i + 1]];
+        if (segment[0][0] === seg[0][0] && segment[0][1] === seg[0][1] ||
+            segment[0][0] === seg[1][0] && segment[0][1] === seg[1][1]) {
             continue;
         }
-        if (intersect(edge, [pointset[i], pointset[i + 1]])) {
+
+        if (intersect(segment, seg)) {
+            // intersectTime += new Date() - intersectStartTime;
             return true;
         }
     }
+    // intersectTime += new Date() - intersectStartTime;
     return false;
 }
 
@@ -864,38 +880,74 @@ function _bBoxAround(edge, boxSize) {
     ];
 }
 
+// function _midPoint1(edge, innerPoints, convex) {
+//     var a1Cos, a2Cos,
+//         angle1Cos = MAX_CONCAVE_ANGLE_COS,
+//         angle2Cos = MAX_CONCAVE_ANGLE_COS,
+//         pointsWithCos = [];
+
+//     innerPoints.forEach(function(pt) {
+//         getCosStartTime = new Date();
+//         a1Cos = _cos(edge[0], edge[1], pt);
+//         a2Cos = _cos(edge[1], edge[0], pt);
+//         getCosTime += new Date() - getCosStartTime;
+
+//         if (a1Cos > angle1Cos && a2Cos > angle2Cos) {
+//             pointsWithCos.push([pt, Math.max(a1Cos, a2Cos)]);
+//             // angle1Cos = a1Cos;
+//             // angle2Cos = a2Cos;
+//         }
+//     });
+
+//     pointsWithCos.sort(function(p1, p2) {
+//         return p1[1] - p2[1];
+//     });
+
+//     var p = pointsWithCos.pop();
+//     while (p !== undefined) {
+//         if (!_intersect([edge[0], p[0]], convex) &&
+//             !_intersect([edge[1], p[0]], convex)) {
+//             return p[0];
+//         }
+//         p = pointsWithCos.pop();
+//     }
+//     return null;
+// }
+
 function _midPoint(edge, innerPoints, convex) {
-    var point1 = null, point2 = null,
+    var point = null,
         angle1Cos = MAX_CONCAVE_ANGLE_COS,
         angle2Cos = MAX_CONCAVE_ANGLE_COS,
         a1Cos, a2Cos;
 
     for (var i = 0; i < innerPoints.length; i++) {
+        // getCosStartTime = new Date();
         a1Cos = _cos(edge[0], edge[1], innerPoints[i]);
         a2Cos = _cos(edge[1], edge[0], innerPoints[i]);
+        // getCosTime += new Date() - getCosStartTime;
 
-        if (a1Cos > MAX_CONCAVE_ANGLE_COS && a2Cos > MAX_CONCAVE_ANGLE_COS) {
-            if ((a1Cos > angle1Cos && !_intersect([edge[0], innerPoints[i]], convex)) && 
-                (a2Cos > angle2Cos && !_intersect([edge[1], innerPoints[i]], convex))) {
+        if (a1Cos > angle1Cos && a2Cos > angle2Cos &&
+            !_intersect([edge[0], innerPoints[i]], convex) &&
+            !_intersect([edge[1], innerPoints[i]], convex)) {
 
-                angle1Cos = a1Cos;
-                point1 = innerPoints[i];
-                angle2Cos = a2Cos;
-                point2 = innerPoints[i];
-            }
+            angle1Cos = a1Cos;
+            angle2Cos = a2Cos;
+            point = innerPoints[i];
         }
     }
 
-    return angle1Cos > angle2Cos ? point1 : point2;
+    return point;
 }
 
 function _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize, grid) {
     var edge,
+        border,
         nPoints,
         bBoxSize,
         midPoint,
         sqEdgeLen,
         bBoxAround,
+        
         midPointInserted = false;
 
     for (var i = 0; i < convex.length - 1; i++) {
@@ -905,19 +957,33 @@ function _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize, grid
         if (sqEdgeLen < maxSqEdgeLen) { continue; }
 
         bBoxSize = MIN_SEARCH_BBOX_SIZE;
-        
-        var border = 0;
+
+        border = 0;
         bBoxAround = _bBoxAround(edge, bBoxSize);
         do {
             bBoxAround = grid.addBorder2Bbox(bBoxAround, border);
             bBoxSize = bBoxAround[2] - bBoxAround[0];
+
+            // getRangeStartTime = new Date();
             nPoints = border > 0 ? grid.rangeBorderPoints(bBoxAround, 1) : grid.rangePoints(bBoxAround);
+            // getRangeTime += new Date() - getRangeStartTime;
+            
+            // getMidPointStartTime = new Date();
             midPoint = _midPoint(edge, nPoints, convex);
+            // getMidPointTime += new Date() - getMidPointStartTime;
+            
             border++;
         }  while (midPoint === null && maxSearchBBoxSize > bBoxSize);
         if (midPoint !== null) {
+            
+            // convexSpliceStartTime = new Date();
             convex.splice(i + 1, 0, midPoint);
+            // convexSpliceTime += new Date() - convexSpliceStartTime;
+
+            // removeGridPointStartTime = new Date();
             grid.removePoint(midPoint);
+            // removeGridPointTime += new Date() - removeGridPointStartTime;
+
             midPointInserted = true;
         }
 
@@ -952,134 +1018,68 @@ function hull(pointset, concavity) {
         return pointset;
     }
 
+    // console.log('Points count', pointset.length);
+
+    // console.time('_sortByX');
     pointset = _sortByX(pointset);
+    // console.timeEnd('_sortByX');
+    // console.time('convex');
     upper = _upperTangent(pointset);
     lower = _lowerTangent(pointset);
     convex = lower.concat(upper);
     convex.push(pointset[0]);
+    // console.timeEnd('convex');
 
+    // console.time('innerPoints');
     maxSearchBBoxSize = Math.max(pointset[pointset.length - 1][0], _getMaxY(convex)) * MAX_SEARCH_BBOX_SIZE_PERCENT;
     innerPoints = pointset.filter(function(pt) {
         return convex.indexOf(pt) < 0;
     });
+    // console.timeEnd('innerPoints');
 
+    // console.time('build grid');
     var g = grid(innerPoints);
+    // console.timeEnd('build grid');
  
+    // console.time('build rbush');
     innerPointsTree = rbush(9, ['[0]', '[1]', '[0]', '[1]']);
     innerPointsTree.load(innerPoints);
-    
-    return _concave(convex, innerPointsTree, Math.pow(concavity, 2), maxSearchBBoxSize, g);
+    // console.timeEnd('build rbush');
+
+    // console.time('_concave');
+    var concave = _concave(convex, innerPointsTree, Math.pow(concavity, 2), maxSearchBBoxSize, g);
+    // console.timeEnd('_concave');
+
+    // console.log('   getRangeTime: ', getRangeTime);
+    // console.log('   getMidPointTime: ', getMidPointTime);
+    // console.log('       getCosTime', getCosTime);
+    // console.log('       intersectTime', intersectTime);
+    // console.log('       intersectCalls', intersectCalls);
+    // console.log('   convexSpliceTime: ', convexSpliceTime);
+    // console.log('   removeGridPointTime: ', removeGridPointTime);
+
+    return concave;
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
-var MIN_SEARCH_BBOX_SIZE = 10;
-var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.8;
+var MIN_SEARCH_BBOX_SIZE = 5;
+var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.6;
 
 module.exports = hull;
-},{"./grid.js":2,"./segments.js":4,"rbush":1}],4:[function(require,module,exports){
-// http://martin-thoma.com/how-to-check-if-two-line-segments-intersect/#tocAnchor-1-5
-
-/**
- * Calculate the cross product of two points.
- * @param a first point
- * @param b second point
- * @return the value of the cross product
- */
-function crossProduct(a, b) {
-    return a[0] * b[1] - b[0] * a[1];
+},{"./grid.js":2,"./intersect.js":4,"rbush":1}],4:[function(require,module,exports){
+var ccw = function (x1, y1, x2, y2, x3, y3) {           
+    var cw = ((y3 - y1) * (x2 - x1)) - ((y2 - y1) * (x3 - x1));
+    return cw > 0 ? true : cw < 0 ? false : true /* colinear */;
 }
 
-/**
- * Check if bounding boxes do intersect. If one bounding box
- * touches the other, they do intersect.
- * @param a first bounding box
- * @param b second bounding box
- * @return <code>true</code> if they intersect,
- *         <code>false</code> otherwise.
- */
-function doBoundingBoxesIntersect(a, b) {
-    return a[0][0] <= b[1][0] && a[1][0] >= b[0][0] && a[0][1] <= b[1][1]
-            && a[1][1] >= b[0][1];
+var intersect = function (seg1, seg2) {
+  var x1 = seg1[0][0], y1 = seg1[0][1],
+      x2 = seg1[1][0], y2 = seg1[1][1],
+      x3 = seg2[0][0], y3 = seg2[0][1],
+      x4 = seg2[1][0], y4 = seg2[1][1];
+    return ccw(x1, y1, x3, y3, x4, y4) !== ccw(x2, y2, x3, y3, x4, y4) && ccw(x1, y1, x2, y2, x3, y3) !== ccw(x1, y1, x2, y2, x4, y4);
 }
 
-/**
- * Checks if a Point is on a line
- * @param a line (interpreted as line, although given as line
- *                segment)
- * @param b point
- * @return <code>true</code> if point is on line, otherwise
- *         <code>false</code>
- */
-function isPointOnLine(a, b) {
-    // Move the image, so that a[0] is on (0|0)
-    var aTmp = [[0,0], [a[1][0] - a[0][0], a[1][1] - a[0][1]]];
-    var bTmp = [b[0] - a[0][0], b[1] - a[0][1]];
-    var r = crossProduct(aTmp[1], bTmp);
-    return Math.abs(r) < EPSILON;
-}
-
-/**
- * Checks if a point is right of a line. If the point is on the
- * line, it is not right of the line.
- * @param a line segment interpreted as a line
- * @param b the point
- * @return <code>true</code> if the point is right of the line,
- *         <code>false</code> otherwise
- */
-function isPointRightOfLine(a, b) {
-    // Move the image, so that a[0] is on (0|0)
-    var aTmp = [[0, 0], [a[1][0] - a[0][0], a[1][1] - a[0][1]]];
-    var bTmp = [b[0] - a[0][0], b[1] - a[0][1]];
-    return crossProduct(aTmp[1], bTmp) < 0;
-}
-
-/**
- * Check if line segment first touches or crosses the line that is
- * defined by line segment second.
- *
- * @param first line segment interpreted as line
- * @param second line segment
- * @return <code>true</code> if line segment first touches or
- *                           crosses line second,
- *         <code>false</code> otherwise.
- */
-function lineSegmentTouchesOrCrossesLine(a, b) {
-    return isPointOnLine(a, b[0])
-            || isPointOnLine(a, b[1])
-            || (isPointRightOfLine(a, b[0]) ^ isPointRightOfLine(a,
-                    b[1]));
-}
-
-function getBoundingBox(a) {
-    return [
-        [
-            Math.min(a[0][0], a[1][0]),
-            Math.min(a[0][1], a[1][1])
-        ],
-        [
-            Math.max(a[0][0], a[1][0]),
-            Math.max(a[0][1], a[1][1])
-        ]
-    ];
-}
-
-/**
- * Check if line segments intersect
- * @param a first line segment
- * @param b second line segment
- * @return <code>true</code> if lines do intersect,
- *         <code>false</code> otherwise
- */
-function doLinesIntersect(a, b) {
-    var box1 = getBoundingBox(a);
-    var box2 = getBoundingBox(b);
-    return doBoundingBoxesIntersect(box1, box2)
-            && lineSegmentTouchesOrCrossesLine(a, b)
-            && lineSegmentTouchesOrCrossesLine(b, a);
-}
-
-var EPSILON = 0.000001;
-
-module.exports = doLinesIntersect;
+module.exports = intersect;
 },{}]},{},[3])(3)
 });
