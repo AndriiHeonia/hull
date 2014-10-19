@@ -99,32 +99,17 @@ function _cos(o, a, b) {
     return dot / Math.sqrt(sqALen * sqBLen);
 }
 
-var getRangeStartTime = 0, getRangeTime = 0,
-    getMidPointStartTime = 0, getMidPointTime = 0,
-    convexSpliceStartTime = 0, convexSpliceTime = 0,
-    removeGridPointStartTime = 0, removeGridPointTime = 0,
-    midPointIfsStartTime = 0, midPointIfsTime = 0,
-    getCosStartTime = 0, getCosTime = 0,
-    intersectStartTime = 0, intersectTime = 0;
-
-var intersectCalls = 0;
-
 function _intersect(segment, pointset) {
-    intersectCalls++;
-    intersectStartTime = new Date();
     for (var i = 0; i < pointset.length - 1; i++) {
         var seg = [pointset[i], pointset[i + 1]];
         if (segment[0][0] === seg[0][0] && segment[0][1] === seg[0][1] ||
             segment[0][0] === seg[1][0] && segment[0][1] === seg[1][1]) {
             continue;
         }
-
         if (intersect(segment, seg)) {
-            intersectTime += new Date() - intersectStartTime;
             return true;
         }
     }
-    intersectTime += new Date() - intersectStartTime;
     return false;
 }
 
@@ -160,10 +145,8 @@ function _midPoint(edge, innerPoints, convex) {
         a1Cos, a2Cos;
 
     for (var i = 0; i < innerPoints.length; i++) {
-        getCosStartTime = new Date();
         a1Cos = _cos(edge[0], edge[1], innerPoints[i]);
         a2Cos = _cos(edge[1], edge[0], innerPoints[i]);
-        getCosTime += new Date() - getCosStartTime;
 
         if (a1Cos > angle1Cos && a2Cos > angle2Cos &&
             !_intersect([edge[0], innerPoints[i]], convex) &&
@@ -185,8 +168,7 @@ function _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid) {
         bBoxSize,
         midPoint,
         sqEdgeLen,
-        bBoxAround,
-        
+        bBoxAround,    
         midPointInserted = false;
 
     for (var i = 0; i < convex.length - 1; i++) {
@@ -202,28 +184,14 @@ function _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid) {
         do {
             bBoxAround = grid.addBorder2Bbox(bBoxAround, border);
             bBoxSize = bBoxAround[2] - bBoxAround[0];
-
-            getRangeStartTime = new Date();
             nPoints = border > 0 ? grid.rangeBorderPoints(bBoxAround, 1) : grid.rangePoints(bBoxAround);
-            getRangeTime += new Date() - getRangeStartTime;
-            
-            getMidPointStartTime = new Date();
-            midPoint = _midPoint(edge, nPoints, convex);
-            getMidPointTime += new Date() - getMidPointStartTime;
-            
+            midPoint = _midPoint(edge, nPoints, convex);            
             border++;
         }  while (midPoint === null && maxSearchBBoxSize > bBoxSize);
 
         if (midPoint !== null) {
-            
-            convexSpliceStartTime = new Date();
             convex.splice(i + 1, 0, midPoint);
-            convexSpliceTime += new Date() - convexSpliceStartTime;
-
-            removeGridPointStartTime = new Date();
             grid.removePoint(midPoint);
-            removeGridPointTime += new Date() - removeGridPointStartTime;
-
             midPointInserted = true;
         }
     }
@@ -239,48 +207,23 @@ function hull(pointset, concavity) {
     var lower, upper, convex,
         innerPoints,
         maxSearchBBoxSize,
-        concavity = concavity || 10;
+        concavity = concavity || 20;
 
     if (pointset.length < 4) {
         return pointset;
     }
-
-    console.log('Points count', pointset.length);
-
-    console.time('_sortByX');
     pointset = _sortByX(pointset);
-    console.timeEnd('_sortByX');
-    console.time('convex');
     upper = _upperTangent(pointset);
     lower = _lowerTangent(pointset);
     convex = lower.concat(upper);
     convex.push(pointset[0]);
-    console.timeEnd('convex');
 
-    console.time('innerPoints');
     maxSearchBBoxSize = Math.max(pointset[pointset.length - 1][0], _getMaxY(convex)) * MAX_SEARCH_BBOX_SIZE_PERCENT;
     innerPoints = pointset.filter(function(pt) {
         return convex.indexOf(pt) < 0;
     });
-    console.timeEnd('innerPoints');
-
-    console.time('build grid');
-    var g = grid(innerPoints);
-    console.timeEnd('build grid');
  
-    console.time('_concave');
-    var concave = _concave(convex, Math.pow(concavity, 2), maxSearchBBoxSize, g);
-    console.timeEnd('_concave');
-
-    console.log('   getRangeTime: ', getRangeTime);
-    console.log('   getMidPointTime: ', getMidPointTime);
-    console.log('       getCosTime', getCosTime);
-    console.log('       intersectTime', intersectTime);
-    console.log('       intersectCalls', intersectCalls);
-    console.log('   convexSpliceTime: ', convexSpliceTime);
-    console.log('   removeGridPointTime: ', removeGridPointTime);
-
-    return concave;
+    return _concave(convex, Math.pow(concavity, 2), maxSearchBBoxSize, grid(innerPoints));
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
