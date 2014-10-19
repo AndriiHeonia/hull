@@ -163,11 +163,6 @@ module.exports = grid;
 - Push hull.js to npmjs.org
 */
 
-/*
-Optimization TODO:
-- Replace RBush to simple grid and use only diff of bBoxes, not full bBox
-*/
-
 'use strict';
 
 var intersect = require('./intersect.js');
@@ -365,7 +360,7 @@ function hull(pointset, concavity) {
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
 var MIN_SEARCH_BBOX_SIZE = 5;
-var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.6;
+var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.8;
 
 module.exports = hull;
 },{"./grid.js":1,"./intersect.js":3}],3:[function(require,module,exports){
