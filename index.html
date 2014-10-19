@@ -115,7 +115,7 @@ var pts = hull(pointset, 80);
 
 <!-- Example 2 -->
 <h3><a name="ex2" class="anchor" href="#ex2"><span class="octicon octicon-link"></span>Big horse</a></h3>
-<p>Hull.js also works well with large data sets. In this example more than 52K points. Execution time in your browser: <span id="horseExecTime"></span> ms.</p>
+<p>Hull.js also works well with large data sets. In this example more than 52K points, <code>concavity = 18</code>. Execution time in your browser: <span id="horseExecTime"></span> ms.</p>
 
 <p>
   <canvas id="canv2" width="960" height="750"></canvas>
@@ -139,7 +139,7 @@ var pts = hull(pointset, 80);
 
     // get and draw hull
     horseExecStart = new Date();
-    var pts = hull(pointset, 30);
+    var pts = hull(pointset, 18);
     horseExecTime = new Date() - horseExecStart;
 
     ctx.strokeStyle = "blue";
