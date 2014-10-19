@@ -14,14 +14,8 @@
 
 /*
  TOTO:
-- Adjust EDGE_LENGTH automatically (REJECTED)
-- Try to make _bBoxAround smallest and increase it step by step to EDGE_LENGTH.
-  It should helps us to use lesser innerPoints in _midPoint on hight density pointsets (DONE!)
-- Check, fix and optimize intersection checking (DONE!)
-- Update readme (DONE!)
-- Create live examples on GitHub pages (DONE!)
-- Fix problem in character example (DONE!)
-- Compare performance with another concave hull implementations
+- Fix problem with points outside hull
+- Compare performance with 0.1
 - Update tests
 - Push hull.js to npmjs.org
 */
