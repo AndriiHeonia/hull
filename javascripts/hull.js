@@ -1,592 +1,139 @@
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.hull=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-/*
- (c) 2013, Vladimir Agafonkin
- RBush, a JavaScript library for high-performance 2D spatial indexing of points and rectangles.
- https://github.com/mourner/rbush
-*/
+// TODO: test it!!!
 
-(function () { 'use strict';
+function Grid(points) {
+    var _cells = [];
 
-function rbush(maxEntries, format) {
-
-    // jshint newcap: false, validthis: true
-    if (!(this instanceof rbush)) return new rbush(maxEntries, format);
-
-    // max entries in a node is 9 by default; min node fill is 40% for best performance
-    this._maxEntries = Math.max(4, maxEntries || 9);
-    this._minEntries = Math.max(2, Math.ceil(this._maxEntries * 0.4));
-
-    if (format) {
-        this._initFormat(format);
-    }
-
-    this.clear();
-}
-
-rbush.prototype = {
-
-    all: function () {
-        return this._all(this.data, []);
-    },
-
-    search: function (bbox) {
-
-        var node = this.data,
-            result = [],
-            toBBox = this.toBBox;
-
-        if (!intersects(bbox, node.bbox)) return result;
-
-        var nodesToSearch = [],
-            i, len, child, childBBox;
-
-        while (node) {
-            for (i = 0, len = node.children.length; i < len; i++) {
-
-                child = node.children[i];
-                childBBox = node.leaf ? toBBox(child) : child.bbox;
-
-                if (intersects(bbox, childBBox)) {
-                    if (node.leaf) result.push(child);
-                    else if (contains(bbox, childBBox)) this._all(child, result);
-                    else nodesToSearch.push(child);
-                }
-            }
-            node = nodesToSearch.pop();
+    points.forEach(function(point) {
+        var cellXY = this.point2CellXY(point),
+            x = cellXY[0],
+            y = cellXY[1];
+        if (_cells[x] === undefined) {
+            _cells[x] = [];
         }
-
-        return result;
-    },
-
-    load: function (data) {
-        if (!(data && data.length)) return this;
-
-        if (data.length < this._minEntries) {
-            for (var i = 0, len = data.length; i < len; i++) {
-                this.insert(data[i]);
-            }
-            return this;
+        if (_cells[x][y] === undefined) {
+            _cells[x][y] = [];
         }
+        _cells[x][y].push([point[0], point[1], _cells[x][y].length]);
+    }, this);
 
-        // recursively build the tree with the given data from stratch using OMT algorithm
-        var node = this._build(data.slice(), 0, data.length - 1, 0);
-
-        if (!this.data.children.length) {
-            // save as is if tree is empty
-            this.data = node;
-
-        } else if (this.data.height === node.height) {
-            // split root if trees have the same height
-            this._splitRoot(this.data, node);
-
-        } else {
-            if (this.data.height < node.height) {
-                // swap trees if inserted one is bigger
-                var tmpNode = this.data;
-                this.data = node;
-                node = tmpNode;
-            }
-
-            // insert the small tree into the large tree at appropriate level
-            this._insert(node, this.data.height - node.height - 1, true);
-        }
-
-        return this;
+    this.cellPoints = function(x, y) { // (Number, Number) -> Array
+        return (_cells[x] !== undefined && _cells[x][y] !== undefined) ? _cells[x][y] : [];
     },
 
-    insert: function (item) {
-        if (item) this._insert(item, this.data.height - 1);
-        return this;
-    },
-
-    clear: function () {
-        this.data = {
-            children: [],
-            height: 1,
-            bbox: empty(),
-            leaf: true
-        };
-        return this;
-    },
-
-    remove: function (item) {
-        if (!item) return this;
-
-        var node = this.data,
-            bbox = this.toBBox(item),
-            path = [],
-            indexes = [],
-            i, parent, index, goingUp;
-
-        // depth-first iterative tree traversal
-        while (node || path.length) {
-
-            if (!node) { // go up
-                node = path.pop();
-                parent = path[path.length - 1];
-                i = indexes.pop();
-                goingUp = true;
-            }
-
-            if (node.leaf) { // check current node
-                index = node.children.indexOf(item);
-
-                if (index !== -1) {
-                    // item found, remove the item and condense tree upwards
-                    node.children.splice(index, 1);
-                    path.push(node);
-                    this._condense(path);
-                    return this;
-                }
-            }
-
-            if (!goingUp && !node.leaf && contains(node.bbox, bbox)) { // go down
-                path.push(node);
-                indexes.push(i);
-                i = 0;
-                parent = node;
-                node = node.children[0];
-
-            } else if (parent) { // go right
-                i++;
-                node = parent.children[i];
-                goingUp = false;
-
-            } else node = null; // nothing found
-        }
-
-        return this;
-    },
-
-    toBBox: function (item) { return item; },
-
-    compareMinX: function (a, b) { return a[0] - b[0]; },
-    compareMinY: function (a, b) { return a[1] - b[1]; },
-
-    toJSON: function () { return this.data; },
-
-    fromJSON: function (data) {
-        this.data = data;
-        return this;
-    },
-
-    _all: function (node, result) {
-        var nodesToSearch = [];
-        while (node) {
-            if (node.leaf) result.push.apply(result, node.children);
-            else nodesToSearch.push.apply(nodesToSearch, node.children);
-
-            node = nodesToSearch.pop();
-        }
-        return result;
-    },
-
-    _build: function (items, left, right, height) {
-
-        var N = right - left + 1,
-            M = this._maxEntries,
-            node;
-
-        if (N <= M) {
-            // reached leaf level; return leaf
-            node = {
-                children: items.slice(left, right + 1),
-                height: 1,
-                bbox: null,
-                leaf: true
-            };
-            calcBBox(node, this.toBBox);
-            return node;
-        }
-
-        if (!height) {
-            // target height of the bulk-loaded tree
-            height = Math.ceil(Math.log(N) / Math.log(M));
-
-            // target number of root entries to maximize storage utilization
-            M = Math.ceil(N / Math.pow(M, height - 1));
-        }
-
-        // TODO eliminate recursion?
-
-        node = {
-            children: [],
-            height: height,
-            bbox: null
-        };
-
-        // split the items into M mostly square tiles
-
-        var N2 = Math.ceil(N / M),
-            N1 = N2 * Math.ceil(Math.sqrt(M)),
-            i, j, right2, right3;
-
-        multiSelect(items, left, right, N1, this.compareMinX);
-
-        for (i = left; i <= right; i += N1) {
-
-            right2 = Math.min(i + N1 - 1, right);
-
-            multiSelect(items, i, right2, N2, this.compareMinY);
-
-            for (j = i; j <= right2; j += N2) {
-
-                right3 = Math.min(j + N2 - 1, right2);
-
-                // pack each entry recursively
-                node.children.push(this._build(items, j, right3, height - 1));
-            }
-        }
-
-        calcBBox(node, this.toBBox);
-
-        return node;
-    },
-
-    _chooseSubtree: function (bbox, node, level, path) {
-
-        var i, len, child, targetNode, area, enlargement, minArea, minEnlargement;
-
-        while (true) {
-            path.push(node);
-
-            if (node.leaf || path.length - 1 === level) break;
-
-            minArea = minEnlargement = Infinity;
-
-            for (i = 0, len = node.children.length; i < len; i++) {
-                child = node.children[i];
-                area = bboxArea(child.bbox);
-                enlargement = enlargedArea(bbox, child.bbox) - area;
-
-                // choose entry with the least area enlargement
-                if (enlargement < minEnlargement) {
-                    minEnlargement = enlargement;
-                    minArea = area < minArea ? area : minArea;
-                    targetNode = child;
-
-                } else if (enlargement === minEnlargement) {
-                    // otherwise choose one with the smallest area
-                    if (area < minArea) {
-                        minArea = area;
-                        targetNode = child;
-                    }
-                }
-            }
-
-            node = targetNode;
-        }
-
-        return node;
-    },
-
-    _insert: function (item, level, isNode) {
-
-        var toBBox = this.toBBox,
-            bbox = isNode ? item.bbox : toBBox(item),
-            insertPath = [];
-
-        // find the best node for accommodating the item, saving all nodes along the path too
-        var node = this._chooseSubtree(bbox, this.data, level, insertPath);
-
-        // put the item into the node
-        node.children.push(item);
-        extend(node.bbox, bbox);
-
-        // split on node overflow; propagate upwards if necessary
-        while (level >= 0) {
-            if (insertPath[level].children.length > this._maxEntries) {
-                this._split(insertPath, level);
-                level--;
-            } else break;
-        }
-
-        // adjust bboxes along the insertion path
-        this._adjustParentBBoxes(bbox, insertPath, level);
-    },
-
-    // split overflowed node into two
-    _split: function (insertPath, level) {
-
-        var node = insertPath[level],
-            M = node.children.length,
-            m = this._minEntries;
-
-        this._chooseSplitAxis(node, m, M);
-
-        var newNode = {
-            children: node.children.splice(this._chooseSplitIndex(node, m, M)),
-            height: node.height
-        };
-
-        if (node.leaf) newNode.leaf = true;
-
-        calcBBox(node, this.toBBox);
-        calcBBox(newNode, this.toBBox);
-
-        if (level) insertPath[level - 1].children.push(newNode);
-        else this._splitRoot(node, newNode);
-    },
-
-    _splitRoot: function (node, newNode) {
-        // split root node
-        this.data = {
-            children: [node, newNode],
-            height: node.height + 1
-        };
-        calcBBox(this.data, this.toBBox);
-    },
-
-    _chooseSplitIndex: function (node, m, M) {
-
-        var i, bbox1, bbox2, overlap, area, minOverlap, minArea, index;
-
-        minOverlap = minArea = Infinity;
-
-        for (i = m; i <= M - m; i++) {
-            bbox1 = distBBox(node, 0, i, this.toBBox);
-            bbox2 = distBBox(node, i, M, this.toBBox);
-
-            overlap = intersectionArea(bbox1, bbox2);
-            area = bboxArea(bbox1) + bboxArea(bbox2);
-
-            // choose distribution with minimum overlap
-            if (overlap < minOverlap) {
-                minOverlap = overlap;
-                index = i;
-
-                minArea = area < minArea ? area : minArea;
-
-            } else if (overlap === minOverlap) {
-                // otherwise choose distribution with minimum area
-                if (area < minArea) {
-                    minArea = area;
-                    index = i;
-                }
-            }
-        }
-
-        return index;
-    },
-
-    // sorts node children by the best axis for split
-    _chooseSplitAxis: function (node, m, M) {
-
-        var compareMinX = node.leaf ? this.compareMinX : compareNodeMinX,
-            compareMinY = node.leaf ? this.compareMinY : compareNodeMinY,
-            xMargin = this._allDistMargin(node, m, M, compareMinX),
-            yMargin = this._allDistMargin(node, m, M, compareMinY);
-
-        // if total distributions margin value is minimal for x, sort by minX,
-        // otherwise it's already sorted by minY
-        if (xMargin < yMargin) node.children.sort(compareMinX);
-    },
-
-    // total margin of all possible split distributions where each node is at least m full
-    _allDistMargin: function (node, m, M, compare) {
-
-        node.children.sort(compare);
-
-        var toBBox = this.toBBox,
-            leftBBox = distBBox(node, 0, m, toBBox),
-            rightBBox = distBBox(node, M - m, M, toBBox),
-            margin = bboxMargin(leftBBox) + bboxMargin(rightBBox),
-            i, child;
-
-        for (i = m; i < M - m; i++) {
-            child = node.children[i];
-            extend(leftBBox, node.leaf ? toBBox(child) : child.bbox);
-            margin += bboxMargin(leftBBox);
-        }
-
-        for (i = M - m - 1; i >= m; i--) {
-            child = node.children[i];
-            extend(rightBBox, node.leaf ? toBBox(child) : child.bbox);
-            margin += bboxMargin(rightBBox);
-        }
-
-        return margin;
-    },
-
-    _adjustParentBBoxes: function (bbox, path, level) {
-        // adjust bboxes along the given tree path
-        for (var i = level; i >= 0; i--) {
-            extend(path[i].bbox, bbox);
-        }
-    },
-
-    _condense: function (path) {
-        // go through the path, removing empty nodes and updating bboxes
-        for (var i = path.length - 1, siblings; i >= 0; i--) {
-            if (path[i].children.length === 0) {
-                if (i > 0) {
-                    siblings = path[i - 1].children;
-                    siblings.splice(siblings.indexOf(path[i]), 1);
-
-                } else this.clear();
-
-            } else calcBBox(path[i], this.toBBox);
-        }
-    },
-
-    _initFormat: function (format) {
-        // data format (minX, minY, maxX, maxY accessors)
-
-        // uses eval-type function compilation instead of just accepting a toBBox function
-        // because the algorithms are very sensitive to sorting functions performance,
-        // so they should be dead simple and without inner calls
-
-        // jshint evil: true
-
-        var compareArr = ['return a', ' - b', ';'];
-
-        this.compareMinX = new Function('a', 'b', compareArr.join(format[0]));
-        this.compareMinY = new Function('a', 'b', compareArr.join(format[1]));
-
-        this.toBBox = new Function('a', 'return [a' + format.join(', a') + '];');
-    }
-};
-
-
-// calculate node's bbox from bboxes of its children
-function calcBBox(node, toBBox) {
-    node.bbox = distBBox(node, 0, node.children.length, toBBox);
-}
-
-// min bounding rectangle of node children from k to p-1
-function distBBox(node, k, p, toBBox) {
-    var bbox = empty();
-
-    for (var i = k, child; i < p; i++) {
-        child = node.children[i];
-        extend(bbox, node.leaf ? toBBox(child) : child.bbox);
-    }
-
-    return bbox;
-}
-
-function empty() { return [Infinity, Infinity, -Infinity, -Infinity]; }
-
-function extend(a, b) {
-    a[0] = Math.min(a[0], b[0]);
-    a[1] = Math.min(a[1], b[1]);
-    a[2] = Math.max(a[2], b[2]);
-    a[3] = Math.max(a[3], b[3]);
-    return a;
-}
-
-function compareNodeMinX(a, b) { return a.bbox[0] - b.bbox[0]; }
-function compareNodeMinY(a, b) { return a.bbox[1] - b.bbox[1]; }
-
-function bboxArea(a)   { return (a[2] - a[0]) * (a[3] - a[1]); }
-function bboxMargin(a) { return (a[2] - a[0]) + (a[3] - a[1]); }
-
-function enlargedArea(a, b) {
-    return (Math.max(b[2], a[2]) - Math.min(b[0], a[0])) *
-           (Math.max(b[3], a[3]) - Math.min(b[1], a[1]));
-}
-
-function intersectionArea (a, b) {
-    var minX = Math.max(a[0], b[0]),
-        minY = Math.max(a[1], b[1]),
-        maxX = Math.min(a[2], b[2]),
-        maxY = Math.min(a[3], b[3]);
-
-    return Math.max(0, maxX - minX) *
-           Math.max(0, maxY - minY);
-}
-
-function contains(a, b) {
-    return a[0] <= b[0] &&
-           a[1] <= b[1] &&
-           b[2] <= a[2] &&
-           b[3] <= a[3];
-}
-
-function intersects (a, b) {
-    return b[0] <= a[2] &&
-           b[1] <= a[3] &&
-           b[2] >= a[0] &&
-           b[3] >= a[1];
-}
-
-// sort an array so that items come in groups of n unsorted items, with groups sorted between each other;
-// combines selection algorithm with binary divide & conquer approach
-
-function multiSelect(arr, left, right, n, compare) {
-    var stack = [left, right],
-        mid;
-
-    while (stack.length) {
-        right = stack.pop();
-        left = stack.pop();
-
-        if (right - left <= n) continue;
-
-        mid = left + Math.ceil((right - left) / n / 2) * n;
-        select(arr, left, right, mid, compare);
-
-        stack.push(left, mid, mid, right);
+    this.removePoint = function(point) { // (Array) -> Array
+        var cellXY = this.point2CellXY(point),
+            cell = _cells[cellXY[0]][cellXY[1]],
+            pointIdxInCell = point[2];
+        
+        cell.splice(pointIdxInCell, 1);
+
+        return cell;
     }
 }
 
-// sort array between left and right (inclusive) so that the smallest k elements come first (unordered)
-function select(arr, left, right, k, compare) {
-    var n, i, z, s, sd, newLeft, newRight, t, j;
+Grid.prototype = {
+    point2CellXY: function(point) { // (Array) -> Array
+        var x = parseInt(point[0] / Grid.CELL_SIZE),
+            y = parseInt(point[1] / Grid.CELL_SIZE);
+        return [x, y];
+    },
 
-    while (right > left) {
-        if (right - left > 600) {
-            n = right - left + 1;
-            i = k - left + 1;
-            z = Math.log(n);
-            s = 0.5 * Math.exp(2 * z / 3);
-            sd = 0.5 * Math.sqrt(z * s * (n - s) / n) * (i - n / 2 < 0 ? -1 : 1);
-            newLeft = Math.max(left, Math.floor(k - i * s / n + sd));
-            newRight = Math.min(right, Math.floor(k + (n - i) * s / n + sd));
-            select(arr, newLeft, newRight, k, compare);
+    rangePoints: function(bbox) { // (Array) -> Array
+        var tlCellXY = this.point2CellXY([bbox[0], bbox[1]]),
+            brCellXY = this.point2CellXY([bbox[2], bbox[3]]),
+            points = [];
+
+        for (var x = tlCellXY[0]; x <= brCellXY[0]; x++) {
+            for (var y = tlCellXY[1]; y <= brCellXY[1]; y++) {
+                points = points.concat(this.cellPoints(x, y));
+            }
         }
 
-        t = arr[k];
-        i = left;
-        j = right;
+        return points;
+    },
 
-        swap(arr, left, k);
-        if (compare(arr[right], t) > 0) swap(arr, left, right);
+    rangeBorderPoints: function(bbox, border) { // (Array, Number) -> Array
+        var tlCellXY = this.point2CellXY([bbox[0], bbox[1]]),
+            brCellXY = this.point2CellXY([bbox[2], bbox[3]]),
+            border = border || 1,
+            points = [];
 
-        while (i < j) {
-            swap(arr, i, j);
-            i++;
-            j--;
-            while (compare(arr[i], t) < 0) i++;
-            while (compare(arr[j], t) > 0) j--;
+        /*
+         _        
+        | |      
+        | |      
+        |_|
+        
+        */
+        for (var x = tlCellXY[0] - border; x < tlCellXY[0]; x++) {
+            for (var y = tlCellXY[1]; y <= brCellXY[1]; y++) {
+                points = points.concat(this.cellPoints(x, y));
+            }
         }
 
-        if (compare(arr[left], t) === 0) swap(arr, left, j);
-        else {
-            j++;
-            swap(arr, j, right);
+        /*
+         _        _
+        | |      | |
+        | |      | |
+        |_|      |_|
+        
+        */
+        for (var x = brCellXY[0] + 1; x <= brCellXY[0] + border; x++) {
+            for (var y = tlCellXY[1]; y <= brCellXY[1]; y++) {
+                points = points.concat(this.cellPoints(x, y));
+            }
         }
 
-        if (j <= k) left = j + 1;
-        if (k <= j) right = j - 1;
+        /*
+         __________
+        |  ______  |
+        | |      | |
+        | |      | |
+        |_|      |_|
+        
+        */
+        for (var x = tlCellXY[0] - border; x <= brCellXY[0] + border; x++) {
+            for (var y = tlCellXY[1] - border; y < tlCellXY[1]; y++) {
+                points = points.concat(this.cellPoints(x, y));
+            }
+        }
+
+        /*
+         __________
+        |  ______  |
+        | |      | |
+        | |      | |
+        | |______| |
+        |__________|
+
+        */
+        for (var x = tlCellXY[0] - border; x <= brCellXY[0] + border; x++) {
+            for (var y = brCellXY[1]; y <= brCellXY[1] + border; y++) {
+                points = points.concat(this.cellPoints(x, y));
+            }
+        }
+
+        return points;
+    },
+
+    addBorder2Bbox: function(bbox, border) { // (Array, Number) -> Array
+        return [
+            bbox[0] - (border * Grid.CELL_SIZE),
+            bbox[1] - (border * Grid.CELL_SIZE),
+            bbox[2] + (border * Grid.CELL_SIZE),
+            bbox[3] + (border * Grid.CELL_SIZE)
+        ];
     }
 }
 
-function swap(arr, i, j) {
-    var tmp = arr[i];
-    arr[i] = arr[j];
-    arr[j] = tmp;
+function grid(points) {
+    return new Grid(points);
 }
 
+Grid.CELL_SIZE = 10;
 
-// export as AMD/CommonJS module or global variable
-if (typeof define === 'function' && define.amd) define(function() { return rbush; });
-else if (typeof module !== 'undefined') module.exports = rbush;
-else if (typeof self !== 'undefined') self.rbush = rbush;
-else window.rbush = rbush;
-
-})();
-
+module.exports = grid;
 },{}],2:[function(require,module,exports){
 /*
  (c) 2014, Andrey Geonya
@@ -596,7 +143,7 @@ else window.rbush = rbush;
  Related papers:
  http://www.it.uu.se/edu/course/homepage/projektTDB/ht13/project10/Project-10-report.pdf
  http://www.cs.jhu.edu/~misha/Fall05/09.13.05.pdf
- http://martin-thoma.com/how-to-check-if-two-line-segments-intersect/
+ http://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
  http://allenchou.net/2013/07/cross-product-of-2d-vectors/
  http://users.livejournal.com/_winnie/237714.html
  http://habrahabr.ru/post/105882/
@@ -616,10 +163,15 @@ else window.rbush = rbush;
 - Push hull.js to npmjs.org
 */
 
+/*
+Optimization TODO:
+- Replace RBush to simple grid and use only diff of bBoxes, not full bBox
+*/
+
 'use strict';
 
-var rbush = require("rbush");
-var intersect = require('./segments.js');
+var intersect = require('./intersect.js');
+var grid = require('./grid.js');
 
 function _sortByX(pointset) {
     return pointset.sort(function(a, b) {
@@ -684,13 +236,14 @@ function _cos(o, a, b) {
     return dot / Math.sqrt(sqALen * sqBLen);
 }
 
-function _intersect(edge, pointset) {
+function _intersect(segment, pointset) {
     for (var i = 0; i < pointset.length - 1; i++) {
-        if (edge[0][0] === pointset[i][0] && edge[0][1] === pointset[i][1] ||
-            edge[0][0] === pointset[i + 1][0] && edge[0][1] === pointset[i + 1][1]) {
+        var seg = [pointset[i], pointset[i + 1]];
+        if (segment[0][0] === seg[0][0] && segment[0][1] === seg[0][1] ||
+            segment[0][0] === seg[1][0] && segment[0][1] === seg[1][1]) {
             continue;
         }
-        if (intersect(edge, [pointset[i], pointset[i + 1]])) {
+        if (intersect(segment, seg)) {
             return true;
         }
     }
@@ -723,7 +276,7 @@ function _bBoxAround(edge, boxSize) {
 }
 
 function _midPoint(edge, innerPoints, convex) {
-    var point1 = null, point2 = null,
+    var point = null,
         angle1Cos = MAX_CONCAVE_ANGLE_COS,
         angle2Cos = MAX_CONCAVE_ANGLE_COS,
         a1Cos, a2Cos;
@@ -732,28 +285,27 @@ function _midPoint(edge, innerPoints, convex) {
         a1Cos = _cos(edge[0], edge[1], innerPoints[i]);
         a2Cos = _cos(edge[1], edge[0], innerPoints[i]);
 
-        if (a1Cos > MAX_CONCAVE_ANGLE_COS && a2Cos > MAX_CONCAVE_ANGLE_COS) {
-            if ((a1Cos > angle1Cos && !_intersect([edge[0], innerPoints[i]], convex)) && 
-                (a2Cos > angle2Cos && !_intersect([edge[1], innerPoints[i]], convex))) {
+        if (a1Cos > angle1Cos && a2Cos > angle2Cos &&
+            !_intersect([edge[0], innerPoints[i]], convex) &&
+            !_intersect([edge[1], innerPoints[i]], convex)) {
 
-                angle1Cos = a1Cos;
-                point1 = innerPoints[i];
-                angle2Cos = a2Cos;
-                point2 = innerPoints[i];
-            }
+            angle1Cos = a1Cos;
+            angle2Cos = a2Cos;
+            point = innerPoints[i];
         }
     }
 
-    return angle1Cos > angle2Cos ? point1 : point2;
+    return point;
 }
 
-function _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize) {
+function _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid) {
     var edge,
+        border,
         nPoints,
         bBoxSize,
         midPoint,
         sqEdgeLen,
-        bBoxAround,
+        bBoxAround,    
         midPointInserted = false;
 
     for (var i = 0; i < convex.length - 1; i++) {
@@ -763,22 +315,26 @@ function _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize) {
         if (sqEdgeLen < maxSqEdgeLen) { continue; }
 
         bBoxSize = MIN_SEARCH_BBOX_SIZE;
+
+        border = 0;
+        bBoxAround = _bBoxAround(edge, bBoxSize);
         do {
-            bBoxAround = _bBoxAround(edge, bBoxSize);
-            nPoints = innerPointsTree.search(bBoxAround);
-            midPoint = _midPoint(edge, nPoints, convex);
-            bBoxSize *= 2;
-        } while (midPoint === null && maxSearchBBoxSize > bBoxSize);
+            bBoxAround = grid.addBorder2Bbox(bBoxAround, border);
+            bBoxSize = bBoxAround[2] - bBoxAround[0];
+            nPoints = border > 0 ? grid.rangeBorderPoints(bBoxAround, 1) : grid.rangePoints(bBoxAround);
+            midPoint = _midPoint(edge, nPoints, convex);            
+            border++;
+        }  while (midPoint === null && maxSearchBBoxSize > bBoxSize);
 
         if (midPoint !== null) {
             convex.splice(i + 1, 0, midPoint);
-            innerPointsTree.remove(midPoint);
+            grid.removePoint(midPoint);
             midPointInserted = true;
         }
     }
 
     if (midPointInserted) {
-        return _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize);
+        return _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid);
     }
 
     return convex;
@@ -787,138 +343,45 @@ function _concave(convex, innerPointsTree, maxSqEdgeLen, maxSearchBBoxSize) {
 function hull(pointset, concavity) {
     var lower, upper, convex,
         innerPoints,
-        innerPointsTree,
         maxSearchBBoxSize,
-        concavity = concavity || 10;
+        concavity = concavity || 20;
 
-    if (pointset.length < 3) {
+    if (pointset.length < 4) {
         return pointset;
     }
-
     pointset = _sortByX(pointset);
     upper = _upperTangent(pointset);
     lower = _lowerTangent(pointset);
     convex = lower.concat(upper);
     convex.push(pointset[0]);
 
-    maxSearchBBoxSize = Math.max(pointset[pointset.length - 1][0], _getMaxY(convex));
+    maxSearchBBoxSize = Math.max(pointset[pointset.length - 1][0], _getMaxY(convex)) * MAX_SEARCH_BBOX_SIZE_PERCENT;
     innerPoints = pointset.filter(function(pt) {
         return convex.indexOf(pt) < 0;
     });
-    innerPointsTree = rbush(9, ['[0]', '[1]', '[0]', '[1]']);
-    innerPointsTree.load(innerPoints);
-    
-    return _concave(convex, innerPointsTree, Math.pow(concavity, 2), maxSearchBBoxSize);
+ 
+    return _concave(convex, Math.pow(concavity, 2), maxSearchBBoxSize, grid(innerPoints));
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
-var MIN_SEARCH_BBOX_SIZE = 10;
+var MIN_SEARCH_BBOX_SIZE = 5;
+var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.6;
 
 module.exports = hull;
-},{"./segments.js":3,"rbush":1}],3:[function(require,module,exports){
-// http://martin-thoma.com/how-to-check-if-two-line-segments-intersect/#tocAnchor-1-5
-
-/**
- * Calculate the cross product of two points.
- * @param a first point
- * @param b second point
- * @return the value of the cross product
- */
-function crossProduct(a, b) {
-    return a[0] * b[1] - b[0] * a[1];
+},{"./grid.js":1,"./intersect.js":3}],3:[function(require,module,exports){
+var ccw = function (x1, y1, x2, y2, x3, y3) {           
+    var cw = ((y3 - y1) * (x2 - x1)) - ((y2 - y1) * (x3 - x1));
+    return cw > 0 ? true : cw < 0 ? false : true; // colinear
 }
 
-/**
- * Check if bounding boxes do intersect. If one bounding box
- * touches the other, they do intersect.
- * @param a first bounding box
- * @param b second bounding box
- * @return <code>true</code> if they intersect,
- *         <code>false</code> otherwise.
- */
-function doBoundingBoxesIntersect(a, b) {
-    return a[0][0] <= b[1][0] && a[1][0] >= b[0][0] && a[0][1] <= b[1][1]
-            && a[1][1] >= b[0][1];
+var intersect = function (seg1, seg2) {
+  var x1 = seg1[0][0], y1 = seg1[0][1],
+      x2 = seg1[1][0], y2 = seg1[1][1],
+      x3 = seg2[0][0], y3 = seg2[0][1],
+      x4 = seg2[1][0], y4 = seg2[1][1];
+    return ccw(x1, y1, x3, y3, x4, y4) !== ccw(x2, y2, x3, y3, x4, y4) && ccw(x1, y1, x2, y2, x3, y3) !== ccw(x1, y1, x2, y2, x4, y4);
 }
 
-/**
- * Checks if a Point is on a line
- * @param a line (interpreted as line, although given as line
- *                segment)
- * @param b point
- * @return <code>true</code> if point is on line, otherwise
- *         <code>false</code>
- */
-function isPointOnLine(a, b) {
-    // Move the image, so that a[0] is on (0|0)
-    var aTmp = [[0,0], [a[1][0] - a[0][0], a[1][1] - a[0][1]]];
-    var bTmp = [b[0] - a[0][0], b[1] - a[0][1]];
-    var r = crossProduct(aTmp[1], bTmp);
-    return Math.abs(r) < EPSILON;
-}
-
-/**
- * Checks if a point is right of a line. If the point is on the
- * line, it is not right of the line.
- * @param a line segment interpreted as a line
- * @param b the point
- * @return <code>true</code> if the point is right of the line,
- *         <code>false</code> otherwise
- */
-function isPointRightOfLine(a, b) {
-    // Move the image, so that a[0] is on (0|0)
-    var aTmp = [[0, 0], [a[1][0] - a[0][0], a[1][1] - a[0][1]]];
-    var bTmp = [b[0] - a[0][0], b[1] - a[0][1]];
-    return crossProduct(aTmp[1], bTmp) < 0;
-}
-
-/**
- * Check if line segment first touches or crosses the line that is
- * defined by line segment second.
- *
- * @param first line segment interpreted as line
- * @param second line segment
- * @return <code>true</code> if line segment first touches or
- *                           crosses line second,
- *         <code>false</code> otherwise.
- */
-function lineSegmentTouchesOrCrossesLine(a, b) {
-    return isPointOnLine(a, b[0])
-            || isPointOnLine(a, b[1])
-            || (isPointRightOfLine(a, b[0]) ^ isPointRightOfLine(a,
-                    b[1]));
-}
-
-function getBoundingBox(a) {
-    return [
-        [
-            Math.min(a[0][0], a[1][0]),
-            Math.min(a[0][1], a[1][1])
-        ],
-        [
-            Math.max(a[0][0], a[1][0]),
-            Math.max(a[0][1], a[1][1])
-        ]
-    ];
-}
-
-/**
- * Check if line segments intersect
- * @param a first line segment
- * @param b second line segment
- * @return <code>true</code> if lines do intersect,
- *         <code>false</code> otherwise
- */
-function doLinesIntersect(a, b) {
-    var box1 = getBoundingBox(a);
-    var box2 = getBoundingBox(b);
-    return doBoundingBoxesIntersect(box1, box2)
-            && lineSegmentTouchesOrCrossesLine(a, b)
-            && lineSegmentTouchesOrCrossesLine(b, a);
-}
-
-var EPSILON = 0.000001;
-
-module.exports = doLinesIntersect;
+module.exports = intersect;
 },{}]},{},[2])(2)
 });

@@ -14,8 +14,9 @@
     <title>Hull.js by AndreyGeonya</title>
     <script src="./javascripts/hull.js"></script>
     <script src="./javascripts/dbscan.js"></script>
-    <script src="./javascripts/pointset1.js"></script>
-    <script src="./javascripts/pointset2.js"></script>
+    <script src="./javascripts/dataUa.js"></script>
+    <script src="./javascripts/dataChars.js"></script>
+    <script src="./javascripts/dataHorse.js"></script>
   </head>
 
   <body>
@@ -36,26 +37,27 @@
 <h3><a name="ex1" class="anchor" href="#ex1"><span class="octicon octicon-link"></span>Ukrainian border</a></h3>
 <p>To receive hull (polygon) by point set just call <code>hull</code> function:</p>
 <pre><code>var pointset = [[168, 180], [168, 178], [168, 179], ...];
-var pts = hull(pointset);
+var pts = hull(pointset, 10);
 // ... draw pts</code></pre>
 <p>
   <canvas id="canv1" width="400" height="250"></canvas>
   <script>
   function example1() {
     var c = document.getElementById('canv1'),
-        ctx = c.getContext('2d');
+        ctx = c.getContext('2d'),
+        pointset = dataUa;
 
     // draw all points
     ctx.fillStyle = "black";
-    for (var i = 0; i < pointset1.length; i++) {
+    for (var i = 0; i < pointset.length; i++) {
         ctx.beginPath();
-        ctx.arc(pointset1[i][0], pointset1[i][1], 1, 0, 2 * Math.PI, true);
+        ctx.arc(pointset[i][0], pointset[i][1], 1, 0, 2 * Math.PI, true);
         ctx.fill();
         ctx.closePath();
     }
 
     // get and draw hull
-    var pts = hull(pointset1);
+    var pts = hull(pointset, 10);
     ctx.strokeStyle = "blue";
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -82,19 +84,20 @@ var pts = hull(pointset, 80);
   <script>
   function example1_1() {
     var c = document.getElementById('canv1_1'),
-        ctx = c.getContext('2d');
+        ctx = c.getContext('2d'),
+        pointset = dataUa;
 
     // draw all points
     ctx.fillStyle = "black";
-    for (var i = 0; i < pointset1.length; i++) {
+    for (var i = 0; i < pointset.length; i++) {
         ctx.beginPath();
-        ctx.arc(pointset1[i][0], pointset1[i][1], 1, 0, 2 * Math.PI, true);
+        ctx.arc(pointset[i][0], pointset[i][1], 1, 0, 2 * Math.PI, true);
         ctx.fill();
         ctx.closePath();
     }
 
     // get and draw hull
-    var pts = hull(pointset1, 80);
+    var pts = hull(pointset, 80);
     ctx.strokeStyle = "blue";
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -110,9 +113,54 @@ var pts = hull(pointset, 80);
 <!-- END: Example 1.1 -->
 
 
-
 <!-- Example 2 -->
-<h3><a name="ex2" class="anchor" href="#ex2"><span class="octicon octicon-link"></span>Chars</a></h3>
+<h3><a name="ex2" class="anchor" href="#ex2"><span class="octicon octicon-link"></span>Big horse</a></h3>
+<p>Hull.js also works well with large data sets. In this example more than 52K points. Execution time in your browser: <span id="horseExecTime"></span> ms.</p>
+
+<p>
+  <canvas id="canv2" width="960" height="750"></canvas>
+  <script>
+  function example2() {
+    var c = document.getElementById('canv2'),
+        ctx = c.getContext('2d'),
+        horseExecStart = 0,
+        horseExecTime = 0,
+        horseExecTimeSpan = document.getElementById('horseExecTime'),
+        pointset = dataHorse;
+
+    // draw all points
+    ctx.fillStyle = "black";
+    for (var i = 0; i < pointset.length; i++) {
+        ctx.beginPath();
+        ctx.arc(pointset[i][0], pointset[i][1], 1, 0, 2 * Math.PI, true);
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    // get and draw hull
+    horseExecStart = new Date();
+    var pts = hull(pointset, 30);
+    horseExecTime = new Date() - horseExecStart;
+
+    ctx.strokeStyle = "blue";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    pts.forEach(function(px) {
+        ctx.lineTo(px[0], px[1]);
+        ctx.moveTo(px[0], px[1]);
+    });
+    ctx.stroke();
+    ctx.closePath();
+
+    horseExecTimeSpan.appendChild(document.createTextNode(horseExecTime));
+  }
+  </script>
+</p>
+<!-- END: Example 2 -->
+
+
+<!-- Example 3 -->
+<h3><a name="ex3" class="anchor" href="#ex3"><span class="octicon octicon-link"></span>Chars</a></h3>
 <p>If you want to get hulls of the point set that looks like multipolygon, then you need to call <code>hull</code> function for each subset (for each polygon). <br /> In this example we use LukaszKrawczyk's <a href="https://github.com/LukaszKrawczyk/clustering" target="_blank">density based clustering library</a> (but you can use any other implementation) to split one large point set to several groups, after that we recive hulls for each of them:</p>
 <pre><code>var clusters,
     dbscan = new DBSCAN(),
@@ -132,28 +180,29 @@ clusters.forEach(function(pointset) {
     // ... draw pts
 });</code></pre>
 <p>
-  <canvas id="canv2" width="572" height="234"></canvas>
+  <canvas id="canv3" width="572" height="234"></canvas>
   <script>
-  function example2() {
-    var c = document.getElementById('canv2'),
+  function example3() {
+    var c = document.getElementById('canv3'),
         ctx = c.getContext('2d'),
         dbscan = new DBSCAN(),
         clusters,
-        colors = ["red", "green", "blue"];
+        colors = ["red", "green", "blue"],
+        pointset = dataChars;
 
     // draw all points
-    for (var i = 0; i < pointset2.length; i++) {
+    for (var i = 0; i < pointset.length; i++) {
         ctx.beginPath();
-        ctx.arc(pointset2[i][0], pointset2[i][1], 1, 0, 2 * Math.PI, true);
+        ctx.arc(pointset[i][0], pointset[i][1], 1, 0, 2 * Math.PI, true);
         ctx.fill();
         ctx.closePath();
     }
 
     // get clusters
-    clusters = dbscan.run(pointset2, 250, 50);
+    clusters = dbscan.run(pointset, 250, 50);
     clusters = clusters.map(function(cluster) {
         return cluster.map(function(i) {
-            return pointset2[i]; // map index to point
+            return pointset[i]; // map index to point
         });
     });
 
@@ -176,31 +225,32 @@ clusters.forEach(function(pointset) {
   }
   </script>
 </p>
-<!-- END: Example 2 -->
+<!-- END: Example 3 -->
 
-<!-- Example 2_1 -->
+<!-- Example 3_1 -->
 
 <p>Else (without clustering) you will receive something like that:</p>
 <pre><code>var pts = hull(pointset, 30);
 // ... draw pts
 </code></pre>
 <p>
-<canvas id="canv2_1" width="572" height="234"></canvas>
+<canvas id="canv3_1" width="572" height="234"></canvas>
 <script>
-  function example2_1() {
-    var c = document.getElementById('canv2_1'),
-        ctx = c.getContext('2d');
+  function example3_1() {
+    var c = document.getElementById('canv3_1'),
+        ctx = c.getContext('2d'),
+        pointset = dataChars;
 
     // draw all points
-    for (var i = 0; i < pointset2.length; i++) {
+    for (var i = 0; i < pointset.length; i++) {
         ctx.beginPath();
-        ctx.arc(pointset2[i][0], pointset2[i][1], 1, 0, 2 * Math.PI, true);
+        ctx.arc(pointset[i][0], pointset[i][1], 1, 0, 2 * Math.PI, true);
         ctx.fill();
         ctx.closePath();
     }
 
     // get and draw hull
-    var pts = hull(pointset2, 30);
+    var pts = hull(pointset, 30);
     ctx.strokeStyle = 'blue';
     ctx.beginPath();
     pts.forEach(function(pt) {
@@ -213,7 +263,7 @@ clusters.forEach(function(pointset) {
   }
 </script>
 </p>
-<!-- END: Example 2_1 -->
+<!-- END: Example 3_1 -->
 
         </section>
       </div>
@@ -221,10 +271,11 @@ clusters.forEach(function(pointset) {
 
     <script>
     window.onload = function() {
-      example1();
-      example1_1();
-      example2();
-      example2_1();
+        example1();
+        example1_1();
+        example2();
+        example3();
+        example3_1();
     }
     </script>
   </body>
