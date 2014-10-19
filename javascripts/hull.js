@@ -151,21 +151,10 @@ module.exports = grid;
 
 /*
  TOTO:
-- Adjust EDGE_LENGTH automatically (REJECTED)
-- Try to make _bBoxAround smallest and increase it step by step to EDGE_LENGTH.
-  It should helps us to use lesser innerPoints in _midPoint on hight density pointsets (DONE!)
-- Check, fix and optimize intersection checking (DONE!)
-- Update readme (DONE!)
-- Create live examples on GitHub pages (DONE!)
-- Fix problem in character example (DONE!)
-- Compare performance with another concave hull implementations
+- Fix problem with points outside hull
+- Compare performance with 0.1
 - Update tests
 - Push hull.js to npmjs.org
-*/
-
-/*
-Optimization TODO:
-- Replace RBush to simple grid and use only diff of bBoxes, not full bBox
 */
 
 'use strict';
@@ -365,7 +354,7 @@ function hull(pointset, concavity) {
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
 var MIN_SEARCH_BBOX_SIZE = 5;
-var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.6;
+var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.8;
 
 module.exports = hull;
 },{"./grid.js":1,"./intersect.js":3}],3:[function(require,module,exports){
