@@ -42,3 +42,34 @@ console.timeEnd('hull(owl58k, 20)');
 console.time('hull(owl102k, 20)');
 hull(owl102k, 20);
 console.timeEnd('hull(owl102k, 20)');
+
+
+// master:
+// hull(horse13k, 20): 1613ms
+// hull(horse26k, 20): 2318ms
+// hull(horse52k, 20): 5597ms
+// hull(horse131k, 20): 19700ms
+
+// hull(owl15k, 20): 518ms
+// hull(owl30k, 20): 829ms
+// hull(owl58k, 20): 2034ms
+// hull(owl102k, 20): 4320ms
+
+// ------------------------------
+
+// speedup:
+// hull(horse13k, 20): 218ms
+// hull(horse26k, 20): 214ms
+// hull(horse52k, 20): 285ms
+// hull(horse131k, 20): 577ms
+
+// hull(owl15k, 20): 47ms
+// hull(owl30k, 20): 112ms
+// hull(owl58k, 20): 149ms
+// hull(owl102k, 20): 214ms
+
+// ------------------------------
+
+// Horse: 7x, 10x, 19x, 34x
+// Owl:   11x, 7x, 13x, 20x
+// Hull.js 0.2. Now it's ~20x faster (on 100K points) than previous triangulation based version.

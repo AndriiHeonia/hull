@@ -153,28 +153,23 @@ function _midPoint(edge, innerPoints, convex) {
 function _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid) {
     var edge,
         border,
-        nPoints,
         bBoxSize,
         midPoint,
-        sqEdgeLen,
         bBoxAround,    
         midPointInserted = false;
 
     for (var i = 0; i < convex.length - 1; i++) {
         edge = [convex[i], convex[i + 1]];
-        sqEdgeLen = _sqLength(edge[0], edge[1]);
 
-        if (sqEdgeLen < maxSqEdgeLen) { continue; }
-
-        bBoxSize = MIN_SEARCH_BBOX_SIZE;
+        if (_sqLength(edge[0], edge[1]) < maxSqEdgeLen) { continue; }
 
         border = 0;
+        bBoxSize = MIN_SEARCH_BBOX_SIZE;
         bBoxAround = _bBoxAround(edge, bBoxSize);
         do {
             bBoxAround = grid.addBorder2Bbox(bBoxAround, border);
             bBoxSize = bBoxAround[2] - bBoxAround[0];
-            nPoints = border > 0 ? grid.rangeBorderPoints(bBoxAround, 1) : grid.rangePoints(bBoxAround);
-            midPoint = _midPoint(edge, nPoints, convex);            
+            midPoint = _midPoint(edge, grid.rangePoints(bBoxAround), convex);            
             border++;
         }  while (midPoint === null && maxSearchBBoxSize > bBoxSize);
 

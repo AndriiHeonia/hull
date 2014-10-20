@@ -53,70 +53,6 @@ Grid.prototype = {
         return points;
     },
 
-    rangeBorderPoints: function(bbox, border) { // (Array, Number) -> Array
-        var tlCellXY = this.point2CellXY([bbox[0], bbox[1]]),
-            brCellXY = this.point2CellXY([bbox[2], bbox[3]]),
-            border = border || 1,
-            points = [];
-
-        /*
-         _        
-        | |      
-        | |      
-        |_|
-        
-        */
-        for (var x = tlCellXY[0] - border; x < tlCellXY[0]; x++) {
-            for (var y = tlCellXY[1]; y <= brCellXY[1]; y++) {
-                points = points.concat(this.cellPoints(x, y));
-            }
-        }
-
-        /*
-         _        _
-        | |      | |
-        | |      | |
-        |_|      |_|
-        
-        */
-        for (var x = brCellXY[0] + 1; x <= brCellXY[0] + border; x++) {
-            for (var y = tlCellXY[1]; y <= brCellXY[1]; y++) {
-                points = points.concat(this.cellPoints(x, y));
-            }
-        }
-
-        /*
-         __________
-        |  ______  |
-        | |      | |
-        | |      | |
-        |_|      |_|
-        
-        */
-        for (var x = tlCellXY[0] - border; x <= brCellXY[0] + border; x++) {
-            for (var y = tlCellXY[1] - border; y < tlCellXY[1]; y++) {
-                points = points.concat(this.cellPoints(x, y));
-            }
-        }
-
-        /*
-         __________
-        |  ______  |
-        | |      | |
-        | |      | |
-        | |______| |
-        |__________|
-
-        */
-        for (var x = tlCellXY[0] - border; x <= brCellXY[0] + border; x++) {
-            for (var y = brCellXY[1]; y <= brCellXY[1] + border; y++) {
-                points = points.concat(this.cellPoints(x, y));
-            }
-        }
-
-        return points;
-    },
-
     addBorder2Bbox: function(bbox, border) { // (Array, Number) -> Array
         return [
             bbox[0] - (border * Grid.CELL_SIZE),
@@ -290,28 +226,23 @@ function _midPoint(edge, innerPoints, convex) {
 function _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid) {
     var edge,
         border,
-        nPoints,
         bBoxSize,
         midPoint,
-        sqEdgeLen,
         bBoxAround,    
         midPointInserted = false;
 
     for (var i = 0; i < convex.length - 1; i++) {
         edge = [convex[i], convex[i + 1]];
-        sqEdgeLen = _sqLength(edge[0], edge[1]);
 
-        if (sqEdgeLen < maxSqEdgeLen) { continue; }
-
-        bBoxSize = MIN_SEARCH_BBOX_SIZE;
+        if (_sqLength(edge[0], edge[1]) < maxSqEdgeLen) { continue; }
 
         border = 0;
+        bBoxSize = MIN_SEARCH_BBOX_SIZE;
         bBoxAround = _bBoxAround(edge, bBoxSize);
         do {
             bBoxAround = grid.addBorder2Bbox(bBoxAround, border);
             bBoxSize = bBoxAround[2] - bBoxAround[0];
-            nPoints = border > 0 ? grid.rangeBorderPoints(bBoxAround, 1) : grid.rangePoints(bBoxAround);
-            midPoint = _midPoint(edge, nPoints, convex);            
+            midPoint = _midPoint(edge, grid.rangePoints(bBoxAround), convex);            
             border++;
         }  while (midPoint === null && maxSearchBBoxSize > bBoxSize);
 
