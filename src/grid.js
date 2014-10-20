@@ -16,7 +16,7 @@ function Grid(points) {
 
     this.cellPoints = function(x, y) { // (Number, Number) -> Array
         return (_cells[x] !== undefined && _cells[x][y] !== undefined) ? _cells[x][y] : [];
-    },
+    };
 
     this.removePoint = function(point) { // (Array) -> Array
         var cellXY = this.point2CellXY(point),
@@ -33,7 +33,7 @@ function Grid(points) {
         cell.splice(pointIdxInCell, 1);
 
         return cell;
-    }
+    };
 }
 
 Grid.prototype = {
@@ -65,7 +65,7 @@ Grid.prototype = {
             bbox[3] + (border * Grid.CELL_SIZE)
         ];
     }
-}
+};
 
 function grid(points) {
     return new Grid(points);

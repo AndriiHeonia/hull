@@ -1,6 +1,4 @@
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.hull=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-// TODO: test it!!!
-
 function Grid(points) {
     var _cells = [];
 
@@ -19,7 +17,7 @@ function Grid(points) {
 
     this.cellPoints = function(x, y) { // (Number, Number) -> Array
         return (_cells[x] !== undefined && _cells[x][y] !== undefined) ? _cells[x][y] : [];
-    },
+    };
 
     this.removePoint = function(point) { // (Array) -> Array
         var cellXY = this.point2CellXY(point),
@@ -30,13 +28,13 @@ function Grid(points) {
             if (cell[i][0] === point[0] && cell[i][1] === point[1]) {
                 pointIdxInCell = i;
                 break;
-            }   
+            }
         }
 
         cell.splice(pointIdxInCell, 1);
 
         return cell;
-    }
+    };
 }
 
 Grid.prototype = {
@@ -68,7 +66,7 @@ Grid.prototype = {
             bbox[3] + (border * Grid.CELL_SIZE)
         ];
     }
-}
+};
 
 function grid(points) {
     return new Grid(points);
@@ -82,22 +80,6 @@ module.exports = grid;
  (c) 2014, Andrey Geonya
  Hull.js, a JavaScript library for concave hull generation by set of points.
  https://github.com/AndreyGeonya/hull
-
- Related papers:
- http://www.it.uu.se/edu/course/homepage/projektTDB/ht13/project10/Project-10-report.pdf
- http://www.cs.jhu.edu/~misha/Fall05/09.13.05.pdf
- http://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
- http://allenchou.net/2013/07/cross-product-of-2d-vectors/
- http://users.livejournal.com/_winnie/237714.html
- http://habrahabr.ru/post/105882/
-*/
-
-/*
- TOTO:
-- Fix problem with points outside hull (DONE!)
-- Compare performance with 0.1 (DONE!)
-- Update tests
-- Push hull.js to npmjs.org
 */
 
 'use strict';
@@ -296,12 +278,12 @@ var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.8;
 
 module.exports = hull;
 },{"./grid.js":1,"./intersect.js":3}],3:[function(require,module,exports){
-var ccw = function (x1, y1, x2, y2, x3, y3) {           
+function ccw(x1, y1, x2, y2, x3, y3) {           
     var cw = ((y3 - y1) * (x2 - x1)) - ((y2 - y1) * (x3 - x1));
     return cw > 0 ? true : cw < 0 ? false : true; // colinear
 }
 
-var intersect = function (seg1, seg2) {
+function intersect(seg1, seg2) {
   var x1 = seg1[0][0], y1 = seg1[0][1],
       x2 = seg1[1][0], y2 = seg1[1][1],
       x3 = seg2[0][0], y3 = seg2[0][1],
