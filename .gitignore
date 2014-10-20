@@ -1,4 +1,5 @@
 node_modules
+npm-debug.log
 hull.sublime-project
 hull.sublime-workspace
 examples/debug.html

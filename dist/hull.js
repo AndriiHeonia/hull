@@ -1,239 +1,80 @@
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.hull=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Delaunay;
+function Grid(points) {
+    var _cells = [];
 
-(function() {
-  "use strict";
-
-  var EPSILON = 1.0 / 1048576.0;
-
-  function supertriangle(vertices) {
-    var xmin = Number.POSITIVE_INFINITY,
-        ymin = Number.POSITIVE_INFINITY,
-        xmax = Number.NEGATIVE_INFINITY,
-        ymax = Number.NEGATIVE_INFINITY,
-        i, dx, dy, dmax, xmid, ymid;
-
-    for(i = vertices.length; i--; ) {
-      if(vertices[i][0] < xmin) xmin = vertices[i][0];
-      if(vertices[i][0] > xmax) xmax = vertices[i][0];
-      if(vertices[i][1] < ymin) ymin = vertices[i][1];
-      if(vertices[i][1] > ymax) ymax = vertices[i][1];
-    }
-
-    dx = xmax - xmin;
-    dy = ymax - ymin;
-    dmax = Math.max(dx, dy);
-    xmid = xmin + dx * 0.5;
-    ymid = ymin + dy * 0.5;
-
-    return [
-      [xmid - 20 * dmax, ymid -      dmax],
-      [xmid            , ymid + 20 * dmax],
-      [xmid + 20 * dmax, ymid -      dmax]
-    ];
-  }
-
-  function circumcircle(vertices, i, j, k) {
-    var x1 = vertices[i][0],
-        y1 = vertices[i][1],
-        x2 = vertices[j][0],
-        y2 = vertices[j][1],
-        x3 = vertices[k][0],
-        y3 = vertices[k][1],
-        fabsy1y2 = Math.abs(y1 - y2),
-        fabsy2y3 = Math.abs(y2 - y3),
-        xc, yc, m1, m2, mx1, mx2, my1, my2, dx, dy;
-
-    /* Check for coincident points */
-    if(fabsy1y2 < EPSILON && fabsy2y3 < EPSILON)
-      throw new Error("Eek! Coincident points!");
-
-    if(fabsy1y2 < EPSILON) {
-      m2  = -((x3 - x2) / (y3 - y2));
-      mx2 = (x2 + x3) / 2.0;
-      my2 = (y2 + y3) / 2.0;
-      xc  = (x2 + x1) / 2.0;
-      yc  = m2 * (xc - mx2) + my2;
-    }
-
-    else if(fabsy2y3 < EPSILON) {
-      m1  = -((x2 - x1) / (y2 - y1));
-      mx1 = (x1 + x2) / 2.0;
-      my1 = (y1 + y2) / 2.0;
-      xc  = (x3 + x2) / 2.0;
-      yc  = m1 * (xc - mx1) + my1;
-    }
-
-    else {
-      m1  = -((x2 - x1) / (y2 - y1));
-      m2  = -((x3 - x2) / (y3 - y2));
-      mx1 = (x1 + x2) / 2.0;
-      mx2 = (x2 + x3) / 2.0;
-      my1 = (y1 + y2) / 2.0;
-      my2 = (y2 + y3) / 2.0;
-      xc  = (m1 * mx1 - m2 * mx2 + my2 - my1) / (m1 - m2);
-      yc  = (fabsy1y2 > fabsy2y3) ?
-        m1 * (xc - mx1) + my1 :
-        m2 * (xc - mx2) + my2;
-    }
-
-    dx = x2 - xc;
-    dy = y2 - yc;
-    return {i: i, j: j, k: k, x: xc, y: yc, r: dx * dx + dy * dy};
-  }
-
-  function dedup(edges) {
-    var i, j, a, b, m, n;
-
-    for(j = edges.length; j; ) {
-      b = edges[--j];
-      a = edges[--j];
-
-      for(i = j; i; ) {
-        n = edges[--i];
-        m = edges[--i];
-
-        if((a === m && b === n) || (a === n && b === m)) {
-          edges.splice(j, 2);
-          edges.splice(i, 2);
-          break;
+    points.forEach(function(point) {
+        var cellXY = this.point2CellXY(point),
+            x = cellXY[0],
+            y = cellXY[1];
+        if (_cells[x] === undefined) {
+            _cells[x] = [];
         }
-      }
-    }
-  }
+        if (_cells[x][y] === undefined) {
+            _cells[x][y] = [];
+        }
+        _cells[x][y].push(point);
+    }, this);
 
-  Delaunay = {
-    triangulate: function(vertices, key) {
-      var n = vertices.length,
-          i, j, indices, st, open, closed, edges, dx, dy, a, b, c;
+    this.cellPoints = function(x, y) { // (Number, Number) -> Array
+        return (_cells[x] !== undefined && _cells[x][y] !== undefined) ? _cells[x][y] : [];
+    };
 
-      /* Bail if there aren't enough vertices to form any triangles. */
-      if(n < 3)
-        return [];
-
-      /* Slice out the actual vertices from the passed objects. (Duplicate the
-       * array even if we don't, though, since we need to make a supertriangle
-       * later on!) */
-      vertices = vertices.slice(0);
-
-      if(key)
-        for(i = n; i--; )
-          vertices[i] = vertices[i][key];
-
-      /* Make an array of indices into the vertex array, sorted by the
-       * vertices' x-position. */
-      indices = new Array(n);
-
-      for(i = n; i--; )
-        indices[i] = i;
-
-      indices.sort(function(i, j) {
-        return vertices[j][0] - vertices[i][0];
-      });
-
-      /* Next, find the vertices of the supertriangle (which contains all other
-       * triangles), and append them onto the end of a (copy of) the vertex
-       * array. */
-      st = supertriangle(vertices);
-      vertices.push(st[0], st[1], st[2]);
-      
-      /* Initialize the open list (containing the supertriangle and nothing
-       * else) and the closed list (which is empty since we havn't processed
-       * any triangles yet). */
-      open   = [circumcircle(vertices, n + 0, n + 1, n + 2)];
-      closed = [];
-      edges  = [];
-
-      /* Incrementally add each vertex to the mesh. */
-      for(i = indices.length; i--; edges.length = 0) {
-        c = indices[i];
-
-        /* For each open triangle, check to see if the current point is
-         * inside it's circumcircle. If it is, remove the triangle and add
-         * it's edges to an edge list. */
-        for(j = open.length; j--; ) {
-          /* If this point is to the right of this triangle's circumcircle,
-           * then this triangle should never get checked again. Remove it
-           * from the open list, add it to the closed list, and skip. */
-          dx = vertices[c][0] - open[j].x;
-          if(dx > 0.0 && dx * dx > open[j].r) {
-            closed.push(open[j]);
-            open.splice(j, 1);
-            continue;
-          }
-
-          /* If we're outside the circumcircle, skip this triangle. */
-          dy = vertices[c][1] - open[j].y;
-          if(dx * dx + dy * dy - open[j].r > EPSILON)
-            continue;
-
-          /* Remove the triangle and add it's edges to the edge list. */
-          edges.push(
-            open[j].i, open[j].j,
-            open[j].j, open[j].k,
-            open[j].k, open[j].i
-          );
-          open.splice(j, 1);
+    this.removePoint = function(point) { // (Array) -> Array
+        var cellXY = this.point2CellXY(point),
+            cell = _cells[cellXY[0]][cellXY[1]],
+            pointIdxInCell;
+        
+        for (var i = 0; i < cell.length; i++) {
+            if (cell[i][0] === point[0] && cell[i][1] === point[1]) {
+                pointIdxInCell = i;
+                break;
+            }
         }
 
-        /* Remove any doubled edges. */
-        dedup(edges);
+        cell.splice(pointIdxInCell, 1);
 
-        /* Add a new triangle for each edge. */
-        for(j = edges.length; j; ) {
-          b = edges[--j];
-          a = edges[--j];
-          open.push(circumcircle(vertices, a, b, c));
-        }
-      }
+        return cell;
+    };
+}
 
-      /* Copy any remaining open triangles to the closed list, and then
-       * remove any triangles that share a vertex with the supertriangle,
-       * building a list of triplets that represent triangles. */
-      for(i = open.length; i--; )
-        closed.push(open[i]);
-      open.length = 0;
-
-      for(i = closed.length; i--; )
-        if(closed[i].i < n && closed[i].j < n && closed[i].k < n)
-          open.push(closed[i].i, closed[i].j, closed[i].k);
-
-      /* Yay, we're done! */
-      return open;
+Grid.prototype = {
+    point2CellXY: function(point) { // (Array) -> Array
+        var x = parseInt(point[0] / Grid.CELL_SIZE),
+            y = parseInt(point[1] / Grid.CELL_SIZE);
+        return [x, y];
     },
-    contains: function(tri, p) {
-      /* Bounding box test first, for quick rejections. */
-      if((p[0] < tri[0][0] && p[0] < tri[1][0] && p[0] < tri[2][0]) ||
-         (p[0] > tri[0][0] && p[0] > tri[1][0] && p[0] > tri[2][0]) ||
-         (p[1] < tri[0][1] && p[1] < tri[1][1] && p[1] < tri[2][1]) ||
-         (p[1] > tri[0][1] && p[1] > tri[1][1] && p[1] > tri[2][1]))
-        return null;
 
-      var a = tri[1][0] - tri[0][0],
-          b = tri[2][0] - tri[0][0],
-          c = tri[1][1] - tri[0][1],
-          d = tri[2][1] - tri[0][1],
-          i = a * d - b * c;
+    rangePoints: function(bbox) { // (Array) -> Array
+        var tlCellXY = this.point2CellXY([bbox[0], bbox[1]]),
+            brCellXY = this.point2CellXY([bbox[2], bbox[3]]),
+            points = [];
 
-      /* Degenerate tri. */
-      if(i === 0.0)
-        return null;
+        for (var x = tlCellXY[0]; x <= brCellXY[0]; x++) {
+            for (var y = tlCellXY[1]; y <= brCellXY[1]; y++) {
+                points = points.concat(this.cellPoints(x, y));
+            }
+        }
 
-      var u = (d * (p[0] - tri[0][0]) - b * (p[1] - tri[0][1])) / i,
-          v = (a * (p[1] - tri[0][1]) - c * (p[0] - tri[0][0])) / i;
+        return points;
+    },
 
-      /* If we're outside the tri, fail. */
-      if(u < 0.0 || v < 0.0 || (u + v) > 1.0)
-        return null;
-
-      return [u, v];
+    addBorder2Bbox: function(bbox, border) { // (Array, Number) -> Array
+        return [
+            bbox[0] - (border * Grid.CELL_SIZE),
+            bbox[1] - (border * Grid.CELL_SIZE),
+            bbox[2] + (border * Grid.CELL_SIZE),
+            bbox[3] + (border * Grid.CELL_SIZE)
+        ];
     }
-  };
+};
 
-  if(typeof module !== "undefined")
-    module.exports = Delaunay;
-})();
+function grid(points) {
+    return new Grid(points);
+}
 
+Grid.CELL_SIZE = 10;
+
+module.exports = grid;
 },{}],2:[function(require,module,exports){
 /*
  (c) 2014, Andrey Geonya
@@ -243,107 +84,213 @@ var Delaunay;
 
 'use strict';
 
-var Delaunay = require('./delaunay');
+var intersect = require('./intersect.js');
+var grid = require('./grid.js');
 
-function hull(pixels, tolerance) {
-    var tIdxs = Delaunay.triangulate(pixels),
-        tol = tolerance || 50,
-        sqTolerance = tol * tol,
-        edges2TriCount = _edges2TriCount(pixels, tIdxs, sqTolerance),
-        boundaryEdges = _getBoundaryEdges(edges2TriCount);
-
-    return _edges2cwPoly(boundaryEdges);
-}
-
-function _squaredDist(px1, px2) {
-    var dx = px1[0] - px2[0],
-        dy = px1[1] - px2[1];
-    return dx * dx + dy * dy;
-}
-
-function _edges2cwPoly(edges) {
-    var maxJ = Math.pow(edges.length, 2),
-        j = 0,
-        checked = {},
-        poly = [],
-        edge = edges[0];
-
-    checked[edge[0] + '-' + edge[1]] = true;
-    poly.push(edge[1]);
-    
-    while (poly.length !== edges.length) {
-        for (var i = 0; i < edges.length; i++) {
-            var nextEdge = edges[i],
-                k = nextEdge[0] + '-' + nextEdge[1];
-            if (checked[k] === true) {
-                continue;
-            }
-            if (nextEdge[0] === edge[1] || nextEdge[1] === edge[1]) {
-                if (nextEdge[0] === edge[1]) {
-                    poly.push(nextEdge[1]);
-                }
-                if (nextEdge[1] === edge[1]) {
-                    poly.push(nextEdge[0]);
-                }
-                edge = nextEdge;
-                checked[k] = true;
-                break;
-            }
-            j++;
+function _sortByX(pointset) {
+    return pointset.sort(function(a, b) {
+        if (a[0] == b[0]) {
+            return a[1] - b[1];                           
+        } else {                                                    
+            return a[0] - b[0];                                                           
         }
-        if (j >= maxJ) {
-            break; // stop infinity loop for multipolygons
+    });
+}
+
+function _getMaxY(pointset) {
+    var maxY = -Infinity;
+    for (var i = pointset.length - 1; i >= 0; i--) {
+        if (pointset[i][1] > maxY) {
+            maxY = pointset[i][1];
+        }
+    }
+    return maxY;
+}
+
+function _upperTangent(pointset) {
+    var lower = [];
+    for (var l = 0; l < pointset.length; l++) {
+        while (lower.length >= 2 && (_cross(lower[lower.length - 2], lower[lower.length - 1], pointset[l]) <= 0)) {
+            lower.pop();
+        }
+        lower.push(pointset[l]);
+    }
+    lower.pop();
+    return lower;
+}
+
+function _lowerTangent(pointset) {
+    var reversed = pointset.reverse(),
+        upper = [];
+    for (var u = 0; u < reversed.length; u++) {
+        while (upper.length >= 2 && (_cross(upper[upper.length - 2], upper[upper.length - 1], reversed[u]) <= 0)) {
+            upper.pop();
+        }
+        upper.push(reversed[u]);
+    }
+    upper.pop();
+    return upper;
+}
+
+function _cross(o, a, b) {
+    return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); 
+}
+
+function _sqLength(a, b) {
+    return Math.pow(b[0] - a[0], 2) + Math.pow(b[1] - a[1], 2);
+}
+
+function _cos(o, a, b) {
+    var aShifted = [a[0] - o[0], a[1] - o[1]],
+        bShifted = [b[0] - o[0], b[1] - o[1]],
+        sqALen = _sqLength(o, a),
+        sqBLen = _sqLength(o, b),
+        dot = aShifted[0] * bShifted[0] + aShifted[1] * bShifted[1];
+
+    return dot / Math.sqrt(sqALen * sqBLen);
+}
+
+function _intersect(segment, pointset) {
+    for (var i = 0; i < pointset.length - 1; i++) {
+        var seg = [pointset[i], pointset[i + 1]];
+        if (segment[0][0] === seg[0][0] && segment[0][1] === seg[0][1] ||
+            segment[0][0] === seg[1][0] && segment[0][1] === seg[1][1]) {
+            continue;
+        }
+        if (intersect(segment, seg)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function _bBoxAround(edge, boxSize) {
+    var minX, maxX, minY, maxY;
+
+    if (edge[0][0] < edge[1][0]) {
+        minX = edge[0][0] - boxSize;
+        maxX = edge[1][0] + boxSize;
+    } else {
+        minX = edge[1][0] - boxSize;
+        maxX = edge[0][0] + boxSize;
+    }
+
+    if (edge[0][1] < edge[1][1]) {
+        minY = edge[0][1] - boxSize;
+        maxY = edge[1][1] + boxSize;
+    } else {
+        minY = edge[1][1] - boxSize;
+        maxY = edge[0][1] + boxSize;
+    }
+
+    return [
+        minX, minY, // tl
+        maxX, maxY  // br
+    ];
+}
+
+function _midPoint(edge, innerPoints, convex) {
+    var point = null,
+        angle1Cos = MAX_CONCAVE_ANGLE_COS,
+        angle2Cos = MAX_CONCAVE_ANGLE_COS,
+        a1Cos, a2Cos;
+
+    for (var i = 0; i < innerPoints.length; i++) {
+        a1Cos = _cos(edge[0], edge[1], innerPoints[i]);
+        a2Cos = _cos(edge[1], edge[0], innerPoints[i]);
+
+        if (a1Cos > angle1Cos && a2Cos > angle2Cos &&
+            !_intersect([edge[0], innerPoints[i]], convex) &&
+            !_intersect([edge[1], innerPoints[i]], convex)) {
+
+            angle1Cos = a1Cos;
+            angle2Cos = a2Cos;
+            point = innerPoints[i];
         }
     }
 
-    return poly;
+    return point;
 }
 
-function _edges2TriCount(pixels, tIdxs, sqTolerance) {
-    var trianglesInEdge = {},
-        incTriCount = function(a, b) {
-            var key = a + '-' + b;
-            trianglesInEdge[key] = trianglesInEdge[key] === undefined ? [1, a, b] : 
-            trianglesInEdge[key][0] + 1;
-        };
+function _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid) {
+    var edge,
+        border,
+        bBoxSize,
+        midPoint,
+        bBoxAround,    
+        midPointInserted = false;
 
-    for (var i = tIdxs.length; i; ) {
-        var tIdx = [];
+    for (var i = 0; i < convex.length - 1; i++) {
+        edge = [convex[i], convex[i + 1]];
 
-        --i; tIdx[0] = tIdxs[i];
-        --i; tIdx[1] = tIdxs[i];
-        --i; tIdx[2] = tIdxs[i];
+        if (_sqLength(edge[0], edge[1]) < maxSqEdgeLen) { continue; }
 
-        if (_squaredDist(pixels[tIdx[0]], pixels[tIdx[1]]) < sqTolerance &&
-            _squaredDist(pixels[tIdx[0]], pixels[tIdx[2]]) < sqTolerance &&
-            _squaredDist(pixels[tIdx[1]], pixels[tIdx[2]]) < sqTolerance) {
+        border = 0;
+        bBoxSize = MIN_SEARCH_BBOX_SIZE;
+        bBoxAround = _bBoxAround(edge, bBoxSize);
+        do {
+            bBoxAround = grid.addBorder2Bbox(bBoxAround, border);
+            bBoxSize = bBoxAround[2] - bBoxAround[0];
+            midPoint = _midPoint(edge, grid.rangePoints(bBoxAround), convex);            
+            border++;
+        }  while (midPoint === null && maxSearchBBoxSize > bBoxSize);
 
-            incTriCount(tIdx[0], tIdx[1]);
-            incTriCount(tIdx[1], tIdx[0]);
-            incTriCount(tIdx[1], tIdx[2]);
-            incTriCount(tIdx[2], tIdx[1]);
-            incTriCount(tIdx[2], tIdx[0]);
-            incTriCount(tIdx[0], tIdx[2]);
+        if (midPoint !== null) {
+            convex.splice(i + 1, 0, midPoint);
+            grid.removePoint(midPoint);
+            midPointInserted = true;
         }
     }
 
-    return trianglesInEdge;
-}
-
-function _getBoundaryEdges(edges2TriCount) {
-    var boundaryEdges = [];
-
-    for (var edge in edges2TriCount) {
-        if (edges2TriCount[edge][0] === 1) {
-            var pxs = [edges2TriCount[edge][1], edges2TriCount[edge][2]];
-            delete edges2TriCount[pxs[1] + '-' + pxs[0]];
-            boundaryEdges.push([pxs[0], pxs[1]]);
-        }
+    if (midPointInserted) {
+        return _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid);
     }
 
-    return boundaryEdges;
+    return convex;
 }
+
+function hull(pointset, concavity) {
+    var lower, upper, convex,
+        innerPoints,
+        maxSearchBBoxSize,
+        maxEdgeLen = concavity || 20;
+
+    if (pointset.length < 4) {
+        return pointset;
+    }
+    pointset = _sortByX(pointset);
+    upper = _upperTangent(pointset);
+    lower = _lowerTangent(pointset);
+    convex = lower.concat(upper);
+    convex.push(pointset[0]);
+
+    maxSearchBBoxSize = Math.max(pointset[pointset.length - 1][0], _getMaxY(convex)) * MAX_SEARCH_BBOX_SIZE_PERCENT;
+    innerPoints = pointset.filter(function(pt) {
+        return convex.indexOf(pt) < 0;
+    });
+ 
+    return _concave(convex, Math.pow(maxEdgeLen, 2), maxSearchBBoxSize, grid(innerPoints));
+}
+
+var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
+var MIN_SEARCH_BBOX_SIZE = 5;
+var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.8;
 
 module.exports = hull;
-},{"./delaunay":1}]},{},[2])(2)
+},{"./grid.js":1,"./intersect.js":3}],3:[function(require,module,exports){
+function ccw(x1, y1, x2, y2, x3, y3) {           
+    var cw = ((y3 - y1) * (x2 - x1)) - ((y2 - y1) * (x3 - x1));
+    return cw > 0 ? true : cw < 0 ? false : true; // colinear
+}
+
+function intersect(seg1, seg2) {
+  var x1 = seg1[0][0], y1 = seg1[0][1],
+      x2 = seg1[1][0], y2 = seg1[1][1],
+      x3 = seg2[0][0], y3 = seg2[0][1],
+      x4 = seg2[1][0], y4 = seg2[1][1];
+    return ccw(x1, y1, x3, y3, x4, y4) !== ccw(x2, y2, x3, y3, x4, y4) && ccw(x1, y1, x2, y2, x3, y3) !== ccw(x1, y1, x2, y2, x4, y4);
+}
+
+module.exports = intersect;
+},{}]},{},[2])(2)
 });
