@@ -46,6 +46,15 @@ Let's see step by step what happens when you call `hull()` function:
 
 If you want to get involved with Hull.js development, just use <a href="https://guides.github.com/introduction/flow/index.html" target="_blank">github flow</a> and feel free to contribute!
 
+## Related papers
+
+* http://www.it.uu.se/edu/course/homepage/projektTDB/ht13/project10/Project-10-report.pdf
+* http://www.cs.jhu.edu/~misha/Fall05/09.13.05.pdf
+* http://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
+* http://allenchou.net/2013/07/cross-product-of-2d-vectors/
+* http://users.livejournal.com/_winnie/237714.html
+* http://habrahabr.ru/post/105882/
+
 ## Changelog
 
 ### 0.2.0 — 14.10.2014

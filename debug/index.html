@@ -21,7 +21,7 @@
     window.onload = function() {
         var c = document.getElementById('canv'),
             ctx = c.getContext('2d'),
-            pointset = horse13k;
+            pointset = horse131k;
 
         c.onclick = function(e) {
             console.log('[' + e.offsetX + ', ' + e.offsetY + ']');
@@ -44,6 +44,7 @@
         ctx.lineWidth = 2;
         ctx.beginPath();
         pts.forEach(function(px) {
+            // console.log('[' + px[0] + ',' + px[1] + ']');
             ctx.lineTo(px[0], px[1]);
             ctx.moveTo(px[0], px[1]);
         });

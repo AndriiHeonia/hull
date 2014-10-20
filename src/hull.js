@@ -2,22 +2,6 @@
  (c) 2014, Andrey Geonya
  Hull.js, a JavaScript library for concave hull generation by set of points.
  https://github.com/AndreyGeonya/hull
-
- Related papers:
- http://www.it.uu.se/edu/course/homepage/projektTDB/ht13/project10/Project-10-report.pdf
- http://www.cs.jhu.edu/~misha/Fall05/09.13.05.pdf
- http://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
- http://allenchou.net/2013/07/cross-product-of-2d-vectors/
- http://users.livejournal.com/_winnie/237714.html
- http://habrahabr.ru/post/105882/
-*/
-
-/*
- TOTO:
-- Fix problem with points outside hull (DONE!)
-- Compare performance with 0.1 (DONE!)
-- Update tests
-- Push hull.js to npmjs.org
 */
 
 'use strict';
@@ -191,7 +175,7 @@ function hull(pointset, concavity) {
     var lower, upper, convex,
         innerPoints,
         maxSearchBBoxSize,
-        concavity = concavity || 20;
+        maxEdgeLen = concavity || 20;
 
     if (pointset.length < 4) {
         return pointset;
@@ -207,7 +191,7 @@ function hull(pointset, concavity) {
         return convex.indexOf(pt) < 0;
     });
  
-    return _concave(convex, Math.pow(concavity, 2), maxSearchBBoxSize, grid(innerPoints));
+    return _concave(convex, Math.pow(maxEdgeLen, 2), maxSearchBBoxSize, grid(innerPoints));
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg

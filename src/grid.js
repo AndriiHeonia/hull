@@ -1,5 +1,3 @@
-// TODO: test it!!!
-
 function Grid(points) {
     var _cells = [];
 
@@ -13,7 +11,7 @@ function Grid(points) {
         if (_cells[x][y] === undefined) {
             _cells[x][y] = [];
         }
-        _cells[x][y].push([point[0], point[1], _cells[x][y].length]);
+        _cells[x][y].push(point);
     }, this);
 
     this.cellPoints = function(x, y) { // (Number, Number) -> Array
@@ -23,8 +21,15 @@ function Grid(points) {
     this.removePoint = function(point) { // (Array) -> Array
         var cellXY = this.point2CellXY(point),
             cell = _cells[cellXY[0]][cellXY[1]],
-            pointIdxInCell = point[2];
+            pointIdxInCell;
         
+        for (var i = 0; i < cell.length; i++) {
+            if (cell[i][0] === point[0] && cell[i][1] === point[1]) {
+                pointIdxInCell = i;
+                break;
+            }
+        }
+
         cell.splice(pointIdxInCell, 1);
 
         return cell;

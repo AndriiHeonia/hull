@@ -14,7 +14,7 @@ function Grid(points) {
         if (_cells[x][y] === undefined) {
             _cells[x][y] = [];
         }
-        _cells[x][y].push([point[0], point[1], _cells[x][y].length]);
+        _cells[x][y].push(point);
     }, this);
 
     this.cellPoints = function(x, y) { // (Number, Number) -> Array
@@ -24,8 +24,15 @@ function Grid(points) {
     this.removePoint = function(point) { // (Array) -> Array
         var cellXY = this.point2CellXY(point),
             cell = _cells[cellXY[0]][cellXY[1]],
-            pointIdxInCell = point[2];
+            pointIdxInCell;
         
+        for (var i = 0; i < cell.length; i++) {
+            if (cell[i][0] === point[0] && cell[i][1] === point[1]) {
+                pointIdxInCell = i;
+                break;
+            }   
+        }
+
         cell.splice(pointIdxInCell, 1);
 
         return cell;
@@ -87,8 +94,8 @@ module.exports = grid;
 
 /*
  TOTO:
-- Fix problem with points outside hull
-- Compare performance with 0.1
+- Fix problem with points outside hull (DONE!)
+- Compare performance with 0.1 (DONE!)
 - Update tests
 - Push hull.js to npmjs.org
 */
@@ -264,7 +271,7 @@ function hull(pointset, concavity) {
     var lower, upper, convex,
         innerPoints,
         maxSearchBBoxSize,
-        concavity = concavity || 20;
+        maxEdgeLen = concavity || 20;
 
     if (pointset.length < 4) {
         return pointset;
@@ -280,7 +287,7 @@ function hull(pointset, concavity) {
         return convex.indexOf(pt) < 0;
     });
  
-    return _concave(convex, Math.pow(concavity, 2), maxSearchBBoxSize, grid(innerPoints));
+    return _concave(convex, Math.pow(maxEdgeLen, 2), maxSearchBBoxSize, grid(innerPoints));
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
