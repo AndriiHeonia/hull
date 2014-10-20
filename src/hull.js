@@ -14,7 +14,7 @@
 
 /*
  TOTO:
-- Fix problem with points outside hull
+- Fix problem with points outside hull (DONE!)
 - Compare performance with 0.1
 - Update tests
 - Push hull.js to npmjs.org
