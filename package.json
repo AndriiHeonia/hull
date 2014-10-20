@@ -16,9 +16,6 @@
         "url": "https://github.com/AndreyGeonya/hull"
     },
     "main": "./src/hull.js",
-    "dependencies": {
-        "rbush": "~1.3.4"
-    },
     "devDependencies": {
         "mocha": "~1.18.2",
         "jshint": "~2.5.0",
