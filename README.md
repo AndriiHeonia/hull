@@ -11,7 +11,7 @@ See examples [here](http://andreygeonya.github.io/hull/)</a>.
 
 ## Params
 * 1st param - array of coordinates in format: [[x1, y1], [x2, y2], ..., [xn, yn]];
-* 2nd param - concavity. 1 - thin shape. Infinity - convex hull. By default 10. 
+* 2nd param - concavity. 1 - thin shape. Infinity - convex hull. By default 20.
 
 ## How it works
 
