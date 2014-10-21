@@ -25,7 +25,7 @@ Let's see step by step what happens when you call `hull()` function:
 
 <li>Builds convex hull:
 
-<img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/1.png" />
+<img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/1.png" /></li>
 
 <li>After that, the edges flex inward (according to `concavity` param). For example:
 
@@ -37,6 +37,8 @@ Let's see step by step what happens when you call `hull()` function:
 
 <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/2_3.png" />
 `concavity = 20`</li>
+
+</ol>
 
 ## Development
 	npm install # install dependencies
