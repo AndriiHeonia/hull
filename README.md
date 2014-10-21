@@ -1,5 +1,7 @@
 Hull.js - JavaScript library that builds concave hull by set of points.
 
+[![Build Status](https://travis-ci.org/AndreyGeonya/hull.svg?branch=master)](https://travis-ci.org/AndreyGeonya/hull)
+
 ## Examples
 
 See live examples <a target="_blank" href="http://andreygeonya.github.io/hull/">here</a>.
