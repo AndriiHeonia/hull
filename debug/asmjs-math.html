@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Concave hull debug page</title>
+    <script src="./asmjs-math.js"></script>
+    <script src="./data/horse131k.js"></script>
+</head>
+<body>
+    <canvas id="canv" width="1024" height="800" style="border: 1px solid black; position: absolute; left: 0px; top: 0px;"></canvas>
+
+    <script>
+    window.onload = function() {
+        var c = document.getElementById('canv'),
+            ctx = c.getContext('2d'),
+            pointset = horse131k;
+
+        // draw all pixels
+        ctx.fillStyle="black";
+        for (var i = 0; i < pointset.length; i++) {
+            ctx.beginPath();
+            ctx.arc(pointset[i][0], pointset[i][1], 1, 0, 2 * Math.PI, true);
+            ctx.fill();
+            ctx.closePath();
+        }
+        
+        // get and draw hull
+        console.time('hull');
+        var pts = hull(pointset, 20);
+        console.timeEnd('hull');
+        ctx.strokeStyle = "blue";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        pts.forEach(function(px) {
+            ctx.lineTo(px[0], px[1]);
+            ctx.moveTo(px[0], px[1]);
+        });
+        ctx.stroke();
+        ctx.closePath();
+    }
+    </script>
+</body>
+</html>
