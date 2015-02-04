@@ -69,7 +69,7 @@ If you want to get involved with Hull.js development, just use <a href="https://
 ## Changelog
 
 ### 0.2.2 — 04.02.2015
-Configurable point formats, now you can use formats like `{x: 10, y: 10}` and `{lat: 52, lng: 82}`;
+Configurable point formats, now you can use points like `{x: 10, y: 10}` and `{lat: 52, lng: 82}`;
 ### 0.2.1 — 21.10.2014
 Some minor updates (doc, package.json, etc.).
 ### 0.2.0 — 20.10.2014
