@@ -14,7 +14,7 @@ See live examples <a target="_blank" href="http://andreygeonya.github.io/hull/">
 ## Params
 * 1st param - array of coordinates in format: `[[x1, y1], [x2, y2], ..., [xn, yn]]`;
 * 2nd param - concavity. `1` - thin shape. `Infinity` - convex hull. By default `20`;
-* 3rd param - points format. For example: `['.lng', '.lat']` if you have points in `{lng: x, lat: y}` format. By default `[x, y]`.
+* 3rd param - points format. For example: `['.lng', '.lat']` if you have `{lng: x, lat: y}` points. By default you can use `[x, y]` points.
 
 ## How it works
 
