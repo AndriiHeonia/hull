@@ -12,8 +12,9 @@ See live examples <a target="_blank" href="http://andreygeonya.github.io/hull/">
 	hull(points, 50); // returns points of the hull (in clockwise order)
 
 ## Params
-* 1st param - array of coordinates in format: [[x1, y1], [x2, y2], ..., [xn, yn]];
-* 2nd param - concavity. 1 - thin shape. Infinity - convex hull. By default 20.
+* 1st param - array of coordinates in format: `[[x1, y1], [x2, y2], ..., [xn, yn]]`;
+* 2nd param - concavity. `1` - thin shape. `Infinity` - convex hull. By default `20`;
+* 3rd param - points format. For example: `['.lng', '.lat']` if you have points in `{lng: x, lat: y}` format. By default `[x, y]`.
 
 ## How it works
 
@@ -51,7 +52,6 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## To-do
 
-* make point formats configurable to support formats like `{x: 10, y: 10}` and `{lat: 52, lng: 82}`;
 * add new map based example that demonstrates usage with other point formats;
 * think about parallelisation of the calculations (on GPU or CPU);
 * think about holes;
@@ -68,6 +68,8 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## Changelog
 
+### 0.2.2 — 04.02.2015
+Configurable point formats, now you can use formats like `{x: 10, y: 10}` and `{lat: 52, lng: 82}`;
 ### 0.2.1 — 21.10.2014
 Some minor updates (doc, package.json, etc.).
 ### 0.2.0 — 20.10.2014
