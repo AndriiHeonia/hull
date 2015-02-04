@@ -52,7 +52,6 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## To-do
 
-* add new map based example that demonstrates usage with other point formats;
 * think about parallelisation of the calculations (on GPU or CPU);
 * think about holes;
 * think about automatic `concavity` adjustment based on density.
