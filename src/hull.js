@@ -9,6 +9,28 @@
 var intersect = require('./intersect.js');
 var grid = require('./grid.js');
 
+function _formatToXy(pointset, format) {
+    if (format === undefined) {
+        return pointset;
+    }
+    return pointset.map(function(pt) {
+        /*jslint evil: true */
+        var _getXY = new Function('pt', 'return [pt' + format[0] + ',' + 'pt' + format[1] + '];');
+        return _getXY(pt);
+    });
+}
+
+function _xyToFormat(pointset, format) {
+    if (format === undefined) {
+        return pointset;
+    }
+    return pointset.map(function(pt) {
+        /*jslint evil: true */
+        var _getObj = new Function('pt', 'var o = {}; o' + format[0] + '= pt[0]; o' + format[1] + '= pt[1]; return o;');
+        return _getObj(pt);
+    });
+}
+
 function _sortByX(pointset) {
     return pointset.sort(function(a, b) {
         if (a[0] == b[0]) {
@@ -171,7 +193,7 @@ function _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid) {
     return convex;
 }
 
-function hull(pointset, concavity) {
+function hull(pointset, concavity, format) {
     var lower, upper, convex,
         innerPoints,
         maxSearchBBoxSize,
@@ -180,7 +202,8 @@ function hull(pointset, concavity) {
     if (pointset.length < 4) {
         return pointset;
     }
-    pointset = _sortByX(pointset);
+
+    pointset = _sortByX(_formatToXy(pointset, format));
     upper = _upperTangent(pointset);
     lower = _lowerTangent(pointset);
     convex = lower.concat(upper);
@@ -191,7 +214,7 @@ function hull(pointset, concavity) {
         return convex.indexOf(pt) < 0;
     });
  
-    return _concave(convex, Math.pow(maxEdgeLen, 2), maxSearchBBoxSize, grid(innerPoints));
+    return _xyToFormat(_concave(convex, Math.pow(maxEdgeLen, 2), maxSearchBBoxSize, grid(innerPoints)), format);
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
