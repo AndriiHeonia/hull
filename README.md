@@ -4,7 +4,7 @@ Hull.js - JavaScript library that builds concave hull by set of points.
 
 ## Examples
 
-See live examples <a target="_blank" href="http://andreygeonya.github.io/hull/">here</a>.
+See live examples <a target="_blank" href="http://andriiheonia.github.io/hull/">here</a>.
 
 ## Usage
 
@@ -23,20 +23,20 @@ Let's see step by step what happens when you call `hull()` function:
 <ol>
     <li>
         <div>Hull.js takes your source points of the shape:</div>
-        <div><img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/0.png" /></div>
+        <div><img src="https://raw.githubusercontent.com/AndriiHeonia/hull/master/readme-imgs/0.png" /></div>
     </li>
     <li>
         <div>Builds convex hull:</div>
-        <div><img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/1.png" /></div>
+        <div><img src="https://raw.githubusercontent.com/AndriiHeonia/hull/master/readme-imgs/1.png" /></div>
     </li>
     <li>
         <div>After that, the edges flex inward (according to `concavity` param). For example:</div>
         <div>
-            <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/2_1.png" />
+            <img src="https://raw.githubusercontent.com/AndriiHeonia/hull/master/readme-imgs/2_1.png" />
             `concavity = 80`
-            <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/2_2.png" />
+            <img src="https://raw.githubusercontent.com/AndriiHeonia/hull/master/readme-imgs/2_2.png" />
             `concavity = 40`
-            <img src="https://raw.githubusercontent.com/AndreyGeonya/hull/master/readme-imgs/2_3.png" />
+            <img src="https://raw.githubusercontent.com/AndriiHeonia/hull/master/readme-imgs/2_3.png" />
             `concavity = 20`
         </div>
     </li>
@@ -67,8 +67,10 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## Changelog
 
+### 0.2.3 — 04.02.2015
+Minor fixes (readme, package.json)
 ### 0.2.2 — 04.02.2015
-Configurable point formats, now you can use points like `{x: 10, y: 10}` and `{lat: 52, lng: 82}`;
+Configurable point formats, now you can use points like `{x: 10, y: 10}` and `{lat: 52, lng: 82}`.
 ### 0.2.1 — 21.10.2014
 Some minor updates (doc, package.json, etc.).
 ### 0.2.0 — 20.10.2014
