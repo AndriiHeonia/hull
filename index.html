@@ -11,12 +11,15 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <title>Hull.js by AndreyGeonya</title>
+    <title>Hull.js by Andrii Heonia</title>
     <script src="./javascripts/hull.js"></script>
     <script src="./javascripts/dbscan.js"></script>
     <script src="./javascripts/dataUa.js"></script>
     <script src="./javascripts/dataChars.js"></script>
     <script src="./javascripts/dataHorse.js"></script>
+    <script src="./javascripts/dataGeo.js"></script>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
   </head>
 
   <body>
@@ -265,6 +268,36 @@ clusters.forEach(function(pointset) {
 </p>
 <!-- END: Example 3_1 -->
 
+<!-- Example 4 -->
+<h3><a name="ex4" class="anchor" href="#ex4"><span class="octicon octicon-link"></span>Geo points</a></h3>
+<p>If your points format differs from the [x, y] then you can provide custom format pattern:</p>
+<pre><code>var pointset = [
+{ lng: -0.2067, lat: 51.4911 },
+{ lng: -0.2070, lat: 51.4915 },
+{ lng: -0.2074, lat: 51.4912 },
+... ];
+
+var pts = hull(geo, 0.0011, ['.lng', '.lat']);
+// ... show pts on map</code></pre>
+<p>
+  <div id="map" style="width: 600px; height: 400px"></div>
+  <script>
+  function example4() {
+    var map = L.map('map').setView([51.4896801420082, -0.210695270900937], 15);
+    L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        id: 'examples.map-i875mjb7'
+    }).addTo(map);
+    dataGeo.forEach(function(latlng) {
+        L.circleMarker(latlng, {radius: 2}).addTo(map);
+    });
+    var pts = hull(dataGeo, 0.0011, ['.lng', '.lat']);
+    L.polygon(pts).addTo(map);
+  }
+  </script>
+</p>
+<!-- END: Example 4 -->
+
         </section>
       </div>
     </div>
@@ -276,6 +309,7 @@ clusters.forEach(function(pointset) {
         example2();
         example3();
         example3_1();
+        example4();
     }
     </script>
   </body>
