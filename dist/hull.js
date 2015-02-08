@@ -162,6 +162,31 @@ function _sqLength(a, b) {
     return Math.pow(b[0] - a[0], 2) + Math.pow(b[1] - a[1], 2);
 }
 
+
+function toRad(n) {
+    return n * Math.PI / 180;
+}
+
+
+function _sqLengthHaversine(a, b) {  
+	var R = 6371000;
+	
+	var lat1 = a[0];
+	var lat2 = b[0];
+	
+	var lon1 = a[1];
+	var lon2 = b[1];
+	
+    var dLat = toRad(lat2 - lat1);
+    var dLong = toRad(lon2 - lon1);
+  
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLong / 2) * Math.sin(dLong / 2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    var d = R * c;
+  
+    return d;
+}
+
 function _cos(o, a, b) {
     var aShifted = [a[0] - o[0], a[1] - o[1]],
         bShifted = [b[0] - o[0], b[1] - o[1]],
@@ -234,7 +259,7 @@ function _midPoint(edge, innerPoints, convex) {
     return point;
 }
 
-function _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid) {
+function _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid, edgeLenOnGlobe) {
     var edge,
         border,
         bBoxSize,
@@ -245,7 +270,12 @@ function _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid) {
     for (var i = 0; i < convex.length - 1; i++) {
         edge = [convex[i], convex[i + 1]];
 
-        if (_sqLength(edge[0], edge[1]) < maxSqEdgeLen) { continue; }
+        if(edgeLenOnGlobe){
+        	if (_sqLengthHaversine(edge[0], edge[1]) < maxSqEdgeLen) { continue; }
+        }else{
+        	if (_sqLength(edge[0], edge[1]) < maxSqEdgeLen) { continue; }
+        }
+        
 
         border = 0;
         bBoxSize = MIN_SEARCH_BBOX_SIZE;
@@ -271,7 +301,7 @@ function _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid) {
     return convex;
 }
 
-function hull(pointset, concavity, format) {
+function hull(pointset, concavity, format, edgeLenOnGlobe) {
     var lower, upper, convex,
         innerPoints,
         maxSearchBBoxSize,
@@ -292,7 +322,10 @@ function hull(pointset, concavity, format) {
         return convex.indexOf(pt) < 0;
     });
  
-    return _xyToFormat(_concave(convex, Math.pow(maxEdgeLen, 2), maxSearchBBoxSize, grid(innerPoints)), format);
+    if(!edgeLenOnGlobe){
+    	maxEdgeLen = Math.pow(maxEdgeLen, 2)
+    }
+    return _xyToFormat(_concave(convex, maxEdgeLen, maxSearchBBoxSize, grid(innerPoints), edgeLenOnGlobe), format);
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg

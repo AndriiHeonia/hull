@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Concave hull debug page</title>
+    <script src="../dist/hull.js"></script>
+    <script src="./data/geoHaversine.js"></script>
+    <script src="http://leafletjs.com/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="http://leafletjs.com/dist/leaflet.css" type="text/css" />
+</head>
+<body>
+    <div id="map" style="width: 800px; height: 600px"></div>
+    <script>
+    window.onload = function() {
+        var map = L.map('map').setView([0, 0], 1);
+        L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', { maxZoom: 18, id: 'examples.map-i875mjb7'}).addTo(map);
+        geo.forEach(function(latlng) {
+            L.circleMarker(latlng, {radius: 2}).addTo(map);
+        });
+        var hullPts = hull(geo, 100, ['.lng', '.lat'], true);
+        L.polygon(hullPts).addTo(map);
+    };
+    </script>
+</body>
+</html>
