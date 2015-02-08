@@ -17,7 +17,7 @@
         geo.forEach(function(latlng) {
             L.circleMarker(latlng, {radius: 2}).addTo(map);
         });
-        var hullPts = hull(geo, 100, ['.lng', '.lat'], true);
+        var hullPts = hull(geo, 2000000, ['.lng', '.lat'], true);
         L.polygon(hullPts).addTo(map);
     };
     </script>

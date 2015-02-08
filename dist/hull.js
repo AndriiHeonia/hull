@@ -129,6 +129,16 @@ function _getMaxY(pointset) {
     return maxY;
 }
 
+function _getMinY(pointset) {
+    var minY = Infinity;
+    for (var i = pointset.length - 1; i >= 0; i--) {
+        if (pointset[i][1] < minY) {
+        	minY = pointset[i][1];
+        }
+    }
+    return minY;
+}
+
 function _upperTangent(pointset) {
     var lower = [];
     for (var l = 0; l < pointset.length; l++) {
@@ -316,8 +326,12 @@ function hull(pointset, concavity, format, edgeLenOnGlobe) {
     lower = _lowerTangent(pointset);
     convex = lower.concat(upper);
     convex.push(pointset[0]);
-
-    maxSearchBBoxSize = Math.max(pointset[pointset.length - 1][0], _getMaxY(convex)) * MAX_SEARCH_BBOX_SIZE_PERCENT;
+    
+    if(edgeLenOnGlobe){
+    	maxSearchBBoxSize = _sqLengthHaversine([0,_getMinY(pointset)], [0,_getMaxY(pointset)]) * MAX_SEARCH_BBOX_SIZE_PERCENT;
+    }else{
+        maxSearchBBoxSize = Math.max(pointset[pointset.length - 1][0], _getMaxY(convex)) * MAX_SEARCH_BBOX_SIZE_PERCENT;
+    }
     innerPoints = pointset.filter(function(pt) {
         return convex.indexOf(pt) < 0;
     });
