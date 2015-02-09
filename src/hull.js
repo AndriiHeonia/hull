@@ -112,8 +112,8 @@ function _sqLengthHaversine(a, b) {
     var dLat = toRad(lat2 - lat1);
     var dLong = toRad(lon2 - lon1);
   
-    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLong / 2) * Math.sin(dLong / 2);
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    var e = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLong / 2) * Math.sin(dLong / 2);
+    var c = 2 * Math.atan2(Math.sqrt(e), Math.sqrt(1 - e));
     var d = R * c;
   
     return d;
@@ -259,7 +259,7 @@ function hull(pointset, concavity, format, edgeLenOnGlobe) {
     });
  
     if(!edgeLenOnGlobe){
-    	maxEdgeLen = Math.pow(maxEdgeLen, 2)
+    	maxEdgeLen = Math.pow(maxEdgeLen, 2);
     }
     return _xyToFormat(_concave(convex, maxEdgeLen, maxSearchBBoxSize, grid(innerPoints), edgeLenOnGlobe), format);
 }
