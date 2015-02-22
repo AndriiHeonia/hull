@@ -276,23 +276,25 @@ clusters.forEach(function(pointset) {
     { lng: -0.2067, lat: 51.4911 },
     { lng: -0.2070, lat: 51.4915 },
     { lng: -0.2074, lat: 51.4912 },
-... ];
+    ...
+];
 
-var pts = hull(geo, 0.0011, ['.lng', '.lat']);
+var pts = hull(pointset, 0.0011, ['.lng', '.lat']);
 // ... show pts on map</code></pre>
 <p>
   <div id="map" style="width: 600px; height: 400px"></div>
   <script>
   function example4() {
     var map = L.map('map').setView([51.4894, -0.209], 15);
+    pointset = dataGeo;
     L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
         maxZoom: 18,
         id: 'examples.map-i875mjb7'
     }).addTo(map);
-    dataGeo.forEach(function(latlng) {
+    pointset.forEach(function(latlng) {
         L.circleMarker(latlng, {radius: 2}).addTo(map);
     });
-    var pts = hull(dataGeo, 0.0011, ['.lng', '.lat']);
+    var pts = hull(pointset, 0.0011, ['.lng', '.lat']);
     L.polygon(pts, {weight: 2}).addTo(map);
   }
   </script>
@@ -309,7 +311,7 @@ var pts = hull(geo, 0.0011, ['.lng', '.lat']);
     ...
 ];
 
-var pts = geo.map(map.latLngToContainerPoint.bind(map));
+var pts = pointset.map(map.latLngToContainerPoint.bind(map));
 pts = hull(pts, 58, ['.x', '.y']);
 pts = pts.map(function(pt) {
     return map.containerPointToLatLng(L.point(pt.x, pt.y));
@@ -320,13 +322,14 @@ pts = pts.map(function(pt) {
   <script>
   function example5() {
     var map = L.map('map1').setView([0, 0], 1);
+    pointset = dataGeoGlobal;
     L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
         id: 'examples.map-i875mjb7'
     }).addTo(map);
-    dataGeoGlobal.forEach(function(latlng) {
+    pointset.forEach(function(latlng) {
         L.circleMarker(latlng, {radius: 2}).addTo(map);
     });
-    var pts = dataGeoGlobal.map(map.latLngToContainerPoint.bind(map));
+    var pts = pointset.map(map.latLngToContainerPoint.bind(map));
     pts = hull(pts, 58, ['.x', '.y']);
     pts = pts.map(function(pt) {
         return map.containerPointToLatLng(L.point(pt.x, pt.y));
