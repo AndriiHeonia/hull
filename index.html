@@ -18,6 +18,7 @@
     <script src="./javascripts/dataChars.js"></script>
     <script src="./javascripts/dataHorse.js"></script>
     <script src="./javascripts/dataGeo.js"></script>
+    <script src="./javascripts/dataGeoGlobal.js"></script>
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
     <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
   </head>
@@ -272,9 +273,9 @@ clusters.forEach(function(pointset) {
 <h3><a name="ex4" class="anchor" href="#ex4"><span class="octicon octicon-link"></span>Geo points</a></h3>
 <p>If your points format differs from the [x, y] then you can provide custom format pattern:</p>
 <pre><code>var pointset = [
-{ lng: -0.2067, lat: 51.4911 },
-{ lng: -0.2070, lat: 51.4915 },
-{ lng: -0.2074, lat: 51.4912 },
+    { lng: -0.2067, lat: 51.4911 },
+    { lng: -0.2070, lat: 51.4915 },
+    { lng: -0.2074, lat: 51.4912 },
 ... ];
 
 var pts = hull(geo, 0.0011, ['.lng', '.lat']);
@@ -298,6 +299,44 @@ var pts = hull(geo, 0.0011, ['.lng', '.lat']);
 </p>
 <!-- END: Example 4 -->
 
+<!-- Example 5 -->
+<h3><a name="ex5" class="anchor" href="#ex5"><span class="octicon octicon-link"></span>Geo points on globe</a></h3>
+<p>All calculations in hull.js based on cartesian coordinate system. So, if you use it for the calculation and data visualization on global map please don't forget about globe distortion during projection. In this case better to convert latitudes and longitudes to cartesian coordinates, calculate concave hull and then convert points back. For example (using <a href="http://leafletjs.com/" target="_blank">Leaflet</a> library):</p>
+<pre><code>var pointset = [
+    { lng:-20, lat:90 },  
+    { lng:-20, lat:80 },
+    { lng:-20, lat:70 },
+    ...
+];
+
+var pts = geo.map(map.latLngToContainerPoint.bind(map));
+pts = hull(pts, 58, ['.x', '.y']);
+pts = pts.map(function(pt) {
+    return map.containerPointToLatLng(L.point(pt.x, pt.y));
+});
+// ... show pts on map</code></pre>
+<p>
+  <div id="map1" style="width: 600px; height: 525px"></div>
+  <script>
+  function example5() {
+    var map = L.map('map1').setView([0, 0], 1);
+    L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
+        id: 'examples.map-i875mjb7'
+    }).addTo(map);
+    dataGeoGlobal.forEach(function(latlng) {
+        L.circleMarker(latlng, {radius: 2}).addTo(map);
+    });
+    var pts = dataGeoGlobal.map(map.latLngToContainerPoint.bind(map));
+    pts = hull(pts, 58, ['.x', '.y']);
+    pts = pts.map(function(pt) {
+        return map.containerPointToLatLng(L.point(pt.x, pt.y));
+    });
+    L.polygon(pts, {weight: 2}).addTo(map);
+  }
+  </script>
+</p>
+<!-- END: Example 5 -->
+
         </section>
       </div>
     </div>
@@ -310,6 +349,7 @@ var pts = hull(geo, 0.0011, ['.lng', '.lat']);
         example3();
         example3_1();
         example4();
+        example5();
     }
     </script>
   </body>
