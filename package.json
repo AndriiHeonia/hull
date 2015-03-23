@@ -1,6 +1,6 @@
 {
     "name": "hull.js",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "description": "JavaScript library that builds concave hulls (shapes) by set of points",
     "homepage": "https://github.com/AndriiHeonia/hull",
     "keywords": [
@@ -10,7 +10,7 @@
         "alpha-shape",
         "algorithm"
     ],
-    "author": "Andrey Geonya <a.heonia@gmail.com>",
+    "author": "Andrii Heonia <a.heonia@gmail.com>",
     "repository": {
         "type": "git",
         "url": "git://github.com/AndriiHeonia/hull.git"
