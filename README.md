@@ -67,6 +67,8 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## Changelog
 
+### 0.2.6 — 01.05.2015
+Fix bower.json
 ### 0.2.5 — 01.05.2015
 Add Bower support
 ### 0.2.4 — 23.03.2015
