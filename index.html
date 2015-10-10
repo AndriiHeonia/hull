@@ -323,8 +323,8 @@ pts = pts.map(function(pt) {
   function example5() {
     var map = L.map('map1').setView([0, 0], 1);
     pointset = dataGeoGlobal;
-    L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
-        id: 'examples.map-i875mjb7'
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
     pointset.forEach(function(latlng) {
         L.circleMarker(latlng, {radius: 2}).addTo(map);
