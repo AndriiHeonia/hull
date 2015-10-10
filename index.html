@@ -287,9 +287,9 @@ var pts = hull(pointset, 0.0011, ['.lng', '.lat']);
   function example4() {
     var map = L.map('map').setView([51.4894, -0.209], 15);
     pointset = dataGeo;
-    L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
-        id: 'examples.map-i875mjb7'
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
     pointset.forEach(function(latlng) {
         L.circleMarker(latlng, {radius: 2}).addTo(map);
