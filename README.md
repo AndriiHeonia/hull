@@ -33,9 +33,9 @@ Let's see step by step what happens when you call `hull()` function:
         <div>After that, the edges flex inward (according to `concavity` param). For example:</div>
         <div>
             <img src="https://raw.githubusercontent.com/AndriiHeonia/hull/master/readme-imgs/2_1.png" />
-            `concavity = 80`
+            `concavity = 80`<br/>
             <img src="https://raw.githubusercontent.com/AndriiHeonia/hull/master/readme-imgs/2_2.png" />
-            `concavity = 40`
+            `concavity = 40`<br/>
             <img src="https://raw.githubusercontent.com/AndriiHeonia/hull/master/readme-imgs/2_3.png" />
             `concavity = 20`
         </div>
