@@ -8,38 +8,8 @@
 
 var intersect = require('./intersect.js');
 var grid = require('./grid.js');
-
-function _formatToXy(pointset, format) {
-    if (format === undefined) {
-        return pointset;
-    }
-    return pointset.map(function(pt) {
-        /*jslint evil: true */
-        var _getXY = new Function('pt', 'return [pt' + format[0] + ',' + 'pt' + format[1] + '];');
-        return _getXY(pt);
-    });
-}
-
-function _xyToFormat(pointset, format) {
-    if (format === undefined) {
-        return pointset;
-    }
-    return pointset.map(function(pt) {
-        /*jslint evil: true */
-        var _getObj = new Function('pt', 'var o = {}; o' + format[0] + '= pt[0]; o' + format[1] + '= pt[1]; return o;');
-        return _getObj(pt);
-    });
-}
-
-function _sortByX(pointset) {
-    return pointset.sort(function(a, b) {
-        if (a[0] == b[0]) {
-            return a[1] - b[1];                           
-        } else {                                                    
-            return a[0] - b[0];                                                           
-        }
-    });
-}
+var formatUtil = require('./format.js');
+var convexHull = require('./convex.js');
 
 function _getMaxY(pointset) {
     var maxY = -Infinity;
@@ -49,35 +19,6 @@ function _getMaxY(pointset) {
         }
     }
     return maxY;
-}
-
-function _upperTangent(pointset) {
-    var lower = [];
-    for (var l = 0; l < pointset.length; l++) {
-        while (lower.length >= 2 && (_cross(lower[lower.length - 2], lower[lower.length - 1], pointset[l]) <= 0)) {
-            lower.pop();
-        }
-        lower.push(pointset[l]);
-    }
-    lower.pop();
-    return lower;
-}
-
-function _lowerTangent(pointset) {
-    var reversed = pointset.reverse(),
-        upper = [];
-    for (var u = 0; u < reversed.length; u++) {
-        while (upper.length >= 2 && (_cross(upper[upper.length - 2], upper[upper.length - 1], reversed[u]) <= 0)) {
-            upper.pop();
-        }
-        upper.push(reversed[u]);
-    }
-    upper.pop();
-    return upper;
-}
-
-function _cross(o, a, b) {
-    return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); 
 }
 
 function _sqLength(a, b) {
@@ -156,9 +97,10 @@ function _midPoint(edge, innerPoints, convex) {
     return point;
 }
 
-function _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid) {
+function _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid, edgeSkipList) {
     var edge,
-        border,
+        keyInSkipList,
+        scaleFactor,
         bBoxSize,
         midPoint,
         bBoxAround,    
@@ -166,18 +108,26 @@ function _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid) {
 
     for (var i = 0; i < convex.length - 1; i++) {
         edge = [convex[i], convex[i + 1]];
+        keyInSkipList = edge[0].join() + ',' + edge[1].join();
 
-        if (_sqLength(edge[0], edge[1]) < maxSqEdgeLen) { continue; }
+        if (_sqLength(edge[0], edge[1]) < maxSqEdgeLen ||
+            edgeSkipList[keyInSkipList] === true) { continue; }
 
-        border = 0;
-        bBoxSize = MIN_SEARCH_BBOX_SIZE;
+        scaleFactor = 0;
+        bBoxSize = CELL_SIZE;
         bBoxAround = _bBoxAround(edge, bBoxSize);
+
         do {
-            bBoxAround = grid.addBorder2Bbox(bBoxAround, border);
+            bBoxAround = grid.extendBbox(bBoxAround, scaleFactor);
             bBoxSize = bBoxAround[2] - bBoxAround[0];
+
             midPoint = _midPoint(edge, grid.rangePoints(bBoxAround), convex);            
-            border++;
+            scaleFactor++;
         }  while (midPoint === null && maxSearchBBoxSize > bBoxSize);
+
+        if (bBoxSize >= maxSearchBBoxSize) {
+            edgeSkipList[keyInSkipList] = true;
+        }
 
         if (midPoint !== null) {
             convex.splice(i + 1, 0, midPoint);
@@ -187,14 +137,15 @@ function _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid) {
     }
 
     if (midPointInserted) {
-        return _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid);
+        return _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid, edgeSkipList);
     }
 
     return convex;
 }
 
 function hull(pointset, concavity, format) {
-    var lower, upper, convex,
+    var convex,
+        concave,
         innerPoints,
         maxSearchBBoxSize,
         maxEdgeLen = concavity || 20;
@@ -203,22 +154,22 @@ function hull(pointset, concavity, format) {
         return pointset;
     }
 
-    pointset = _sortByX(_formatToXy(pointset, format));
-    upper = _upperTangent(pointset);
-    lower = _lowerTangent(pointset);
-    convex = lower.concat(upper);
-    convex.push(pointset[0]);
+    convex = convexHull(formatUtil.toXy(pointset, format));
 
-    maxSearchBBoxSize = Math.max(pointset[pointset.length - 1][0], _getMaxY(convex)) * MAX_SEARCH_BBOX_SIZE_PERCENT;
+    maxSearchBBoxSize = Math.max(pointset[pointset.length - 1][0], _getMaxY(convex)) *
+                        MAX_SEARCH_BBOX_SIZE_PERCENT;
     innerPoints = pointset.filter(function(pt) {
         return convex.indexOf(pt) < 0;
     });
+    concave = _concave(
+        convex, Math.pow(maxEdgeLen, 2),
+        maxSearchBBoxSize, grid(innerPoints, CELL_SIZE), {});
  
-    return _xyToFormat(_concave(convex, Math.pow(maxEdgeLen, 2), maxSearchBBoxSize, grid(innerPoints)), format);
+    return formatUtil.fromXy(concave, format);
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
-var MIN_SEARCH_BBOX_SIZE = 5;
-var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.8;
+var CELL_SIZE = 10;
+var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.7;
 
 module.exports = hull;

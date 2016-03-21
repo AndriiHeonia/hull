@@ -15,13 +15,71 @@
     <script src="./data/owl102k.js"></script>
 </head>
 <body>
-    <canvas id="canv" width="1024" height="1024" style="border: 1px solid black; position: absolute; left: 0px; top: 0px;"></canvas>
+    <canvas id="canv" width="1024" height="750" style="border: 1px solid black; position: absolute; left: 0px; top: 0px;"></canvas>
+    <canvas id="debugCanv" width="1024" height="750" style="border: 1px solid black; position: absolute; left: 0px; top: 0px;"></canvas>
 
     <script>
     window.onload = function() {
         var c = document.getElementById('canv'),
             ctx = c.getContext('2d'),
+            debugCanv = document.getElementById('debugCanv'),
+            debugCtx = debugCanv.getContext('2d'),
             pointset = horse13k;
+
+        window.drawPoints = function(points, color, radius) {
+            points.forEach(function(pt) {
+                drawPoint(pt, color, radius);
+            });
+        }
+
+        window.drawPoint = function(point, color, radius) {
+            radius = radius || 3;
+            debugCtx.fillStyle = color;
+            debugCtx.beginPath();
+            debugCtx.arc(point[0], point[1], radius, 0, 2 * Math.PI, true);
+            debugCtx.fill();
+            debugCtx.closePath();
+        }
+
+        window.drawEdges = function(strip, color) {
+            for (var i = 0; i < strip.length - 1; i++) {
+                edge = [strip[i], strip[i + 1]];
+                drawEdge(edge, color);
+            }
+        }
+
+        window.drawEdge = function(edge, color) {
+            debugCtx.strokeStyle = color;
+            debugCtx.lineWidth = 2;
+            debugCtx.beginPath();
+            debugCtx.moveTo(edge[0][0], edge[0][1]);
+            debugCtx.lineTo(edge[1][0], edge[1][1]);
+            debugCtx.stroke();
+            debugCtx.closePath();
+        }
+
+        window.drawRect = function(rect, color, filled) {
+            filled = filled || false;
+            debugCtx.fillStyle = debugCtx.strokeStyle = color;
+            debugCtx.lineWidth = 2;
+            debugCtx.beginPath();
+            var x = rect[0],
+                y = rect[1],
+                w = rect[2] - rect[0],
+                h = rect[3] - rect[1];
+            if (filled) {
+                debugCtx.fillRect(x, y, w, h);
+            }
+            else {
+                debugCtx.rect(x, y, w, h);
+                debugCtx.stroke();
+            };
+            debugCtx.closePath();
+        }
+
+        window.clearCanvas = function() {
+            debugCtx.clearRect(0, 0, debugCanv.width, debugCanv.height);
+        }
 
         c.onclick = function(e) {
             console.log('[' + e.offsetX + ', ' + e.offsetY + ']');
@@ -35,10 +93,10 @@
             ctx.fill();
             ctx.closePath();
         }
-        
+
         // get and draw hull
         console.time('hull');
-        var pts = hull(pointset, 20);
+        var pts = hull(pointset, 10);
         console.timeEnd('hull');
         ctx.strokeStyle = "blue";
         ctx.lineWidth = 2;

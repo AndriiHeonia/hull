@@ -1,5 +1,7 @@
-function Grid(points) {
+function Grid(points, cellSize) {
     var _cells = [];
+    
+    this._cellSize = cellSize;
 
     points.forEach(function(point) {
         var cellXY = this.point2CellXY(point),
@@ -38,8 +40,8 @@ function Grid(points) {
 
 Grid.prototype = {
     point2CellXY: function(point) { // (Array) -> Array
-        var x = parseInt(point[0] / Grid.CELL_SIZE),
-            y = parseInt(point[1] / Grid.CELL_SIZE);
+        var x = parseInt(point[0] / this._cellSize),
+            y = parseInt(point[1] / this._cellSize);
         return [x, y];
     },
 
@@ -57,20 +59,18 @@ Grid.prototype = {
         return points;
     },
 
-    addBorder2Bbox: function(bbox, border) { // (Array, Number) -> Array
+    extendBbox: function(bbox, scaleFactor) { // (Array, Number) -> Array
         return [
-            bbox[0] - (border * Grid.CELL_SIZE),
-            bbox[1] - (border * Grid.CELL_SIZE),
-            bbox[2] + (border * Grid.CELL_SIZE),
-            bbox[3] + (border * Grid.CELL_SIZE)
+            bbox[0] - (scaleFactor * this._cellSize),
+            bbox[1] - (scaleFactor * this._cellSize),
+            bbox[2] + (scaleFactor * this._cellSize),
+            bbox[3] + (scaleFactor * this._cellSize)
         ];
     }
 };
 
-function grid(points) {
-    return new Grid(points);
+function grid(points, cellSize) {
+    return new Grid(points, cellSize);
 }
-
-Grid.CELL_SIZE = 10;
 
 module.exports = grid;

@@ -1,6 +1,6 @@
 {
     "name": "hull.js",
-    "version": "0.2.7",
+    "version": "0.2.8",
     "description": "JavaScript library that builds concave hulls (shapes) by set of points",
     "homepage": "https://github.com/AndriiHeonia/hull",
     "keywords": [
@@ -17,11 +17,13 @@
     },
     "main": "./src/hull.js",
     "devDependencies": {
+        "nodemon": "~1.9.0",
         "mocha": "~1.18.2",
         "jshint": "~2.5.0",
         "browserify": "~5.11.0"
     },
     "scripts": {
+        "watch": "./node_modules/nodemon/bin/nodemon.js --watch src --exec \"./node_modules/browserify/bin/cmd.js ./src/hull.js --standalone hull > ./dist/hull.js\"",
         "test": "./node_modules/jshint/bin/jshint src/intersect.js && ./node_modules/jshint/bin/jshint src/grid.js && ./node_modules/jshint/bin/jshint src/hull.js && ./node_modules/.bin/mocha -R spec && ./node_modules/browserify/bin/cmd.js ./src/hull.js --standalone hull > ./dist/hull.js"
     },
     "jshintConfig": {
