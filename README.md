@@ -70,7 +70,8 @@ If you want to get involved with Hull.js development, just use <a href="https://
 ## Changelog
 
 ### 0.2.8 — 01.04.2016
-Added edgeSkipList to increase performance (especially for the highly accurate shapes with the small `concavity` number).
+- added edgeSkipList to increase performance (especially for the highly accurate shapes with the small `concavity` number).
+- refactoring
 ### 0.2.7 — 01.05.2015
 Fixed bower.json
 ### 0.2.6 — 01.05.2015
