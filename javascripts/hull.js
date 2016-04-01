@@ -165,16 +165,6 @@ function _sortByX(pointset) {
     });
 }
 
-function _getMaxY(pointset) {
-    var maxY = -Infinity;
-    for (var i = pointset.length - 1; i >= 0; i--) {
-        if (pointset[i][1] > maxY) {
-            maxY = pointset[i][1];
-        }
-    }
-    return maxY;
-}
-
 function _sqLength(a, b) {
     return Math.pow(b[0] - a[0], 2) + Math.pow(b[1] - a[1], 2);
 }
@@ -203,7 +193,34 @@ function _intersect(segment, pointset) {
     return false;
 }
 
-function _bBoxAround(edge, boxSize) {
+function _bBoxAroundPoints(pointset) {
+    var minX = Infinity,
+        minY = Infinity,
+        maxX = -Infinity,
+        maxY = -Infinity;
+
+    for (var i = pointset.length - 1; i >= 0; i--) {
+        if (pointset[i][0] < minX) {
+            minX = pointset[i][0];
+        }
+        if (pointset[i][1] < minY) {
+            minY = pointset[i][1];
+        }
+        if (pointset[i][0] > maxX) {
+            maxX = pointset[i][0];
+        }
+        if (pointset[i][1] > maxY) {
+            maxY = pointset[i][1];
+        }
+    }
+
+    return [
+        minX, minY, // tl
+        maxX, maxY  // br
+    ];
+}
+
+function _bBoxAroundEdge(edge, boxSize) {
     var minX, maxX, minY, maxY;
 
     if (edge[0][0] < edge[1][0]) {
@@ -251,35 +268,37 @@ function _midPoint(edge, innerPoints, convex) {
     return point;
 }
 
-function _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid, edgeSkipList) {
+function _concave(convex, maxSqEdgeLen, maxSearchArea, grid, edgeSkipList) {
     var edge,
         keyInSkipList,
         scaleFactor,
-        bBoxSize,
         midPoint,
-        bBoxAround,    
+        bBoxAround,
+        bBoxWidth,
+        bBoxHeight,
         midPointInserted = false;
 
     for (var i = 0; i < convex.length - 1; i++) {
         edge = [convex[i], convex[i + 1]];
+
         keyInSkipList = edge[0].join() + ',' + edge[1].join();
 
         if (_sqLength(edge[0], edge[1]) < maxSqEdgeLen ||
             edgeSkipList[keyInSkipList] === true) { continue; }
 
         scaleFactor = 0;
-        bBoxSize = CELL_SIZE;
-        bBoxAround = _bBoxAround(edge, bBoxSize);
+        bBoxAround = _bBoxAroundEdge(edge, CELL_SIZE);
 
         do {
             bBoxAround = grid.extendBbox(bBoxAround, scaleFactor);
-            bBoxSize = bBoxAround[2] - bBoxAround[0];
+            bBoxWidth = bBoxAround[2] - bBoxAround[0];
+            bBoxHeight = bBoxAround[3] - bBoxAround[1];
 
             midPoint = _midPoint(edge, grid.rangePoints(bBoxAround), convex);            
             scaleFactor++;
-        }  while (midPoint === null && maxSearchBBoxSize > bBoxSize);
+        }  while (midPoint === null && (maxSearchArea[0] > bBoxWidth || maxSearchArea[1] > bBoxHeight));
 
-        if (bBoxSize >= maxSearchBBoxSize) {
+        if (bBoxWidth >= maxSearchArea[0] && bBoxHeight >= maxSearchArea[1]) {
             edgeSkipList[keyInSkipList] = true;
         }
 
@@ -291,7 +310,7 @@ function _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid, edgeSkipList) {
     }
 
     if (midPointInserted) {
-        return _concave(convex, maxSqEdgeLen, maxSearchBBoxSize, grid, edgeSkipList);
+        return _concave(convex, maxSqEdgeLen, maxSearchArea, grid, edgeSkipList);
     }
 
     return convex;
@@ -301,7 +320,8 @@ function hull(pointset, concavity, format) {
     var convex,
         concave,
         innerPoints,
-        maxSearchBBoxSize,
+        bBoxAroundPoints,
+        maxSearchArea,
         maxEdgeLen = concavity || 20;
 
     if (pointset.length < 4) {
@@ -309,16 +329,19 @@ function hull(pointset, concavity, format) {
     }
 
     pointset = _sortByX(formatUtil.toXy(pointset, format));
+    bBoxAroundPoints = _bBoxAroundPoints(pointset);
+    maxSearchArea = [
+        (bBoxAroundPoints[2] - bBoxAroundPoints[0]) * MAX_SEARCH_BBOX_SIZE_PERCENT,
+        (bBoxAroundPoints[3] - bBoxAroundPoints[1]) * MAX_SEARCH_BBOX_SIZE_PERCENT
+    ];
 
     convex = convexHull(pointset);
-    maxSearchBBoxSize = Math.max(pointset[pointset.length - 1][0], _getMaxY(convex)) *
-                        MAX_SEARCH_BBOX_SIZE_PERCENT;
     innerPoints = pointset.filter(function(pt) {
         return convex.indexOf(pt) < 0;
     });
     concave = _concave(
         convex, Math.pow(maxEdgeLen, 2),
-        maxSearchBBoxSize, grid(innerPoints, CELL_SIZE), {});
+        maxSearchArea, grid(innerPoints, CELL_SIZE), {});
  
     return formatUtil.fromXy(concave, format);
 }
