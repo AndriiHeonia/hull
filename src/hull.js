@@ -76,28 +76,12 @@ function _bBoxAroundPoints(pointset) {
     ];
 }
 
-function _bBoxAroundEdge(edge, boxSize) {
-    var minX, maxX, minY, maxY;
-
-    if (edge[0][0] < edge[1][0]) {
-        minX = edge[0][0] - boxSize;
-        maxX = edge[1][0] + boxSize;
-    } else {
-        minX = edge[1][0] - boxSize;
-        maxX = edge[0][0] + boxSize;
-    }
-
-    if (edge[0][1] < edge[1][1]) {
-        minY = edge[0][1] - boxSize;
-        maxY = edge[1][1] + boxSize;
-    } else {
-        minY = edge[1][1] - boxSize;
-        maxY = edge[0][1] + boxSize;
-    }
-
+function _bBoxAroundEdge(edge) {
     return [
-        minX, minY, // tl
-        maxX, maxY  // br
+        Math.min(edge[0][0], edge[1][0]), // left
+        Math.min(edge[0][1], edge[1][1]), // top
+        Math.max(edge[0][0], edge[1][0]), // right
+        Math.max(edge[0][1], edge[1][1])  // bottom
     ];
 }
 
@@ -136,7 +120,6 @@ function _concave(convex, maxSqEdgeLen, maxSearchArea, grid, edgeSkipList) {
 
     for (var i = 0; i < convex.length - 1; i++) {
         edge = [convex[i], convex[i + 1]];
-
         keyInSkipList = edge[0].join() + ',' + edge[1].join();
 
         if (_sqLength(edge[0], edge[1]) < maxSqEdgeLen ||
@@ -144,7 +127,6 @@ function _concave(convex, maxSqEdgeLen, maxSearchArea, grid, edgeSkipList) {
 
         scaleFactor = 0;
         bBoxAround = _bBoxAroundEdge(edge, CELL_SIZE);
-
         do {
             bBoxAround = grid.extendBbox(bBoxAround, scaleFactor);
             bBoxWidth = bBoxAround[2] - bBoxAround[0];
@@ -204,6 +186,6 @@ function hull(pointset, concavity, format) {
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
 var CELL_SIZE = 10;
-var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.7;
+var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.6;
 
 module.exports = hull;

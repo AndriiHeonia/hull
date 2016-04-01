@@ -24,7 +24,7 @@
             ctx = c.getContext('2d'),
             debugCanv = document.getElementById('debugCanv'),
             debugCtx = debugCanv.getContext('2d'),
-            pointset = horse13k;
+            pointset = horse52k;
 
         window.drawPoints = function(points, color, radius) {
             points.forEach(function(pt) {
@@ -96,7 +96,7 @@
 
         // get and draw hull
         console.time('hull');
-        var pts = hull(pointset, 10);
+        var pts = hull(pointset, 20);
         console.timeEnd('hull');
         ctx.strokeStyle = "blue";
         ctx.lineWidth = 2;
