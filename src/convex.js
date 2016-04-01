@@ -2,16 +2,6 @@ function _cross(o, a, b) {
     return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
 }
 
-function _sortByX(pointset) {
-    return pointset.sort(function(a, b) {
-        if (a[0] == b[0]) {
-            return a[1] - b[1];
-        } else {
-            return a[0] - b[0];
-        }
-    });
-}
-
 function _upperTangent(pointset) {
     var lower = [];
     for (var l = 0; l < pointset.length; l++) {
@@ -37,9 +27,9 @@ function _lowerTangent(pointset) {
     return upper;
 }
 
+// pointset has to be sorted by X
 function convex(pointset) {
     var convex;
-    pointset = _sortByX(pointset);
     upper = _upperTangent(pointset);
     lower = _lowerTangent(pointset);
     convex = lower.concat(upper);

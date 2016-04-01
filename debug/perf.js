@@ -93,7 +93,7 @@ hull(geoNorvay600k, 0.5);
 console.timeEnd('hull(geoNorvay600k, 0.5)');
 
 
-// master (0.1):
+// version 0.1.0:
 
 // hull(horse13k, 20): 1613ms
 // hull(horse26k, 20): 2318ms
@@ -107,7 +107,7 @@ console.timeEnd('hull(geoNorvay600k, 0.5)');
 
 // ------------------------------
 
-// master (0.2):
+// version 0.2.0:
 
 // hull(horse13k, 20): 187ms
 // hull(horse26k, 20): 191ms
@@ -135,26 +135,26 @@ console.timeEnd('hull(geoNorvay600k, 0.5)');
 
 // ------------------------------
 
-// ongoing (0.2.8):
+// version 0.2.8:
 
-// hull(horse13k, 20): 187ms
-// hull(horse26k, 20): 247ms
-// hull(horse52k, 20): 273ms
-// hull(horse131k, 20): 755ms
+// hull(horse13k, 20): 186ms
+// hull(horse26k, 20): 245ms
+// hull(horse52k, 20): 269ms
+// hull(horse131k, 20): 770ms
 
-// hull(owl15k, 20): 59ms
-// hull(owl30k, 20): 81ms
-// hull(owl58k, 20): 173ms
-// hull(owl102k, 20): 226ms
+// hull(owl15k, 20): 61ms
+// hull(owl30k, 20): 91ms
+// hull(owl58k, 20): 174ms
+// hull(owl102k, 20): 233ms
 
-// hull(horse13k, 10): 1826ms
-// hull(horse26k, 10): 889ms
-// hull(horse52k, 10): 505ms
-// hull(horse131k, 10): 1233ms
+// hull(horse13k, 10): 1854ms
+// hull(horse26k, 10): 907ms
+// hull(horse52k, 10): 518ms
+// hull(horse131k, 10): 1242ms
 
-// hull(owl15k, 10): 2353ms
-// hull(owl30k, 10): 421ms
-// hull(owl58k, 10): 244ms
-// hull(owl102k, 10): 308ms
+// hull(owl15k, 10): 2380ms
+// hull(owl30k, 10): 428ms
+// hull(owl58k, 10): 245ms
+// hull(owl102k, 10): 304ms
 
-// hull(geoNorvay600k, 0.5): 322564ms
+// hull(geoNorvay600k, 0.5): 333637ms

@@ -1,5 +1,5 @@
 /*
- (c) 2014-2015, Andrii Heonia
+ (c) 2014-2016, Andrii Heonia
  Hull.js, a JavaScript library for concave hull generation by set of points.
  https://github.com/AndriiHeonia/hull
 */
@@ -10,6 +10,16 @@ var intersect = require('./intersect.js');
 var grid = require('./grid.js');
 var formatUtil = require('./format.js');
 var convexHull = require('./convex.js');
+
+function _sortByX(pointset) {
+    return pointset.sort(function(a, b) {
+        if (a[0] == b[0]) {
+            return a[1] - b[1];
+        } else {
+            return a[0] - b[0];
+        }
+    });
+}
 
 function _getMaxY(pointset) {
     var maxY = -Infinity;
@@ -154,8 +164,9 @@ function hull(pointset, concavity, format) {
         return pointset;
     }
 
-    convex = convexHull(formatUtil.toXy(pointset, format));
+    pointset = _sortByX(formatUtil.toXy(pointset, format));
 
+    convex = convexHull(pointset);
     maxSearchBBoxSize = Math.max(pointset[pointset.length - 1][0], _getMaxY(convex)) *
                         MAX_SEARCH_BBOX_SIZE_PERCENT;
     innerPoints = pointset.filter(function(pt) {

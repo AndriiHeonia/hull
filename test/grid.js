@@ -17,7 +17,7 @@ var points = [
     [10, 10],
     [11, 11]
 ];
-var g = grid(points);
+var g = grid(points, 10);
 
 module.exports = function() {
     describe('cellPoints', function() {
@@ -62,12 +62,12 @@ module.exports = function() {
         });
     });
 
-    describe('addBorder2Bbox', function() {
+    describe('extendBbox', function() {
         it('should increase bBox to 1 cell', function() {
-            assert.deepEqual(g.addBorder2Bbox([0, 0, 11, 11], 1), [-10, -10, 21, 21]);
+            assert.deepEqual(g.extendBbox([0, 0, 11, 11], 1), [-10, -10, 21, 21]);
         });
         it('should increase bBox to 2 cells', function() {
-            assert.deepEqual(g.addBorder2Bbox([0, 0, 11, 11], 2), [-20, -20, 31, 31]);
+            assert.deepEqual(g.extendBbox([0, 0, 11, 11], 2), [-20, -20, 31, 31]);
         });
     });
 }

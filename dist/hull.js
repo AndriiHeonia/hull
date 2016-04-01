@@ -3,16 +3,6 @@ function _cross(o, a, b) {
     return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
 }
 
-function _sortByX(pointset) {
-    return pointset.sort(function(a, b) {
-        if (a[0] == b[0]) {
-            return a[1] - b[1];
-        } else {
-            return a[0] - b[0];
-        }
-    });
-}
-
 function _upperTangent(pointset) {
     var lower = [];
     for (var l = 0; l < pointset.length; l++) {
@@ -38,9 +28,9 @@ function _lowerTangent(pointset) {
     return upper;
 }
 
+// pointset has to be sorted by X
 function convex(pointset) {
     var convex;
-    pointset = _sortByX(pointset);
     upper = _upperTangent(pointset);
     lower = _lowerTangent(pointset);
     convex = lower.concat(upper);
@@ -77,50 +67,26 @@ module.exports = {
 }
 },{}],3:[function(require,module,exports){
 function Grid(points, cellSize) {
-    var _cells = [];
-    
+    this._cells = [];
     this._cellSize = cellSize;
 
     points.forEach(function(point) {
         var cellXY = this.point2CellXY(point),
             x = cellXY[0],
             y = cellXY[1];
-        if (_cells[x] === undefined) {
-            _cells[x] = [];
+        if (this._cells[x] === undefined) {
+            this._cells[x] = [];
         }
-        if (_cells[x][y] === undefined) {
-            _cells[x][y] = [];
+        if (this._cells[x][y] === undefined) {
+            this._cells[x][y] = [];
         }
-        _cells[x][y].push(point);
+        this._cells[x][y].push(point);
     }, this);
-
-    this.cellPoints = function(x, y) { // (Number, Number) -> Array
-        return (_cells[x] !== undefined && _cells[x][y] !== undefined) ? _cells[x][y] : [];
-    };
-
-    this.removePoint = function(point) { // (Array) -> Array
-        var cellXY = this.point2CellXY(point),
-            cell = _cells[cellXY[0]][cellXY[1]],
-            pointIdxInCell;
-        
-        for (var i = 0; i < cell.length; i++) {
-            if (cell[i][0] === point[0] && cell[i][1] === point[1]) {
-                pointIdxInCell = i;
-                break;
-            }
-        }
-
-        cell.splice(pointIdxInCell, 1);
-
-        return cell;
-    };
 }
 
 Grid.prototype = {
-    point2CellXY: function(point) { // (Array) -> Array
-        var x = parseInt(point[0] / this._cellSize),
-            y = parseInt(point[1] / this._cellSize);
-        return [x, y];
+    cellPoints: function(x, y) { // (Number, Number) -> Array
+        return (this._cells[x] !== undefined && this._cells[x][y] !== undefined) ? this._cells[x][y] : [];
     },
 
     rangePoints: function(bbox) { // (Array) -> Array
@@ -135,6 +101,29 @@ Grid.prototype = {
         }
 
         return points;
+    },
+
+    removePoint: function(point) { // (Array) -> Array
+        var cellXY = this.point2CellXY(point),
+            cell = this._cells[cellXY[0]][cellXY[1]],
+            pointIdxInCell;
+        
+        for (var i = 0; i < cell.length; i++) {
+            if (cell[i][0] === point[0] && cell[i][1] === point[1]) {
+                pointIdxInCell = i;
+                break;
+            }
+        }
+
+        cell.splice(pointIdxInCell, 1);
+
+        return cell;
+    },
+
+    point2CellXY: function(point) { // (Array) -> Array
+        var x = parseInt(point[0] / this._cellSize),
+            y = parseInt(point[1] / this._cellSize);
+        return [x, y];
     },
 
     extendBbox: function(bbox, scaleFactor) { // (Array, Number) -> Array
@@ -154,7 +143,7 @@ function grid(points, cellSize) {
 module.exports = grid;
 },{}],4:[function(require,module,exports){
 /*
- (c) 2014-2015, Andrii Heonia
+ (c) 2014-2016, Andrii Heonia
  Hull.js, a JavaScript library for concave hull generation by set of points.
  https://github.com/AndriiHeonia/hull
 */
@@ -165,6 +154,16 @@ var intersect = require('./intersect.js');
 var grid = require('./grid.js');
 var formatUtil = require('./format.js');
 var convexHull = require('./convex.js');
+
+function _sortByX(pointset) {
+    return pointset.sort(function(a, b) {
+        if (a[0] == b[0]) {
+            return a[1] - b[1];
+        } else {
+            return a[0] - b[0];
+        }
+    });
+}
 
 function _getMaxY(pointset) {
     var maxY = -Infinity;
@@ -309,8 +308,9 @@ function hull(pointset, concavity, format) {
         return pointset;
     }
 
-    convex = convexHull(formatUtil.toXy(pointset, format));
+    pointset = _sortByX(formatUtil.toXy(pointset, format));
 
+    convex = convexHull(pointset);
     maxSearchBBoxSize = Math.max(pointset[pointset.length - 1][0], _getMaxY(convex)) *
                         MAX_SEARCH_BBOX_SIZE_PERCENT;
     innerPoints = pointset.filter(function(pt) {
@@ -339,14 +339,6 @@ function intersect(seg1, seg2) {
       x2 = seg1[1][0], y2 = seg1[1][1],
       x3 = seg2[0][0], y3 = seg2[0][1],
       x4 = seg2[1][0], y4 = seg2[1][1];
-
-    // segments touch each other
-    // if ((x1 === x3 && y1 === y3) ||
-    //     (x1 === x4 && y1 === y4) ||
-    //     (x2 === x3 && y2 === y3) ||
-    //     (x2 === x4 && y2 === y4)) {
-    //     return true;
-    // }
 
     return ccw(x1, y1, x3, y3, x4, y4) !== ccw(x2, y2, x3, y3, x4, y4) && ccw(x1, y1, x2, y2, x3, y3) !== ccw(x1, y1, x2, y2, x4, y4);
 }

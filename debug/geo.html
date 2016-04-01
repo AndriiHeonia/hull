@@ -17,13 +17,15 @@
     <script>
     var map;
     window.onload = function() {
-        var pointset = geoNorvay600k,
+        var pointset,
             c = document.getElementById('canv'),
             ctx = c.getContext('2d');
 
-        map = L.map('mapContainer').setView({lat: 67.23806155909902, lng: 23.5546875}, 4);
-        // pointset = geo;
-        // map = L.map('mapContainer').setView(pointset[pointset.length-1], 15);
+        // pointset = geoNorvay600k;
+        // map = L.map('mapContainer').setView({lat: 67.23806155909902, lng: 23.5546875}, 4);
+
+        pointset = geo;
+        map = L.map('mapContainer').setView(pointset[pointset.length-1], 15);
 
         L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
 			maxZoom: 18,
@@ -41,7 +43,7 @@
                 var pt = map.latLngToContainerPoint(pointset[i]);
                 ctx.fillStyle="red";
                 ctx.beginPath();
-                ctx.arc(pt.x, pt.y, 0.5, 0, 2 * Math.PI);
+                ctx.arc(pt.x, pt.y, 2.5, 0, 2 * Math.PI);
                 ctx.fill();
                 ctx.closePath();
             }
@@ -58,13 +60,16 @@
         });
 
         console.time('hull');
-        var hullPts = hull(pointset, 0.5);
-        // var hullPts = hull(pointset, 0.0011, ['.lng', '.lat']);
+        // var hullPts = hull(pointset, 0.5);
+        var hullPts = hull(pointset, 0.0011, ['.lng', '.lat']);
         console.timeEnd('hull');
         console.log('hullPts.length: ', hullPts.length);
 
-        L.polygon(hullPts, {weight: 2}).addTo(map);
+        // hullPts.forEach(function(pt) {
+        //     console.log('{lng: ' + pt.lng + ', lat: ' + pt.lat + '}, ');
+        // });
 
+        L.polygon(hullPts, {weight: 2}).addTo(map);
     };
     </script>
 </body>
