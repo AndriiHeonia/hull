@@ -270,7 +270,7 @@ function _concave(convex, maxSqEdgeLen, maxSearchArea, grid, edgeSkipList) {
             edgeSkipList[keyInSkipList] === true) { continue; }
 
         scaleFactor = 0;
-        bBoxAround = _bBoxAroundEdge(edge, CELL_SIZE);
+        bBoxAround = _bBoxAroundEdge(edge);
         do {
             bBoxAround = grid.extendBbox(bBoxAround, scaleFactor);
             bBoxWidth = bBoxAround[2] - bBoxAround[0];
