@@ -193,7 +193,7 @@ function _intersect(segment, pointset) {
     return false;
 }
 
-function _bBoxAroundPoints(pointset) {
+function _occupiedArea(pointset) {
     var minX = Infinity,
         minY = Infinity,
         maxX = -Infinity,
@@ -215,12 +215,12 @@ function _bBoxAroundPoints(pointset) {
     }
 
     return [
-        minX, minY, // tl
-        maxX, maxY  // br
+        maxX - minX, // width
+        maxY - minY  // height
     ];
 }
 
-function _bBoxAroundEdge(edge) {
+function _bBoxAround(edge) {
     return [
         Math.min(edge[0][0], edge[1][0]), // left
         Math.min(edge[0][1], edge[1][1]), // top
@@ -270,7 +270,7 @@ function _concave(convex, maxSqEdgeLen, maxSearchArea, grid, edgeSkipList) {
             edgeSkipList[keyInSkipList] === true) { continue; }
 
         scaleFactor = 0;
-        bBoxAround = _bBoxAroundEdge(edge);
+        bBoxAround = _bBoxAround(edge);
         do {
             bBoxAround = grid.extendBbox(bBoxAround, scaleFactor);
             bBoxWidth = bBoxAround[2] - bBoxAround[0];
@@ -302,8 +302,9 @@ function hull(pointset, concavity, format) {
     var convex,
         concave,
         innerPoints,
-        bBoxAroundPoints,
+        occupiedArea,
         maxSearchArea,
+        cellSize,
         maxEdgeLen = concavity || 20;
 
     if (pointset.length < 4) {
@@ -311,25 +312,27 @@ function hull(pointset, concavity, format) {
     }
 
     pointset = _sortByX(formatUtil.toXy(pointset, format));
-    bBoxAroundPoints = _bBoxAroundPoints(pointset);
+    occupiedArea = _occupiedArea(pointset);
     maxSearchArea = [
-        (bBoxAroundPoints[2] - bBoxAroundPoints[0]) * MAX_SEARCH_BBOX_SIZE_PERCENT,
-        (bBoxAroundPoints[3] - bBoxAroundPoints[1]) * MAX_SEARCH_BBOX_SIZE_PERCENT
+        occupiedArea[0] * MAX_SEARCH_BBOX_SIZE_PERCENT,
+        occupiedArea[1] * MAX_SEARCH_BBOX_SIZE_PERCENT
     ];
 
     convex = convexHull(pointset);
     innerPoints = pointset.filter(function(pt) {
         return convex.indexOf(pt) < 0;
     });
+
+    cellSize = Math.ceil(1 / (pointset.length / (occupiedArea[0] * occupiedArea[1])));
+
     concave = _concave(
         convex, Math.pow(maxEdgeLen, 2),
-        maxSearchArea, grid(innerPoints, CELL_SIZE), {});
+        maxSearchArea, grid(innerPoints, cellSize), {});
  
     return formatUtil.fromXy(concave, format);
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
-var CELL_SIZE = 10;
 var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.6;
 
 module.exports = hull;

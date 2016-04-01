@@ -21,11 +21,11 @@
             c = document.getElementById('canv'),
             ctx = c.getContext('2d');
 
-        // pointset = geoNorvay600k;
-        // map = L.map('mapContainer').setView({lat: 67.23806155909902, lng: 23.5546875}, 4);
+        pointset = geoNorvay600k;
+        map = L.map('mapContainer').setView({lat: 67.23806155909902, lng: 23.5546875}, 4);
 
-        pointset = geo;
-        map = L.map('mapContainer').setView(pointset[pointset.length-1], 15);
+        // pointset = geo;
+        // map = L.map('mapContainer').setView(pointset[pointset.length-1], 15);
 
         L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
 			maxZoom: 18,
@@ -60,8 +60,8 @@
         });
 
         console.time('hull');
-        // var hullPts = hull(pointset, 0.5);
-        var hullPts = hull(pointset, 0.0011, ['.lng', '.lat']);
+        var hullPts = hull(pointset, 0.5);
+        // var hullPts = hull(pointset, 0.0011, ['.lng', '.lat']);
         console.timeEnd('hull');
         console.log('hullPts.length: ', hullPts.length);
 
