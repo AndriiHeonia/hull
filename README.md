@@ -43,9 +43,9 @@ Let's see step by step what happens when you call `hull()` function:
 </ol>
 
 ## Development
-	npm install # install dependencies
-	npm test	# build dist file and run tests
-	npm run-script watch # watch ./src dir and rebuild dist file
+	npm install             # install dependencies
+	npm test	            # build dist file and run tests
+	npm run-script watch    # watch ./src dir and rebuild dist file
 
 ## Contribute
 
