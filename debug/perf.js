@@ -137,24 +137,24 @@ console.timeEnd('hull(geoNorvay600k, 0.5)');
 
 // version 0.2.8:
 
-// hull(horse13k, 20): 186ms
+// hull(horse13k, 20): 192ms
 // hull(horse26k, 20): 245ms
-// hull(horse52k, 20): 269ms
-// hull(horse131k, 20): 770ms
+// hull(horse52k, 20): 397ms
+// hull(horse131k, 20): 766ms
 
-// hull(owl15k, 20): 61ms
-// hull(owl30k, 20): 91ms
+// hull(owl15k, 20): 83ms
+// hull(owl30k, 20): 80ms
 // hull(owl58k, 20): 174ms
-// hull(owl102k, 20): 233ms
+// hull(owl102k, 20): 226ms
 
-// hull(horse13k, 10): 1854ms
-// hull(horse26k, 10): 907ms
-// hull(horse52k, 10): 518ms
-// hull(horse131k, 10): 1242ms
+// hull(horse13k, 10): 2868ms
+// hull(horse26k, 10): 1100ms
+// hull(horse52k, 10): 695ms
+// hull(horse131k, 10): 1265ms
 
-// hull(owl15k, 10): 2380ms
-// hull(owl30k, 10): 428ms
-// hull(owl58k, 10): 245ms
-// hull(owl102k, 10): 304ms
+// hull(owl15k, 10): 2347ms
+// hull(owl30k, 10): 422ms
+// hull(owl58k, 10): 251ms
+// hull(owl102k, 10): 315ms
 
-// hull(geoNorvay600k, 0.5): 333637ms
+// hull(geoNorvay600k, 0.5): 271473ms
