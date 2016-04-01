@@ -30,7 +30,7 @@ Let's see step by step what happens when you call `hull()` function:
         <div><img src="https://raw.githubusercontent.com/AndriiHeonia/hull/master/readme-imgs/1.png" /></div>
     </li>
     <li>
-        <div>After that, the edges flex inward (according to `concavity` param). For example:</div>
+        <div>After that, the edges flex inward (according to the `concavity` param). For example:</div>
         <div>
             <img src="https://raw.githubusercontent.com/AndriiHeonia/hull/master/readme-imgs/2_1.png" />
             `concavity = 80`<br/>
@@ -53,7 +53,7 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## To-do
 
-* think about parallelisation of the calculations (on GPU or CPU);
+* think about parallelisation (on GPU or CPU);
 * think about holes;
 * think about automatic `concavity` adjustment based on density.
 
@@ -69,12 +69,14 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## Changelog
 
+### 0.2.8 — 01.04.2016
+Added edgeSkipList to increase performance (especially for the highly accurate shapes with the small `concavity` number).
 ### 0.2.7 — 01.05.2015
-Fix bower.json
+Fixed bower.json
 ### 0.2.6 — 01.05.2015
-Fix bower.json
+Fixed bower.json
 ### 0.2.5 — 01.05.2015
-Add Bower support
+Bower support
 ### 0.2.4 — 23.03.2015
 Minor fixes (copyrights)
 ### 0.2.3 — 04.02.2015
