@@ -69,6 +69,8 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## Changelog
 
+### 0.2.9 — 28.07.2016
+Fixed modification of the initial array, added filtration of the duplicates
 ### 0.2.8 — 01.04.2016
 Added edgeSkipList to increase performance of the highly accurate shapes (with the small `concavity` number) + refactoring.
 ### 0.2.7 — 01.05.2015

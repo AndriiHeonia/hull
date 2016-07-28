@@ -86,7 +86,7 @@ console.timeEnd('hull(owl102k, 10)');
 
 console.log('\n');
 
-// geoNorvay600k, concavity = 0.2
+// geoNorvay600k, concavity = 0.5
 
 console.time('hull(geoNorvay600k, 0.5)');
 hull(geoNorvay600k, 0.5);
@@ -158,3 +158,29 @@ console.timeEnd('hull(geoNorvay600k, 0.5)');
 // hull(owl102k, 10): 309ms
 
 // hull(geoNorvay600k, 0.5): 116772ms
+
+// ------------------------------
+
+// version 0.2.9:
+
+// hull(horse13k, 20): 233ms
+// hull(horse26k, 20): 240ms
+// hull(horse52k, 20): 328ms
+// hull(horse131k, 20): 917ms
+
+// hull(owl15k, 20): 50ms
+// hull(owl30k, 20): 69ms
+// hull(owl58k, 20): 128ms
+// hull(owl102k, 20): 284ms
+
+// hull(horse13k, 10): 1160ms
+// hull(horse26k, 10): 675ms
+// hull(horse52k, 10): 902ms
+// hull(horse131k, 10): 1215ms
+
+// hull(owl15k, 10): 393ms
+// hull(owl30k, 10): 204ms
+// hull(owl58k, 10): 194ms
+// hull(owl102k, 10): 279ms
+
+// hull(geoNorvay600k, 0.5): 116033ms

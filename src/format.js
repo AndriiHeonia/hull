@@ -2,7 +2,7 @@ module.exports = {
 
     toXy: function(pointset, format) {
         if (format === undefined) {
-            return pointset;
+            return pointset.slice();
         }
         return pointset.map(function(pt) {
             /*jslint evil: true */
@@ -13,7 +13,7 @@ module.exports = {
 
     fromXy: function(pointset, format) {
         if (format === undefined) {
-            return pointset;
+            return pointset.slice();
         }
         return pointset.map(function(pt) {
             /*jslint evil: true */
