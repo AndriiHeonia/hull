@@ -44,7 +44,7 @@ module.exports = {
 
     toXy: function(pointset, format) {
         if (format === undefined) {
-            return pointset;
+            return pointset.slice();
         }
         return pointset.map(function(pt) {
             /*jslint evil: true */
@@ -55,7 +55,7 @@ module.exports = {
 
     fromXy: function(pointset, format) {
         if (format === undefined) {
-            return pointset;
+            return pointset.slice();
         }
         return pointset.map(function(pt) {
             /*jslint evil: true */
@@ -154,6 +154,13 @@ var intersect = require('./intersect.js');
 var grid = require('./grid.js');
 var formatUtil = require('./format.js');
 var convexHull = require('./convex.js');
+
+function _filterDuplicates(pointset) {
+    return pointset.filter(function(el, idx, arr) {
+        var prevEl = arr[idx - 1];
+        return idx === 0 || !(prevEl[0] === el[0] && prevEl[1] === el[1]);
+    });
+}
 
 function _sortByX(pointset) {
     return pointset.sort(function(a, b) {
@@ -305,25 +312,27 @@ function hull(pointset, concavity, format) {
         occupiedArea,
         maxSearchArea,
         cellSize,
+        points,
         maxEdgeLen = concavity || 20;
 
     if (pointset.length < 4) {
-        return pointset;
+        return pointset.slice();
     }
 
-    pointset = _sortByX(formatUtil.toXy(pointset, format));
-    occupiedArea = _occupiedArea(pointset);
+    points = _filterDuplicates(_sortByX(formatUtil.toXy(pointset, format)));
+
+    occupiedArea = _occupiedArea(points);
     maxSearchArea = [
         occupiedArea[0] * MAX_SEARCH_BBOX_SIZE_PERCENT,
         occupiedArea[1] * MAX_SEARCH_BBOX_SIZE_PERCENT
     ];
 
-    convex = convexHull(pointset);
-    innerPoints = pointset.filter(function(pt) {
+    convex = convexHull(points);
+    innerPoints = points.filter(function(pt) {
         return convex.indexOf(pt) < 0;
     });
 
-    cellSize = Math.ceil(1 / (pointset.length / (occupiedArea[0] * occupiedArea[1])));
+    cellSize = Math.ceil(1 / (points.length / (occupiedArea[0] * occupiedArea[1])));
 
     concave = _concave(
         convex, Math.pow(maxEdgeLen, 2),
