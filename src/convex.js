@@ -30,8 +30,8 @@ function _lowerTangent(pointset) {
 // pointset has to be sorted by X
 function convex(pointset) {
     var convex,
-    upper = _upperTangent(pointset),
-    lower = _lowerTangent(pointset);
+        upper = _upperTangent(pointset),
+        lower = _lowerTangent(pointset);
     convex = lower.concat(upper);
     convex.push(pointset[0]);  
     return convex;  
