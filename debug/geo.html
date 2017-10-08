@@ -7,6 +7,7 @@
 
     <script src="./data/geo.js"></script>
     <script src="./data/geoNorvay600k.js"></script>
+    <script src="./data/geoDateBorder.js"></script>
 
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
     <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
@@ -17,23 +18,31 @@
     <script>
     var map;
     window.onload = function() {
-        var pointset,
+        var mapOpts = {inertia: false},
+            pointset,
+            format,
+            concavity,
             c = document.getElementById('canv'),
             ctx = c.getContext('2d');
 
-        pointset = geoNorvay600k;
-        map = L.map('mapContainer').setView({lat: 67.23806155909902, lng: 23.5546875}, 4);
+        // pointset = geoNorvay600k;
+        // concavity = 0.5;
+        // map = L.map('mapContainer', mapOpts).setView({lat: 67.23806155909902, lng: 23.5546875}, 4);
 
-        // pointset = geo;
-        // map = L.map('mapContainer').setView(pointset[pointset.length-1], 15);
+        pointset = geo;
+        concavity = 0.0011;
+        format = ['.lng', '.lat'];
+        map = L.map('mapContainer', mapOpts).setView(pointset[pointset.length-1], 15);
 
-        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
-			maxZoom: 18,
-			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
-			id: 'mapbox.streets'
-		}).addTo(map);
+        // pointset = geoDateBorder;
+        // concavity = 30;
+        // format = ['.lng', '.lat'];
+        // map = L.map('mapContainer', mapOpts).setView(pointset[0], 1);
+
+        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
 
         function clearCanvas() {
             ctx.clearRect(0, 0, c.width, c.height);
@@ -43,7 +52,7 @@
                 var pt = map.latLngToContainerPoint(pointset[i]);
                 ctx.fillStyle="red";
                 ctx.beginPath();
-                ctx.arc(pt.x, pt.y, 0.5, 0, 2 * Math.PI);
+                ctx.arc(pt.x, pt.y, 2, 0, 2 * Math.PI);
                 ctx.fill();
                 ctx.closePath();
             }
@@ -55,13 +64,12 @@
         map.on('dragend', drawAllPoints);
         map.on('zoomend', drawAllPoints);
 
-        map.on('click', function(e) {
-           console.log(e);
-        });
+        // map.on('click', function(e) {
+        //    console.log(e);
+        // });
 
         console.time('hull');
-        var hullPts = hull(pointset, 0.5);
-        // var hullPts = hull(pointset, 0.0011, ['.lng', '.lat']);
+        var hullPts = hull(pointset, concavity, format);
         console.timeEnd('hull');
         console.log('hullPts.length: ', hullPts.length);
 
