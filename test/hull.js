@@ -20,8 +20,20 @@ module.exports = function() {
         assert.deepEqual(hull(points, 0.0011, ['.lng', '.lat']), expected);
     });
 
-    it('should return first point as last point', function() {
+    it('should append the first point', function() {
         var points = [[141, 408], [160, 400], [177, 430]];
+        var expected = [[141, 408], [160, 400], [177, 430], [141, 408]];
+        assert.deepEqual(hull(points, 50), expected);
+    });
+
+    it('should not append the first point', function() {
+        var points = [[141, 408], [160, 400], [141, 408]];
+        var expected = [[141, 408], [160, 400], [141, 408]];
+        assert.deepEqual(hull(points, 50), expected);
+    });
+
+    it('should not append the first point', function() {
+        var points = [[141, 408], [160, 400], [177, 430], [141, 408]];
         var expected = [[141, 408], [160, 400], [177, 430], [141, 408]];
         assert.deepEqual(hull(points, 50), expected);
     });

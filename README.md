@@ -69,6 +69,8 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## Changelog
 
+### 0.2.11 — 05.05.2019
+Return the first point as the last point when fewer than 4 unique points are provided.
 ### 0.2.10 — 04.09.2016
 Fixed missing "var" declaration
 ### 0.2.9 — 28.07.2016

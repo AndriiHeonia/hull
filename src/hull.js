@@ -171,11 +171,11 @@ function hull(pointset, concavity, format) {
         points,
         maxEdgeLen = concavity || 20;
 
-    if (pointset.length < 4) {
-        return pointset.concat([pointset[0]]).slice();
-    }
-
     points = _filterDuplicates(_sortByX(formatUtil.toXy(pointset, format)));
+
+    if (points.length < 4) {
+        return points.concat([points[0]]);
+    }
 
     occupiedArea = _occupiedArea(points);
     maxSearchArea = [
