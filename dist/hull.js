@@ -1,4 +1,4 @@
-!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.hull=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.hull = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 function _cross(o, a, b) {
     return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
 }
@@ -284,7 +284,7 @@ function _concave(convex, maxSqEdgeLen, maxSearchArea, grid, edgeSkipList) {
             bBoxWidth = bBoxAround[2] - bBoxAround[0];
             bBoxHeight = bBoxAround[3] - bBoxAround[1];
 
-            midPoint = _midPoint(edge, grid.rangePoints(bBoxAround), convex);            
+            midPoint = _midPoint(edge, grid.rangePoints(bBoxAround), convex);
             scaleFactor++;
         }  while (midPoint === null && (maxSearchArea[0] > bBoxWidth || maxSearchArea[1] > bBoxHeight));
 
@@ -316,11 +316,11 @@ function hull(pointset, concavity, format) {
         points,
         maxEdgeLen = concavity || 20;
 
-    if (pointset.length < 4) {
-        return pointset.slice();
-    }
-
     points = _filterDuplicates(_sortByX(formatUtil.toXy(pointset, format)));
+
+    if (points.length < 4) {
+        return points.concat([points[0]]);
+    }
 
     occupiedArea = _occupiedArea(points);
     maxSearchArea = [
@@ -338,7 +338,7 @@ function hull(pointset, concavity, format) {
     concave = _concave(
         convex, Math.pow(maxEdgeLen, 2),
         maxSearchArea, grid(innerPoints, cellSize), {});
- 
+
     return formatUtil.fromXy(concave, format);
 }
 
@@ -346,6 +346,7 @@ var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
 var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.6;
 
 module.exports = hull;
+
 },{"./convex.js":1,"./format.js":2,"./grid.js":3,"./intersect.js":5}],5:[function(require,module,exports){
 function ccw(x1, y1, x2, y2, x3, y3) {           
     var cw = ((y3 - y1) * (x2 - x1)) - ((y2 - y1) * (x3 - x1));

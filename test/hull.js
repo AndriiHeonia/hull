@@ -19,4 +19,22 @@ module.exports = function() {
         var expected = [{lng: -0.206792373176235, lat: 51.4911165465815 }, {lng: -0.207062672933557, lat: 51.4915703125214 }, {lng: -0.207465840096923, lat: 51.4912077781219 }, {lng: -0.210193421020222, lat: 51.4918159814458 }, {lng: -0.214944392455692, lat: 51.4929945001276 }, {lng: -0.216849005460861, lat: 51.4921781720221 }, {lng: -0.214162055384851, lat: 51.4905275966855 }, {lng: -0.212571431609104, lat: 51.4903145141462 }, {lng: -0.209680931181673, lat: 51.4901894811742 }, {lng: -0.208161917730384, lat: 51.4903551232517 }, {lng: -0.208133371509344, lat: 51.4910830915252 }, {lng: -0.206792373176235, lat: 51.4911165465815}];
         assert.deepEqual(hull(points, 0.0011, ['.lng', '.lat']), expected);
     });
+
+    it('should append the first point', function() {
+        var points = [[141, 408], [160, 400], [177, 430]];
+        var expected = [[141, 408], [160, 400], [177, 430], [141, 408]];
+        assert.deepEqual(hull(points, 50), expected);
+    });
+
+    it('should not append the first point', function() {
+        var points = [[141, 408], [160, 400], [141, 408]];
+        var expected = [[141, 408], [160, 400], [141, 408]];
+        assert.deepEqual(hull(points, 50), expected);
+    });
+
+    it('should not append the first point', function() {
+        var points = [[141, 408], [160, 400], [177, 430], [141, 408]];
+        var expected = [[141, 408], [160, 400], [177, 430], [141, 408]];
+        assert.deepEqual(hull(points, 50), expected);
+    });
 }
