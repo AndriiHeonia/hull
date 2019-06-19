@@ -53,8 +53,8 @@ Grid.prototype = {
     },
 
     point2CellXY: function(point) { // (Array) -> Array
-        var x = parseInt(point[0] / this._cellSize),
-            y = parseInt(point[1] / this._cellSize);
+        var x = (point[0] / this._cellSize) | 0,
+            y = (point[1] / this._cellSize) | 0;
         return [x, y];
     },
 

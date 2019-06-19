@@ -122,8 +122,8 @@ Grid.prototype = {
     },
 
     point2CellXY: function(point) { // (Array) -> Array
-        var x = parseInt(point[0] / this._cellSize),
-            y = parseInt(point[1] / this._cellSize);
+        var x = (point[0] / this._cellSize) | 0,
+            y = (point[1] / this._cellSize) | 0;
         return [x, y];
     },
 
@@ -272,7 +272,8 @@ function _concave(convex, maxSqEdgeLen, maxSearchArea, grid, edgeSkipList) {
 
     for (var i = 0; i < convex.length - 1; i++) {
         edge = [convex[i], convex[i + 1]];
-        keyInSkipList = i + ',' + (i + 1);
+        // generate a key in the format X0,Y0,X1,Y1
+        keyInSkipList = edge[0][0] + ',' + edge[0][1] + ',' + edge[1][0] + ',' + edge[1][1];
 
         if (_sqLength(edge[0], edge[1]) < maxSqEdgeLen ||
             edgeSkipList.has(keyInSkipList)) { continue; }
