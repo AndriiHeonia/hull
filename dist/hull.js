@@ -272,10 +272,10 @@ function _concave(convex, maxSqEdgeLen, maxSearchArea, grid, edgeSkipList) {
 
     for (var i = 0; i < convex.length - 1; i++) {
         edge = [convex[i], convex[i + 1]];
-        keyInSkipList = edge[0].join() + ',' + edge[1].join();
+        keyInSkipList = i + ',' + (i + 1);
 
         if (_sqLength(edge[0], edge[1]) < maxSqEdgeLen ||
-            edgeSkipList[keyInSkipList] === true) { continue; }
+            edgeSkipList.has(keyInSkipList)) { continue; }
 
         scaleFactor = 0;
         bBoxAround = _bBoxAround(edge);
@@ -289,7 +289,7 @@ function _concave(convex, maxSqEdgeLen, maxSearchArea, grid, edgeSkipList) {
         }  while (midPoint === null && (maxSearchArea[0] > bBoxWidth || maxSearchArea[1] > bBoxHeight));
 
         if (bBoxWidth >= maxSearchArea[0] && bBoxHeight >= maxSearchArea[1]) {
-            edgeSkipList[keyInSkipList] = true;
+            edgeSkipList.add(keyInSkipList);
         }
 
         if (midPoint !== null) {
@@ -337,9 +337,13 @@ function hull(pointset, concavity, format) {
 
     concave = _concave(
         convex, Math.pow(maxEdgeLen, 2),
-        maxSearchArea, grid(innerPoints, cellSize), {});
+        maxSearchArea, grid(innerPoints, cellSize), new Set());
 
-    return formatUtil.fromXy(concave, format);
+    if (format) {
+        return formatUtil.fromXy(concave, format);
+    } else {
+        return concave;
+    }
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
