@@ -127,7 +127,8 @@ function _concave(convex, maxSqEdgeLen, maxSearchArea, grid, edgeSkipList) {
 
     for (var i = 0; i < convex.length - 1; i++) {
         edge = [convex[i], convex[i + 1]];
-        keyInSkipList = edge[0].join() + ',' + edge[1].join();
+        // generate a key in the format X0,Y0,X1,Y1
+        keyInSkipList = edge[0][0] + ',' + edge[0][1] + ',' + edge[1][0] + ',' + edge[1][1];
 
         if (_sqLength(edge[0], edge[1]) < maxSqEdgeLen ||
             edgeSkipList.has(keyInSkipList)) { continue; }
