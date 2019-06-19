@@ -194,7 +194,11 @@ function hull(pointset, concavity, format) {
         convex, Math.pow(maxEdgeLen, 2),
         maxSearchArea, grid(innerPoints, cellSize), new Set());
 
-    return formatUtil.fromXy(concave, format);
+    if (format) {
+        return formatUtil.fromXy(concave, format);
+    } else {
+        return concave;
+    }
 }
 
 var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
