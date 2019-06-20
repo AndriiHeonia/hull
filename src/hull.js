@@ -12,19 +12,21 @@ var formatUtil = require('./format.js');
 var convexHull = require('./convex.js');
 
 function _filterDuplicates(pointset) {
-    return pointset.filter(function(el, idx, arr) {
-        var prevEl = arr[idx - 1];
-        return idx === 0 || !(prevEl[0] === el[0] && prevEl[1] === el[1]);
-    });
+    const unique = [pointset[0]];
+    let lastPoint = pointset[0];
+    for (let i = 1; i < pointset.length; i++) {
+        const currentPoint = pointset[i];
+        if (lastPoint[0] !== currentPoint[0] || lastPoint[1] !== currentPoint[1]) {
+            unique.push(currentPoint);
+        }
+        lastPoint = currentPoint;
+    }
+    return unique;
 }
 
 function _sortByX(pointset) {
     return pointset.sort(function(a, b) {
-        if (a[0] == b[0]) {
-            return a[1] - b[1];
-        } else {
-            return a[0] - b[0];
-        }
+        return (a[0] - b[0]) || (a[1] - b[1]);
     });
 }
 
