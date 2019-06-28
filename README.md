@@ -43,7 +43,7 @@ Let's see step by step what happens when you call `hull()` function:
 </ol>
 
 ## Limitations
-This library relies on ES6. The ES6 features used are 
+This library relies on ES6. The ES6 features used are:
 - `new Set(null)`, `Set#add`, `Set#has`
 - `let`, `const`
 - `Math.trunc` (if available)
@@ -52,7 +52,7 @@ You may use [polyfills](https://www.npmjs.com/package/core-js) for `Set` and com
 
 ## Development
 	npm install             # install dependencies
-	npm test	            # build dist file and run tests
+	npm test                # build dist file and run tests
 	npm run-script watch    # watch ./src dir and rebuild dist file
 
 ## Contribute
@@ -61,7 +61,6 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## To-do
 
-* think about parallelisation (on GPU or CPU);
 * think about holes;
 * think about automatic `concavity` adjustment based on density.
 
