@@ -1,7 +1,7 @@
-var assert = require("assert"),
+const assert = require("assert"),
     grid = require('../src/grid.js');
 
-var points = [
+const points = [
     // cell 0,0
     [0, 0],
     [1, 1],
@@ -17,7 +17,7 @@ var points = [
     [10, 10],
     [11, 11]
 ];
-var g = grid(points, 10);
+const g = grid(points, 10);
 
 module.exports = function() {
     describe('cellPoints', function() {

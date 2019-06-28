@@ -1,4 +1,4 @@
-var geoDateBorder =[
+const geoDateBorder =[
     {
         "lng":145.529,
         "lat":18.515
