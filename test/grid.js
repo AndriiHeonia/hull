@@ -1,7 +1,7 @@
-var assert = require("assert"),
+const assert = require("assert"),
     grid = require('../src/grid.js');
 
-var points = [
+const points = [
     // cell 0,0
     [0, 0],
     [1, 1],
@@ -17,7 +17,7 @@ var points = [
     [10, 10],
     [11, 11]
 ];
-var g = grid(points, 10);
+const g = grid(points, 10);
 
 module.exports = function() {
     describe('cellPoints', function() {
@@ -35,21 +35,18 @@ module.exports = function() {
         });
     });
 
-    describe('point2CellXY', function() {
-        it('should return [0,0]', function() {
-            assert.deepEqual(g.point2CellXY([1, 1]), [0, 0]);
+    describe('coordToCellNum', function() {
+        it('should return 0 for 0', function() {
+            assert.deepEqual(g.coordToCellNum(1), 0);
         });
-        it('should return [0,1]', function() {
-            assert.deepEqual(g.point2CellXY([1, 11]), [0, 1]);
+        it('should return 1 for 11', function() {
+            assert.deepEqual(g.coordToCellNum(11), 1);
         });
-        it('should return [1,0]', function() {
-            assert.deepEqual(g.point2CellXY([11, 1]), [1, 0]);
+        it('should return 1 for 10', function() {
+            assert.deepEqual(g.coordToCellNum(10), 1);
         });
-        it('should return [1,1]', function() {
-            assert.deepEqual(g.point2CellXY([10, 10]), [1, 1]);
-        });
-        it('should return [1,1]', function() {
-            assert.deepEqual(g.point2CellXY([11, 11]), [1, 1]);
+        it('should return 1 for 11', function() {
+            assert.deepEqual(g.coordToCellNum(11), 1);
         });
     });
 

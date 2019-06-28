@@ -6,7 +6,7 @@ module.exports = {
         }
         return pointset.map(function(pt) {
             /*jslint evil: true */
-            var _getXY = new Function('pt', 'return [pt' + format[0] + ',' + 'pt' + format[1] + '];');
+            const _getXY = new Function('pt', 'return [pt' + format[0] + ',' + 'pt' + format[1] + '];');
             return _getXY(pt);
         });
     },
@@ -17,7 +17,7 @@ module.exports = {
         }
         return pointset.map(function(pt) {
             /*jslint evil: true */
-            var _getObj = new Function('pt', 'var o = {}; o' + format[0] + '= pt[0]; o' + format[1] + '= pt[1]; return o;');
+            const _getObj = new Function('pt', 'const o = {}; o' + format[0] + '= pt[0]; o' + format[1] + '= pt[1]; return o;');
             return _getObj(pt);
         });
     }

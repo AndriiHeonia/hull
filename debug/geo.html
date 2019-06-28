@@ -16,12 +16,9 @@
     <div id="mapContainer" style="width: 1024px; height: 650px; position: absolute; left: 0px; top: 0px;"></div>
     <canvas id="canv" width="1024" height="650" style="pointer-events: none; border: 1px solid black; position: absolute; left: 0px; top: 0px;"></canvas>
     <script>
-    var map;
+    let map;
     window.onload = function() {
-        var mapOpts = {inertia: false},
-            pointset,
-            format,
-            concavity,
+        const mapOpts = {inertia: false},
             c = document.getElementById('canv'),
             ctx = c.getContext('2d');
 
@@ -29,9 +26,9 @@
         // concavity = 0.5;
         // map = L.map('mapContainer', mapOpts).setView({lat: 67.23806155909902, lng: 23.5546875}, 4);
 
-        pointset = geo;
-        concavity = 0.0011;
-        format = ['.lng', '.lat'];
+        const pointset = geo;
+        const concavity = 0.0011;
+        const format = ['.lng', '.lat'];
         map = L.map('mapContainer', mapOpts).setView(pointset[pointset.length-1], 15);
 
         // pointset = geoDateBorder;
@@ -48,8 +45,8 @@
             ctx.clearRect(0, 0, c.width, c.height);
         }
         function drawAllPoints() {
-            for (var i = 0; i < pointset.length; i++) {
-                var pt = map.latLngToContainerPoint(pointset[i]);
+            for (let i = 0; i < pointset.length; i++) {
+                const pt = map.latLngToContainerPoint(pointset[i]);
                 ctx.fillStyle="red";
                 ctx.beginPath();
                 ctx.arc(pt.x, pt.y, 2, 0, 2 * Math.PI);
@@ -69,7 +66,7 @@
         // });
 
         console.time('hull');
-        var hullPts = hull(pointset, concavity, format);
+        const hullPts = hull(pointset, concavity, format);
         console.timeEnd('hull');
         console.log('hullPts.length: ', hullPts.length);
 

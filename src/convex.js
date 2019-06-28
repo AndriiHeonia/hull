@@ -3,8 +3,8 @@ function _cross(o, a, b) {
 }
 
 function _upperTangent(pointset) {
-    var lower = [];
-    for (var l = 0; l < pointset.length; l++) {
+    const lower = [];
+    for (let l = 0; l < pointset.length; l++) {
         while (lower.length >= 2 && (_cross(lower[lower.length - 2], lower[lower.length - 1], pointset[l]) <= 0)) {
             lower.pop();
         }
@@ -15,9 +15,9 @@ function _upperTangent(pointset) {
 }
 
 function _lowerTangent(pointset) {
-    var reversed = pointset.reverse(),
+    const reversed = pointset.reverse(),
         upper = [];
-    for (var u = 0; u < reversed.length; u++) {
+    for (let u = 0; u < reversed.length; u++) {
         while (upper.length >= 2 && (_cross(upper[upper.length - 2], upper[upper.length - 1], reversed[u]) <= 0)) {
             upper.pop();
         }
@@ -29,10 +29,9 @@ function _lowerTangent(pointset) {
 
 // pointset has to be sorted by X
 function convex(pointset) {
-    var convex,
-        upper = _upperTangent(pointset),
-        lower = _lowerTangent(pointset);
-    convex = lower.concat(upper);
+    const upper = _upperTangent(pointset),
+          lower = _lowerTangent(pointset);
+    const convex = lower.concat(upper);
     convex.push(pointset[0]);  
     return convex;  
 }

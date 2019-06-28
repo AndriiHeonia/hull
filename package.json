@@ -28,7 +28,8 @@
     },
     "jshintConfig": {
         "forin": false,
-        "node": true
+        "node": true,
+        "esversion": 6
     },
     "license": "BSD"
 }

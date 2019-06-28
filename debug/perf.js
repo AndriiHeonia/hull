@@ -1,4 +1,4 @@
-var horse13k = require('./data/horse13k.js'),
+const horse13k = require('./data/horse13k.js'),
     horse26k = require('./data/horse26k.js'),
     horse52k = require('./data/horse52k.js'),
     horse131k = require('./data/horse131k.js'),
@@ -8,7 +8,7 @@ var horse13k = require('./data/horse13k.js'),
     owl102k = require('./data/owl102k.js'),
     geoNorvay600k = require('./data/geoNorvay600k.js');
 
-var hull = require('../src/hull');
+const hull = require('../src/hull');
 
 // concavity = 20
 

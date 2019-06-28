@@ -21,7 +21,7 @@
 
     <script>
     window.onload = function() {
-        var c = document.getElementById('canv'),
+        const c = document.getElementById('canv'),
             ctx = c.getContext('2d'),
             debugCanv = document.getElementById('debugCanv'),
             debugCtx = debugCanv.getContext('2d'),
@@ -43,7 +43,7 @@
         }
 
         window.drawEdges = function(strip, color) {
-            for (var i = 0; i < strip.length - 1; i++) {
+            for (let i = 0; i < strip.length - 1; i++) {
                 edge = [strip[i], strip[i + 1]];
                 drawEdge(edge, color);
             }
@@ -64,7 +64,7 @@
             debugCtx.fillStyle = debugCtx.strokeStyle = color;
             debugCtx.lineWidth = 2;
             debugCtx.beginPath();
-            var x = rect[0],
+            const x = rect[0],
                 y = rect[1],
                 w = rect[2] - rect[0],
                 h = rect[3] - rect[1];
@@ -88,7 +88,7 @@
 
         // draw all pixels
         ctx.fillStyle="black";
-        for (var i = 0; i < pointset.length; i++) {
+        for (let i = 0; i < pointset.length; i++) {
             ctx.beginPath();
             ctx.arc(pointset[i][0], pointset[i][1], 1, 0, 2 * Math.PI, true);
             ctx.fill();
@@ -97,7 +97,7 @@
 
         // get and draw hull
         console.time('hull');
-        var pts = hull(pointset, 20);
+        const pts = hull(pointset, 20);
         console.timeEnd('hull');
         ctx.strokeStyle = "blue";
         ctx.lineWidth = 2;
