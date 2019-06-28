@@ -58,8 +58,12 @@ Grid.prototype = {
         return cell;
     },
 
-    point2Cell: function(x) { // (Array) -> Array
-        return (x * this._reverseCellSize) | 0;
+    trunc: Math.trunc || function(val) { // (number) -> number
+        return val - val % 1;
+    },
+
+    point2Cell: function(x) { // (number) -> number
+        return this.trunc(x * this._reverseCellSize);
     },
 
     extendBbox: function(bbox, scaleFactor) { // (Array, Number) -> Array
