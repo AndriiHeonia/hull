@@ -76,14 +76,16 @@ function Grid(points, cellSize) {
         const point = points[i];
         const x = this.point2Cell(point[0]);
         const y = this.point2Cell(point[1]);
-        if (this._cells[x] === undefined) {
+        let cellX = this._cells[x];
+        let cellXY;
+        if (!cellX) {
             const array = [];
             array[y] = [point];
             this._cells[x] = array;
-        } else if (this._cells[x][y] === undefined) {
-            this._cells[x][y] = [point];
+        } else if (!(cellXY = cellX[y])) {
+            cellX[y] = [point];
         } else {
-            this._cells[x][y].push(point);
+            cellXY.push(point);
         }
     }
 }
@@ -359,9 +361,8 @@ var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.6;
 module.exports = hull;
 
 },{"./convex.js":1,"./format.js":2,"./grid.js":3,"./intersect.js":5}],5:[function(require,module,exports){
-function ccw(x1, y1, x2, y2, x3, y3) {           
-    var cw = ((y3 - y1) * (x2 - x1)) - ((y2 - y1) * (x3 - x1));
-    return cw > 0 ? true : cw < 0 ? false : true; // colinear
+function ccw(x1, y1, x2, y2, x3, y3) {
+    return ((y3 - y1) * (x2 - x1)) - ((y2 - y1) * (x3 - x1)) >= 0; // colinear
 }
 
 function intersect(seg1, seg2) {

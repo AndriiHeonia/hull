@@ -7,11 +7,11 @@ function Grid(points, cellSize) {
         const point = points[i];
         const x = this.point2Cell(point[0]);
         const y = this.point2Cell(point[1]);
-        if (this._cells[x] === undefined) {
+        if (!this._cells[x]) {
             const array = [];
             array[y] = [point];
             this._cells[x] = array;
-        } else if (this._cells[x][y] === undefined) {
+        } else if (!this._cells[x][y]) {
             this._cells[x][y] = [point];
         } else {
             this._cells[x][y].push(point);
