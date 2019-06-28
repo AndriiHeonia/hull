@@ -35,18 +35,18 @@ module.exports = function() {
         });
     });
 
-    describe('point2Cell', function() {
+    describe('coordToCellNum', function() {
         it('should return 0 for 0', function() {
-            assert.deepEqual(g.point2Cell(1), 0);
+            assert.deepEqual(g.coordToCellNum(1), 0);
         });
         it('should return 1 for 11', function() {
-            assert.deepEqual(g.point2Cell(11), 1);
+            assert.deepEqual(g.coordToCellNum(11), 1);
         });
         it('should return 1 for 10', function() {
-            assert.deepEqual(g.point2Cell(10), 1);
+            assert.deepEqual(g.coordToCellNum(10), 1);
         });
         it('should return 1 for 11', function() {
-            assert.deepEqual(g.point2Cell(11), 1);
+            assert.deepEqual(g.coordToCellNum(11), 1);
         });
     });
 

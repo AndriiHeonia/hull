@@ -73,8 +73,8 @@ function Grid(points, cellSize) {
 
     for (let i = 0; i < points.length; i++) {
         const point = points[i];
-        const x = this.point2Cell(point[0]);
-        const y = this.point2Cell(point[1]);
+        const x = this.coordToCellNum(point[0]);
+        const y = this.coordToCellNum(point[1]);
         if (!this._cells[x]) {
             const array = [];
             array[y] = [point];
@@ -93,10 +93,10 @@ Grid.prototype = {
     },
 
     rangePoints: function(bbox) { // (Array) -> Array
-        const tlCellX = this.point2Cell(bbox[0]);
-        const tlCellY = this.point2Cell(bbox[1]);
-        const brCellX = this.point2Cell(bbox[2]);
-        const brCellY = this.point2Cell(bbox[3]);
+        const tlCellX = this.coordToCellNum(bbox[0]);
+        const tlCellY = this.coordToCellNum(bbox[1]);
+        const brCellX = this.coordToCellNum(bbox[2]);
+        const brCellY = this.coordToCellNum(bbox[3]);
         const points = [];
 
         for (let x = tlCellX; x <= brCellX; x++) {
@@ -109,8 +109,8 @@ Grid.prototype = {
     },
 
     removePoint: function(point) { // (Array) -> Array
-        const cellX = this.point2Cell(point[0]);
-        const cellY = this.point2Cell(point[1]);
+        const cellX = this.coordToCellNum(point[0]);
+        const cellY = this.coordToCellNum(point[1]);
         const cell = this._cells[cellX][cellY];
         let pointIdxInCell;
         
@@ -126,8 +126,12 @@ Grid.prototype = {
         return cell;
     },
 
-    point2Cell: function(x) { // (Array) -> Array
-        return (x * this._reverseCellSize) | 0;
+    trunc: Math.trunc || function(val) { // (number) -> number
+        return val - val % 1;
+    },
+
+    coordToCellNum: function(x) { // (number) -> number
+        return this.trunc(x * this._reverseCellSize);
     },
 
     extendBbox: function(bbox, scaleFactor) { // (Array, Number) -> Array
