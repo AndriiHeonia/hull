@@ -31,8 +31,8 @@ Grid.prototype = {
         const brCellY = this.point2Cell(bbox[3]);
         const points = [];
 
-        for (var x = tlCellX; x <= brCellX; x++) {
-            for (var y = tlCellY; y <= brCellY; y++) {
+        for (let x = tlCellX; x <= brCellX; x++) {
+            for (let y = tlCellY; y <= brCellY; y++) {
                 Array.prototype.push.apply(points, this.cellPoints(x, y));
             }
         }
@@ -46,7 +46,7 @@ Grid.prototype = {
         const cell = this._cells[cellX][cellY];
         let pointIdxInCell;
         
-        for (var i = 0; i < cell.length; i++) {
+        for (let i = 0; i < cell.length; i++) {
             if (cell[i][0] === point[0] && cell[i][1] === point[1]) {
                 pointIdxInCell = i;
                 break;

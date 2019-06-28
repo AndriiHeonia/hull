@@ -6,10 +6,10 @@
 
 'use strict';
 
-var intersect = require('./intersect.js');
-var grid = require('./grid.js');
-var formatUtil = require('./format.js');
-var convexHull = require('./convex.js');
+const intersect = require('./intersect.js');
+const grid = require('./grid.js');
+const formatUtil = require('./format.js');
+const convexHull = require('./convex.js');
 
 function _filterDuplicates(pointset) {
     const unique = [pointset[0]];
@@ -35,7 +35,7 @@ function _sqLength(a, b) {
 }
 
 function _cos(o, a, b) {
-    var aShifted = [a[0] - o[0], a[1] - o[1]],
+    const aShifted = [a[0] - o[0], a[1] - o[1]],
         bShifted = [b[0] - o[0], b[1] - o[1]],
         sqALen = _sqLength(o, a),
         sqBLen = _sqLength(o, b),
@@ -45,8 +45,8 @@ function _cos(o, a, b) {
 }
 
 function _intersect(segment, pointset) {
-    for (var i = 0; i < pointset.length - 1; i++) {
-        var seg = [pointset[i], pointset[i + 1]];
+    for (let i = 0; i < pointset.length - 1; i++) {
+        const seg = [pointset[i], pointset[i + 1]];
         if (segment[0][0] === seg[0][0] && segment[0][1] === seg[0][1] ||
             segment[0][0] === seg[1][0] && segment[0][1] === seg[1][1]) {
             continue;
@@ -59,12 +59,12 @@ function _intersect(segment, pointset) {
 }
 
 function _occupiedArea(pointset) {
-    var minX = Infinity,
-        minY = Infinity,
-        maxX = -Infinity,
-        maxY = -Infinity;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
 
-    for (var i = pointset.length - 1; i >= 0; i--) {
+    for (let i = pointset.length - 1; i >= 0; i--) {
         if (pointset[i][0] < minX) {
             minX = pointset[i][0];
         }
@@ -95,12 +95,12 @@ function _bBoxAround(edge) {
 }
 
 function _midPoint(edge, innerPoints, convex) {
-    var point = null,
+    let point = null,
         angle1Cos = MAX_CONCAVE_ANGLE_COS,
         angle2Cos = MAX_CONCAVE_ANGLE_COS,
         a1Cos, a2Cos;
 
-    for (var i = 0; i < innerPoints.length; i++) {
+    for (let i = 0; i < innerPoints.length; i++) {
         a1Cos = _cos(edge[0], edge[1], innerPoints[i]);
         a2Cos = _cos(edge[1], edge[0], innerPoints[i]);
 
@@ -118,25 +118,21 @@ function _midPoint(edge, innerPoints, convex) {
 }
 
 function _concave(convex, maxSqEdgeLen, maxSearchArea, grid, edgeSkipList) {
-    var edge,
-        keyInSkipList,
-        scaleFactor,
-        midPoint,
-        bBoxAround,
-        bBoxWidth,
-        bBoxHeight,
-        midPointInserted = false;
+    let midPointInserted = false;
 
-    for (var i = 0; i < convex.length - 1; i++) {
-        edge = [convex[i], convex[i + 1]];
+    for (let i = 0; i < convex.length - 1; i++) {
+        const edge = [convex[i], convex[i + 1]];
         // generate a key in the format X0,Y0,X1,Y1
-        keyInSkipList = edge[0][0] + ',' + edge[0][1] + ',' + edge[1][0] + ',' + edge[1][1];
+        const keyInSkipList = edge[0][0] + ',' + edge[0][1] + ',' + edge[1][0] + ',' + edge[1][1];
 
         if (_sqLength(edge[0], edge[1]) < maxSqEdgeLen ||
             edgeSkipList.has(keyInSkipList)) { continue; }
 
-        scaleFactor = 0;
-        bBoxAround = _bBoxAround(edge);
+        let scaleFactor = 0;
+        let bBoxAround = _bBoxAround(edge);
+        let bBoxWidth;
+        let bBoxHeight;
+        let midPoint;
         do {
             bBoxAround = grid.extendBbox(bBoxAround, scaleFactor);
             bBoxWidth = bBoxAround[2] - bBoxAround[0];
@@ -165,35 +161,28 @@ function _concave(convex, maxSqEdgeLen, maxSearchArea, grid, edgeSkipList) {
 }
 
 function hull(pointset, concavity, format) {
-    var convex,
-        concave,
-        innerPoints,
-        occupiedArea,
-        maxSearchArea,
-        cellSize,
-        points,
-        maxEdgeLen = concavity || 20;
+    let maxEdgeLen = concavity || 20;
 
-    points = _filterDuplicates(_sortByX(formatUtil.toXy(pointset, format)));
+    const points = _filterDuplicates(_sortByX(formatUtil.toXy(pointset, format)));
 
     if (points.length < 4) {
         return points.concat([points[0]]);
     }
 
-    occupiedArea = _occupiedArea(points);
-    maxSearchArea = [
+    const occupiedArea = _occupiedArea(points);
+    const maxSearchArea = [
         occupiedArea[0] * MAX_SEARCH_BBOX_SIZE_PERCENT,
         occupiedArea[1] * MAX_SEARCH_BBOX_SIZE_PERCENT
     ];
 
-    convex = convexHull(points);
-    innerPoints = points.filter(function(pt) {
+    const convex = convexHull(points);
+    const innerPoints = points.filter(function(pt) {
         return convex.indexOf(pt) < 0;
     });
 
-    cellSize = Math.ceil(1 / (points.length / (occupiedArea[0] * occupiedArea[1])));
+    const cellSize = Math.ceil(1 / (points.length / (occupiedArea[0] * occupiedArea[1])));
 
-    concave = _concave(
+    const concave = _concave(
         convex, Math.pow(maxEdgeLen, 2),
         maxSearchArea, grid(innerPoints, cellSize), new Set());
 
@@ -204,7 +193,7 @@ function hull(pointset, concavity, format) {
     }
 }
 
-var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
-var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.6;
+const MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
+const MAX_SEARCH_BBOX_SIZE_PERCENT = 0.6;
 
 module.exports = hull;
