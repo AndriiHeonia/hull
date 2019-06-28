@@ -42,6 +42,14 @@ Let's see step by step what happens when you call `hull()` function:
     </li>
 </ol>
 
+## Limitations
+This library relies on ES6. The ES6 features used are 
+- `new Set(null)`, `Set#add`, `Set#has`
+- `let`, `const`
+- `Math.trunc` (if available)
+
+You may use [polyfills](https://www.npmjs.com/package/core-js) for `Set` and compile with [babel](https://babeljs.io/) to continue to support old browsers.
+
 ## Development
 	npm install             # install dependencies
 	npm test	            # build dist file and run tests
@@ -69,6 +77,9 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## Changelog
 
+### 1.0.0 — 28.06.2019
+Change language level to ES6.
+Performance improvements.
 ### 0.2.11 — 05.05.2019
 Return the first point as the last point when fewer than 4 unique points are provided.
 ### 0.2.10 — 04.09.2016
