@@ -76,6 +76,8 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## Changelog
 
+### 1.0.1 — 24.10.2020
+Introduced fix that avoids hitting stack size limit on large arrays
 ### 1.0.0 — 28.06.2019
 Change language level to ES6.
 Performance improvements.
