@@ -101,7 +101,10 @@ Grid.prototype = {
 
         for (let x = tlCellX; x <= brCellX; x++) {
             for (let y = tlCellY; y <= brCellY; y++) {
-                Array.prototype.push.apply(points, this.cellPoints(x, y));
+                // replaced Array.prototype.push.apply to avoid hitting stack size limit on larger arrays.
+                for (let i = 0; i < this.cellPoints(x, y).length; i++) {
+                    points.push(this.cellPoints(x, y)[i]);
+                }
             }
         }
 
@@ -113,7 +116,7 @@ Grid.prototype = {
         const cellY = this.coordToCellNum(point[1]);
         const cell = this._cells[cellX][cellY];
         let pointIdxInCell;
-        
+
         for (let i = 0; i < cell.length; i++) {
             if (cell[i][0] === point[0] && cell[i][1] === point[1]) {
                 pointIdxInCell = i;
