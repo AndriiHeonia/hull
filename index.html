@@ -214,7 +214,7 @@ clusters.forEach(function(pointset) {
     ctx.lineWidth = 2;
     clusters.forEach(function(pointset, idx) {
         if(pointset.length < 50) { return; } // filter noise
-        
+
         var pts = hull(pointset, 30);
         ctx.strokeStyle = colors[idx];
         ctx.beginPath();
@@ -305,7 +305,7 @@ var pts = hull(pointset, 0.0011, ['.lng', '.lat']);
 <h3><a name="ex5" class="anchor" href="#ex5"><span class="octicon octicon-link"></span>Geo points on the globe</a></h3>
 <p>All calculations in hull.js based on the cartesian coordinate system. If you use it for the calculation and data visualization on the global map please don't forget that globe has the shape of geoid, latitude and longitude are angles (not points with X and Y), and after projection we have some map distortion. So, for the better accuracy you need to convert latitudes and longitudes to cartesian coordinates, calculate concave hull and then convert points back to the geo points. For example (using <a href="http://leafletjs.com/" target="_blank">Leaflet</a> library):</p>
 <pre><code>var pointset = [
-    { lng:-20, lat:90 },  
+    { lng:-20, lat:90 },
     { lng:-20, lat:80 },
     { lng:-20, lat:70 },
     ...
@@ -345,7 +345,7 @@ pts = pts.map(function(pt) {
     </div>
     <footer>
       <div class="inner">
-        &copy; 2014-2019 <a href="https://www.linkedin.com/in/andriiheonia" target="_blank">Andrii Heonia</a>
+        &copy; 2014-2020 <a href="https://www.linkedin.com/in/andriiheonia" target="_blank">Andrii Heonia</a>
       </div>
     </footer>
     <script>
