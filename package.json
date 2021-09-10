@@ -15,7 +15,7 @@
         "type": "git",
         "url": "git://github.com/AndriiHeonia/hull.git"
     },
-    "main": "./src/hull.js",
+    "main": "./dist/hull.js",
     "devDependencies": {
         "nodemon": "~1.18.0",
         "mocha": "~6.0.2",
@@ -31,5 +31,8 @@
         "node": true,
         "esversion": 6
     },
-    "license": "BSD"
+    "license": "BSD",
+    "files": [
+        "dist"
+    ]
 }
