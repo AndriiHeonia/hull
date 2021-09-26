@@ -76,29 +76,33 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## Changelog
 
+### 1.0.2 — 26.09.2021
+- Clean up .gitignore.
+- Add "debug" folder to .npmignore to reduce tarball size.
 ### 1.0.1 — 24.10.2020
-Introduced fix that avoids hitting stack size limit on large arrays
+Introduce fix that avoids hitting stack size limit on large arrays.
 ### 1.0.0 — 28.06.2019
-Change language level to ES6.
-Performance improvements.
+- Change language level to ES6.
+- Performance improvements.
 ### 0.2.11 — 05.05.2019
 Return the first point as the last point when fewer than 4 unique points are provided.
 ### 0.2.10 — 04.09.2016
-Fixed missing "var" declaration
+Fix missing "var" declaration.
 ### 0.2.9 — 28.07.2016
-Fixed modification of the initial array, added filtration of the duplicates
+- Fix modification of the initial array.
+- Add filtration of the duplicates.
 ### 0.2.8 — 01.04.2016
-Added edgeSkipList to increase performance of the highly accurate shapes (with the small `concavity` number) + refactoring.
+Add edgeSkipList to increase performance of the highly accurate shapes (with the small `concavity` number) + refactoring.
 ### 0.2.7 — 01.05.2015
-Fixed bower.json
+Fix bower.json.
 ### 0.2.6 — 01.05.2015
-Fixed bower.json
+Fix bower.json.
 ### 0.2.5 — 01.05.2015
-Bower support
+Bower support.
 ### 0.2.4 — 23.03.2015
-Minor fixes (copyrights)
+Minor fixes (copyrights).
 ### 0.2.3 — 04.02.2015
-Minor fixes (readme, package.json)
+Minor fixes (readme, package.json).
 ### 0.2.2 — 04.02.2015
 Configurable point formats, now you can use points like `{x: 10, y: 10}` and `{lat: 52, lng: 82}`.
 ### 0.2.1 — 21.10.2014

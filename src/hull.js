@@ -1,5 +1,5 @@
 /*
- (c) 2014-2020, Andrii Heonia
+ (c) 2014-2021, Andrii Heonia
  Hull.js, a JavaScript library for concave hull generation by set of points.
  https://github.com/AndriiHeonia/hull
 */
