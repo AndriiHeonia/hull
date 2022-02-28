@@ -1,6 +1,6 @@
 /*
- (c) 2014-2021, Andrii Heonia
- Hull.js, a JavaScript library for concave hull generation by set of points.
+ (c) 2014, Andrii Heonia
+ Hull.js, a JavaScript library for concave hull generation by the set of points.
  https://github.com/AndriiHeonia/hull
 */
 
@@ -166,7 +166,8 @@ function hull(pointset, concavity, format) {
     const points = _filterDuplicates(_sortByX(formatUtil.toXy(pointset, format)));
 
     if (points.length < 4) {
-        return points.concat([points[0]]);
+        const concave = points.concat([points[0]]);
+        return format ? formatUtil.fromXy(concave, format) : concave;
     }
 
     const occupiedArea = _occupiedArea(points);
@@ -186,11 +187,7 @@ function hull(pointset, concavity, format) {
         convex, Math.pow(maxEdgeLen, 2),
         maxSearchArea, grid(innerPoints, cellSize), new Set());
 
-    if (format) {
-        return formatUtil.fromXy(concave, format);
-    } else {
-        return concave;
-    }
+    return format ? formatUtil.fromXy(concave, format) : concave;
 }
 
 const MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg

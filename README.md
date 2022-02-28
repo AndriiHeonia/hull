@@ -1,6 +1,4 @@
-Hull.js - JavaScript library that builds concave hull by set of points.
-
-[![Build Status](https://travis-ci.org/AndriiHeonia/hull.svg?branch=master)](https://travis-ci.org/AndriiHeonia/hull)
+Hull.js is a JavaScript library that builds concave hull by the set of points.
 
 ## Examples
 
@@ -51,9 +49,13 @@ This library relies on ES6. The ES6 features used are:
 You may use [polyfills](https://www.npmjs.com/package/core-js) for `Set` and compile with [babel](https://babeljs.io/) to continue to support old browsers.
 
 ## Development
-	npm install             # install dependencies
-	npm test                # build dist file and run tests
-	npm run-script watch    # watch ./src dir and rebuild dist file
+	npm install     # install dependencies
+	npm test        # build dist file and run tests
+	npm run watch   # watch ./src dir and rebuild dist file
+
+## TypeScript
+
+You can find TypeScript type definitions [here](https://www.npmjs.com/package/@types/hull.js). Keep in mind that type definitions are not maintained by the author of this library and the latest versions might not match. At the same time, this library is not actively maintained since 2015 and contains only minor changes, so even the older d.ts file should work fine.
 
 ## Contribute
 
@@ -76,38 +78,46 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## Changelog
 
+<details>
+    <summary>Expand</summary>
+
+### 1.0.7 - 03.05.2024
+This release squashes former 1.0.3, 1.0.4, 1.0.5 and 1.0.6 releases into one reasonable commit with the following minor changes:
+- Fix issue with formatting when users pass less than 4 points as an input.
+- Remove bower and travis files as they are deprecated.
 ### 1.0.2 — 26.09.2021
 - Clean up .gitignore.
 - Add "debug" folder to .npmignore to reduce tarball size.
 ### 1.0.1 — 24.10.2020
-Introduce fix that avoids hitting stack size limit on large arrays.
+- Fix that avoids hitting stack size limit on large arrays.
 ### 1.0.0 — 28.06.2019
 - Change language level to ES6.
 - Performance improvements.
 ### 0.2.11 — 05.05.2019
-Return the first point as the last point when fewer than 4 unique points are provided.
+- Minor changes: return the first point as the last point when fewer than 4 unique points are provided.
 ### 0.2.10 — 04.09.2016
-Fix missing "var" declaration.
+- Minor changes: fix missing "var" declaration.
 ### 0.2.9 — 28.07.2016
 - Fix modification of the initial array.
 - Add filtration of the duplicates.
 ### 0.2.8 — 01.04.2016
-Add edgeSkipList to increase performance of the highly accurate shapes (with the small `concavity` number) + refactoring.
+- Add edgeSkipList to increase performance of the highly accurate shapes (with the small `concavity` number) + some refactoring.
 ### 0.2.7 — 01.05.2015
-Fix bower.json.
+- Minor changes: fix bower.json.
 ### 0.2.6 — 01.05.2015
-Fix bower.json.
+- Minor changes: fix bower.json.
 ### 0.2.5 — 01.05.2015
-Bower support.
+- Minor changes: Bower support.
 ### 0.2.4 — 23.03.2015
-Minor fixes (copyrights).
+- Minor changes: copyrights.
 ### 0.2.3 — 04.02.2015
-Minor fixes (readme, package.json).
+- Minor changes: readme, package.json.
 ### 0.2.2 — 04.02.2015
-Configurable point formats, now you can use points like `{x: 10, y: 10}` and `{lat: 52, lng: 82}`.
+- Configurable point format, now you can use points like `{x: 10, y: 10}` and `{lat: 52, lng: 82}`.
 ### 0.2.1 — 21.10.2014
-Some minor updates (doc, package.json, etc.).
+- Minor changes: doc, package.json, etc.
 ### 0.2.0 — 20.10.2014
-Second version with better performance inspired by <a href="http://www.it.uu.se/edu/course/homepage/projektTDB/ht13/project10/Project-10-report.pdf" target="_blank">this</a> article.
+- Second version with better performance inspired by <a href="http://www.it.uu.se/edu/course/homepage/projektTDB/ht13/project10/Project-10-report.pdf" target="_blank">this</a> article.
 ### 0.1.0 — 06.09.2014
-First version based on Delaunay triangulation.
+- First version based on Delaunay triangulation.
+</details>
