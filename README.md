@@ -2,6 +2,12 @@ Hull.js - JavaScript library that builds concave hull by set of points.
 
 [![Build Status](https://travis-ci.org/AndriiHeonia/hull.svg?branch=master)](https://travis-ci.org/AndriiHeonia/hull)
 
+## Important Information
+
+This library was born in free independent Ukraine, and it has 2 important messages:
+* one message for the civilized world: Ukraine and the whole free world is under attack right now, and you can help to defend it by supporting the Armed Forces of Ukraine who are fighting for all of us on the front line. Just donate either here: https://bank.gov.ua/en/news/all/natsionalniy-bank-vidkriv-spetsrahunok-dlya-zboru-koshtiv-na-potrebi-armiyi or here: https://savelife.in.ua/en/donate/
+* and one message for russia: **Русский военный корабль, иди нахуй!**
+
 ## Examples
 
 See live examples <a target="_blank" href="http://andriiheonia.github.io/hull/">here</a>.
