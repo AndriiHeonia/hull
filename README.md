@@ -1,12 +1,10 @@
-Hull.js - JavaScript library that builds concave hull by set of points.
+Hull.js is a JavaScript library that builds concave hull by the set of points.
 
 [![Build Status](https://travis-ci.org/AndriiHeonia/hull.svg?branch=master)](https://travis-ci.org/AndriiHeonia/hull)
 
 ## Important Information
 
-This library was born in free independent Ukraine, and it has 2 important messages:
-* one message for the civilized world: Ukraine and the whole free world is under attack right now, and you can help to defend it by supporting the Armed Forces of Ukraine who are fighting for all of us on the front line. Just donate either here: https://bank.gov.ua/en/news/all/natsionalniy-bank-vidkriv-spetsrahunok-dlya-zboru-koshtiv-na-potrebi-armiyi or here: https://savelife.in.ua/en/donate/
-* and one message for russia: **Русский военный корабль, иди нахуй!**
+This library was born in free independent Ukraine. Today not only Ukraine, but the entire international rule-based order is under attack, and you can help to defend it by supporting the Armed Forces of Ukraine via well trusted https://savelife.in.ua/en/ foundation. For other options to help, explore https://ukraine.ua/.
 
 ## Examples
 
@@ -57,9 +55,9 @@ This library relies on ES6. The ES6 features used are:
 You may use [polyfills](https://www.npmjs.com/package/core-js) for `Set` and compile with [babel](https://babeljs.io/) to continue to support old browsers.
 
 ## Development
-	npm install             # install dependencies
-	npm test                # build dist file and run tests
-	npm run-script watch    # watch ./src dir and rebuild dist file
+	npm install     # install dependencies
+	npm test        # build dist file and run tests
+	npm run watch   # watch ./src dir and rebuild dist file
 
 ## Contribute
 
@@ -82,6 +80,9 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## Changelog
 
+### 1.0.3 — 05.11.2022
+- Fix issue with formatting when users pass less than 4 points as an input.
+- Remove bower.json, as Bower itself is deprecated.
 ### 1.0.2 — 26.09.2021
 - Clean up .gitignore.
 - Add "debug" folder to .npmignore to reduce tarball size.
