@@ -78,6 +78,8 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## Changelog
 
+### 1.0.4 — 17.10.2023
+- Remove unused travis file and update readme.
 ### 1.0.3 — 05.11.2022
 - Fix issue with formatting when users pass less than 4 points as an input.
 - Remove bower.json, as Bower itself is deprecated.
