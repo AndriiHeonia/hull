@@ -1,9 +1,5 @@
 Hull.js is a JavaScript library that builds concave hull by the set of points.
 
-## Important Information
-
-This library was born in free independent Ukraine. Today not only Ukraine, but the entire international rule-based order is under attack, and you can help to defend it by supporting Ukraine. Please explore https://ukraine.ua/ for available options. Thanks!
-
 ## Examples
 
 See live examples <a target="_blank" href="http://andriiheonia.github.io/hull/">here</a>.
@@ -78,6 +74,8 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## Changelog
 
+### 1.0.5 — 08.02.2024
+- Minor fixes (readme, copyrights).
 ### 1.0.4 — 17.10.2023
 - Remove unused travis file and update readme.
 ### 1.0.3 — 05.11.2022
@@ -87,34 +85,34 @@ If you want to get involved with Hull.js development, just use <a href="https://
 - Clean up .gitignore.
 - Add "debug" folder to .npmignore to reduce tarball size.
 ### 1.0.1 — 24.10.2020
-Introduce fix that avoids hitting stack size limit on large arrays.
+- Introduce fix that avoids hitting stack size limit on large arrays.
 ### 1.0.0 — 28.06.2019
 - Change language level to ES6.
 - Performance improvements.
 ### 0.2.11 — 05.05.2019
-Return the first point as the last point when fewer than 4 unique points are provided.
+- Return the first point as the last point when fewer than 4 unique points are provided.
 ### 0.2.10 — 04.09.2016
-Fix missing "var" declaration.
+- Fix missing "var" declaration.
 ### 0.2.9 — 28.07.2016
 - Fix modification of the initial array.
 - Add filtration of the duplicates.
 ### 0.2.8 — 01.04.2016
-Add edgeSkipList to increase performance of the highly accurate shapes (with the small `concavity` number) + refactoring.
+- Add edgeSkipList to increase performance of the highly accurate shapes (with the small `concavity` number) + refactoring.
 ### 0.2.7 — 01.05.2015
-Fix bower.json.
+- Fix bower.json.
 ### 0.2.6 — 01.05.2015
-Fix bower.json.
+- Fix bower.json.
 ### 0.2.5 — 01.05.2015
-Bower support.
+- Bower support.
 ### 0.2.4 — 23.03.2015
-Minor fixes (copyrights).
+- Minor fixes (copyrights).
 ### 0.2.3 — 04.02.2015
-Minor fixes (readme, package.json).
+- Minor fixes (readme, package.json).
 ### 0.2.2 — 04.02.2015
-Configurable point formats, now you can use points like `{x: 10, y: 10}` and `{lat: 52, lng: 82}`.
+- Configurable point formats, now you can use points like `{x: 10, y: 10}` and `{lat: 52, lng: 82}`.
 ### 0.2.1 — 21.10.2014
-Some minor updates (doc, package.json, etc.).
+- Some minor updates (doc, package.json, etc.).
 ### 0.2.0 — 20.10.2014
-Second version with better performance inspired by <a href="http://www.it.uu.se/edu/course/homepage/projektTDB/ht13/project10/Project-10-report.pdf" target="_blank">this</a> article.
+- Second version with better performance inspired by <a href="http://www.it.uu.se/edu/course/homepage/projektTDB/ht13/project10/Project-10-report.pdf" target="_blank">this</a> article.
 ### 0.1.0 — 06.09.2014
-First version based on Delaunay triangulation.
+- First version based on Delaunay triangulation.

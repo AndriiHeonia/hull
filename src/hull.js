@@ -1,9 +1,3 @@
-/*
- (c) 2014-2022, Andrii Heonia
- Hull.js is a JavaScript library for concave hull generation by the set of points.
- https://github.com/AndriiHeonia/hull
-*/
-
 'use strict';
 
 const intersect = require('./intersect.js');
