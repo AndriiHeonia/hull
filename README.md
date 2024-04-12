@@ -74,6 +74,8 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## Changelog
 
+### 1.0.6 — 12.04.2024
+- Exclude "readme-imgs" folder from NPM package.
 ### 1.0.5 — 08.02.2024
 - Minor fixes (readme, copyrights).
 ### 1.0.4 — 17.10.2023
