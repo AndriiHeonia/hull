@@ -57,6 +57,10 @@ You may use [polyfills](https://www.npmjs.com/package/core-js) for `Set` and com
 
 If you want to get involved with Hull.js development, just use <a href="https://guides.github.com/introduction/flow/index.html" target="_blank">github flow</a> and feel free to contribute!
 
+## Typescript
+
+Install <a target="_blank" href="https://www.npmjs.com/package/@types/hull.js">@types/hull.js</a> for TypeScript and ES6 import syntax support. 
+ 
 ## To-do
 
 * think about holes;
