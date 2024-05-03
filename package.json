@@ -1,6 +1,6 @@
 {
-    "name": "hull.js",
-    "version": "1.0.7",
+    "name": "@andriiheonia/hull",
+    "version": "1.0.8",
     "description": "JavaScript library that builds concave hulls (shapes) by the set of points",
     "homepage": "https://github.com/AndriiHeonia/hull",
     "keywords": [
@@ -16,6 +16,7 @@
         "url": "git://github.com/AndriiHeonia/hull.git"
     },
     "main": "./src/hull.js",
+    "types": "./src/hull.d.ts",
     "devDependencies": {
         "nodemon": "~1.18.0",
         "mocha": "~6.0.2",

@@ -48,6 +48,23 @@ This library relies on ES6. The ES6 features used are:
 
 You may use [polyfills](https://www.npmjs.com/package/core-js) for `Set` and compile with [babel](https://babeljs.io/) to continue to support old browsers.
 
+## NPM package
+
+This library is hosted on [GitHub Packages](https://docs.github.com/en/packages). To install it using NPM, you should have an `.npmrc` file next to your `package.json` with the following content:
+
+```
+@andriiheonia:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
+```
+
+And include `hull` library as a dependency to your `package.json`:
+
+```
+"@andriiheonia/hull": "^1.0.8"
+```
+
+For more details see [GitHub instruction](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry#installing-a-package).
+
 ## Development
 	npm install     # install dependencies
 	npm test        # build dist file and run tests
@@ -55,7 +72,7 @@ You may use [polyfills](https://www.npmjs.com/package/core-js) for `Set` and com
 
 ## TypeScript
 
-You can find TypeScript type definitions [here](https://www.npmjs.com/package/@types/hull.js). Keep in mind that type definitions are not maintained by the author of this library and the latest versions might not match. At the same time, this library is not actively maintained since 2015 and contains only minor changes, so even the older d.ts file should work fine.
+You can find TypeScript type definitions in `src` folder.
 
 ## Contribute
 
@@ -81,6 +98,8 @@ If you want to get involved with Hull.js development, just use <a href="https://
 <details>
     <summary>Expand</summary>
 
+### 1.0.8 - 09.05.2024
+- Migrate from [npmjs registry](https://docs.npmjs.com/cli/v10/using-npm/registry) to [GitHub Packages](https://docs.github.com/en/packages).
 ### 1.0.7 - 03.05.2024
 This release squashes former 1.0.3, 1.0.4, 1.0.5 and 1.0.6 releases into one reasonable commit with the following minor changes:
 - Fix issue with formatting when users pass less than 4 points as an input.
