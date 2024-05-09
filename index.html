@@ -302,7 +302,7 @@ var pts = hull(pointset, 0.0011, ['.lng', '.lat']);
 <!-- END: Example 4 -->
 
 <!-- Example 5 -->
-<h3><a name="ex5" class="anchor" href="#ex5"><span class="octicon octicon-link"></span>Geo points on the globe</a></h3>
+<h3><a name="ex5" class="anchor" href="#ex5"><span class="octicon octicon-link"></span>Geo Points on a Globe</a></h3>
 <p>All calculations in hull.js are based on cartesian coordinate system. If you use it for calculation and data visualization on the global map, don't forget that globe has the shape of geoid, latitude and longitude are angles (not points with X and Y), and after projection we have some map distortion. So, for the better accuracy you need to convert latitudes and longitudes to cartesian coordinates, calculate concave hull and then convert points back to the geo points. For example (using <a href="http://leafletjs.com/" target="_blank">Leaflet</a> library):</p>
 <pre><code>var pointset = [
     { lng:-20, lat:90 },
