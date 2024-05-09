@@ -154,8 +154,8 @@
     module.exports = grid;
     },{}],4:[function(require,module,exports){
     /*
-     (c) 2014-2022, Andrii Heonia
-     Hull.js is a JavaScript library for concave hull generation by the set of points.
+     (c) 2014-2024, Andrii Heonia
+     Hull.js, a JavaScript library for concave hull generation by the set of points.
      https://github.com/AndriiHeonia/hull
     */
 
