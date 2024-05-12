@@ -1,4 +1,4 @@
-Hull.js is a JavaScript library that builds concave hull by the set of points.
+Hull.js is a JavaScript library that builds concave hull by a set of points.
 
 ## Examples
 
@@ -10,8 +10,8 @@ See live examples <a target="_blank" href="http://andriiheonia.github.io/hull/">
 	hull(points, 50); // returns points of the hull (in clockwise order)
 
 ## Params
-* 1st param - array of coordinates in format: `[[x1, y1], [x2, y2], ..., [xn, yn]]`;
-* 2nd param - concavity. `1` - thin shape. `Infinity` - convex hull. By default `20`;
+* 1st param - array of coordinates in format: `[[x1, y1], [x2, y2], ..., [xn, yn]]`.
+* 2nd param - concavity. `1` - thin shape. `Infinity` - convex hull. By default `20`.
 * 3rd param - points format. For example: `['.lng', '.lat']` if you have `{lng: x, lat: y}` points. By default you can use `[x, y]` points.
 
 ## How it works
@@ -42,9 +42,9 @@ Let's see step by step what happens when you call `hull()` function:
 
 ## Limitations
 This library relies on ES6. The ES6 features used are:
-- `new Set(null)`, `Set#add`, `Set#has`
-- `let`, `const`
-- `Math.trunc` (if available)
+- `new Set(null)`, `Set#add`, `Set#has`.
+- `let`, `const`.
+- `Math.trunc` (if available).
 
 You may use [polyfills](https://www.npmjs.com/package/core-js) for `Set` and compile with [babel](https://babeljs.io/) to continue to support old browsers.
 
@@ -65,6 +65,12 @@ And include `hull` library as a dependency to your `package.json`:
 
 For more details see [GitHub instruction](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry#installing-a-package).
 
+If for some reason you don't want to use GitHub Packages, you can use [GitHub URL](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#github-urls) as a dependency, e.g.:
+
+```
+"@andriiheonia/hull": "andriiheonia/hull"
+```
+
 ## Development
 	npm install     # install dependencies
 	npm test        # build dist file and run tests
@@ -80,17 +86,17 @@ If you want to get involved with Hull.js development, just use <a href="https://
 
 ## To-do
 
-* think about holes;
+* think about holes.
 * think about automatic `concavity` adjustment based on density.
 
 ## Related papers
 
-* <a target="_blank" href="http://www.it.uu.se/edu/course/homepage/projektTDB/ht13/project10/Project-10-report.pdf">Implementation of a fast and efficient concave hull algorithm</a>;
-* <a target="_blank" href="http://www.cs.jhu.edu/~misha/Fall05/09.13.05.pdf">Computational Geometry: Convex Hulls</a>;
-* <a target="_blank" href="https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain">Andrew's monotone chain convex hull algorithm</a>;
-* <a target="_blank" href="http://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/">Line Segment Intersection Algorithm</a>;
-* <a target="_blank" href="http://allenchou.net/2013/07/cross-product-of-2d-vectors/">Game Math: "Cross Product" of 2D Vectors</a>;
-* <a target="_blank" href="http://users.livejournal.com/_winnie/237714.html">Угол между двумя векторами</a>;
+* <a target="_blank" href="http://www.it.uu.se/edu/course/homepage/projektTDB/ht13/project10/Project-10-report.pdf">Implementation of a fast and efficient concave hull algorithm</a>.
+* <a target="_blank" href="http://www.cs.jhu.edu/~misha/Fall05/09.13.05.pdf">Computational Geometry: Convex Hulls</a>.
+* <a target="_blank" href="https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain">Andrew's monotone chain convex hull algorithm</a>.
+* <a target="_blank" href="http://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/">Line Segment Intersection Algorithm</a>.
+* <a target="_blank" href="http://allenchou.net/2013/07/cross-product-of-2d-vectors/">Game Math: "Cross Product" of 2D Vectors</a>.
+* <a target="_blank" href="http://users.livejournal.com/_winnie/237714.html">Угол между двумя векторами</a>.
 * <a target="_blank" href="http://habrahabr.ru/post/105882/">Когда не нужна тригонометрия</a>.
 
 ## Changelog
