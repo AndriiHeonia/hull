@@ -15,7 +15,7 @@
     <title>Hull.js by Andrii Heonia</title>
     <script src="./javascripts/hull.js"></script>
     <script src="./javascripts/dbscan.js"></script>
-    <script src="./javascripts/dataTorch.js"></script>
+    <script src="./javascripts/dataMan.js"></script>
     <script src="./javascripts/dataChars.js"></script>
     <script src="./javascripts/dataHorse.js"></script>
     <script src="./javascripts/dataGeo.js"></script>
@@ -41,16 +41,16 @@
 <!-- Example 1 -->
 <h3><a name="ex1" class="anchor" href="#ex1"><span class="octicon octicon-link"></span>Basic Usage</a></h3>
 <p>To get concave hull (polygon) by a set of points just call <code>hull</code> function:</p>
-<pre><code>var pointset = [[90, 187], [91, 189], [92, 186], [93, 190], ...];
+<pre><code>var pointset = [[251, 275], [248, 276], [255, 272], [246,278], ...];
 var pts = hull(pointset, 10);
 // ... draw pts</code></pre>
 <p>
-  <canvas id="canv1" width="190" height="400"></canvas>
+  <canvas id="canv1" width="512" height="512"></canvas>
   <script>
   function example1() {
     var c = document.getElementById('canv1'),
         ctx = c.getContext('2d'),
-        pointset = dataTorch;
+        pointset = dataMan;
 
     // draw all points
     ctx.fillStyle = "black";
@@ -81,16 +81,16 @@ var pts = hull(pointset, 10);
 
 <!-- EXAMPLE 1.1 -->
 <p>You can adjust concavity of a hull via 2nd param:</p>
-<pre><code>var pointset = [[90, 187], [91, 189], [92, 186], [93, 190], ...];
+<pre><code>var pointset = [[251, 275], [248, 276], [255, 272], [246,278], ...];
 var pts = hull(pointset, 80);
 // ... draw pts</code></pre>
 <p>
-  <canvas id="canv1_1" width="190" height="400"></canvas>
+  <canvas id="canv1_1" width="512" height="512"></canvas>
   <script>
   function example1_1() {
     var c = document.getElementById('canv1_1'),
         ctx = c.getContext('2d'),
-        pointset = dataTorch;
+        pointset = dataMan;
 
     // draw all points
     ctx.fillStyle = "black";
